@@ -12,7 +12,7 @@ enum Directions {
     LEFT
 };
 
-#ifdef WINDOWS
+#ifdef WIN32
     #define CLEAR "cls"
 #else
     #define CLEAR "clear"
@@ -27,124 +27,136 @@ class tile {
 
 };
 
-bool moved = true, win = false, boardFull = false;
-uint score = 0;
-tile board[4][4];
+class game {
 
-void endLine(int n) {
+    private:
+        bool moved;
+        bool win;
+        bool boardFull;
+        uint score;
 
-    for (int i = 0; i < n; i++)
-        std::cout << std::endl;
+        void endl(int n) {
 
-}
-
-void addTile() {};
-
-void drawBoard() {
-
-    system(CLEAR);
-
-    std::cout << "SCORE: " << score;
-    endLine(1);
-    std::cout << "-----------------------------";
-    endLine(4);
-
-    for (int i = 0; i < 4; i++) {
-
-        std::cout << "+------+------+------+------+" ;
-        endLine(1);
-
-        for (int j = 0; j < 4; j++) {
-
-            std::cout << "| ";
-            if (!board[i][j].value)
-                std::cout << std::setw(7);
-            else
-                std::cout << std::setw(4) << board[i][j].value;
+            for (int i = 0; i < n; i++)
+                std::cout << std::endl;
 
         }
 
-        std::cout << " | ";
-        endLine(1);
+        void addTile() {}
 
-    }
+        void drawBoard() {
 
-    std::cout << "+------+------+------+------+";
-    endLine(4);
-};
+            system(CLEAR);
 
-void move(Directions d) {};
+            std::cout << "SCORE: " << score;
+            endl(1);
+            std::cout << "-----------------------------";
+            endl(4);
 
-void input(int err = 0) {
+            for (int i = 0; i < 4; i++) {
 
-    moved = false;
-    char c;
+                std::cout << " +------+------+------+------+" ;
+                endl(1);
 
-    std::cout << "W => Up";
-    endLine(1);
-    std::cout << "A => Left";
-    endLine(1);
-    std::cout << "S => Down";
-    endLine(1);
-    std::cout << "D => Right";
-    endLine(2);
+                for (int j = 0; j < 4; j++) {
 
-    if (err) {
-        std::cout << "Invalid input. Please try again.";
-        endLine(2);
-    }
+                    std::cout << " | ";
+                    if (!board[i][j].value)
+                        std::cout << std::setw(7);
+                    else
+                        std::cout << std::setw(4) << board[i][j].value;
 
-    std::cout << "Enter Move: ";
-    std::cin >> c;
+                }
 
-    c = toupper(c);
+                std::cout << "| ";
+                endl(1);
 
-    switch(c) {
+            }
 
-        case 'W':
-            move(UP);
-            break;
-        case 'A':
-            move(LEFT);
-            break;
-        case 'S':
-            move(DOWN);
-            break;
-        case 'D':
-            move(RIGHT);
-            break;
-        default:
-            drawBoard();
-            input(1);
-            break;
+            std::cout << " +------+------+------+------+";
+            endl(4);
+        }
 
-    };
+        void move(Directions d) {}
 
-};
+        void input(int err = 0) {
 
-bool canMove() {};
+            moved = false;
+            char c;
 
-void start() {
+            std::cout << "W => Up";
+            endl(1);
+            std::cout << "A => Left";
+            endl(1);
+            std::cout << "S => Down";
+            endl(1);
+            std::cout << "D => Right";
+            endl(2);
 
-    addTile();
+            if (err) {
+                std::cout << "Invalid input. Please try again.";
+                endl(2);
+            }
 
-    while (1) {
-        if (moved)
+            std::cout << "Enter Move: ";
+            std::cin >> c;
+
+            c = toupper(c);
+
+            switch(c) {
+
+                case 'W':
+                    move(UP);
+                    break;
+                case 'A':
+                    move(LEFT);
+                    break;
+                case 'S':
+                    move(DOWN);
+                    break;
+                case 'D':
+                    move(RIGHT);
+                    break;
+                default:
+                    drawBoard();
+                    input(1);
+                    break;
+
+            };
+
+        }
+
+        bool canMove() {}
+    
+    public:
+
+        game() : win(false), moved(true), boardFull(false), score(0) {}
+        
+        void start() {
+
             addTile();
-        drawBoard();
-        if (boardFull)
-            break;
-        input();
-    }
 
-}
+            while (1) {
+                if (moved)
+                    addTile();
+                drawBoard();
+                if (boardFull)
+                    break;
+                input();
+            }
+
+        }
+
+        tile board[4][4];
+       
+};
 
 int main () {
 
     srand(time(NULL));
 
-    drawBoard();
+    game g;
 
-    input();
+    g.start();
 
 }
