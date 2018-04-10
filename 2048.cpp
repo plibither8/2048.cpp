@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 
 typedef unsigned int uint;
 enum Directions {
@@ -44,17 +45,35 @@ class game {
 
         void addTile() {
             
+			std::vector< std::vector<int> > emptyArr;
+			emptyTiles(emptyArr);
+
+			if(!emptyArr.size())
+				boardFull = true;
+
             int a, b;
             do {
                 a = rand() % 4;
                 b = rand() % 4;
-            } while(!board[a][b].value);
+            } while(board[a][b].value);
 
             int twoOrFour = rand() % 100;
+			board[a][b].value = twoOrFour > 89 ? 4 : 2;
 
-            twoOrFour > 89 ? board[a][b].value = 2 : board[a][b].value = 4;
+			moved = true;
 
         }
+
+		void emptyTiles(std::vector<std::vector<int> > &emptyArr) {
+			
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+					if (!board[i][j].value) {
+						std::vector<int> newEmpty{ i, j };
+						emptyArr.push_back(newEmpty);
+					}
+
+		}
 
         void drawBoard() {
 
@@ -89,11 +108,9 @@ class game {
             endl(4);
         }
 
-        void move(Directions d) {}
-
         void input(int err = 0) {
 
-            moved = false;
+            moved = true;
             char c;
 
             std::cout << "W => Up";
@@ -103,7 +120,7 @@ class game {
             std::cout << "S => Down";
             endl(1);
             std::cout << "D => Right";
-            endl(2);
+            endl(4);
 
             if (err) {
                 std::cout << "Invalid input. Please try again.";
@@ -138,9 +155,39 @@ class game {
 
         }
 
-        bool canMove() {}
-    
-    public:
+        bool canMove() {
+			
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++)
+					if (!board[i][j].value)
+						return true;
+
+			for (int i = 0; i < 4; i++)
+				for (int j = 0; j < 4; j++) {
+					if (testAdd(i + 1, j, board[i][j].value))
+						return true;
+					if (testAdd(i - 1, j, board[i][j].value))
+						return true;
+					if (testAdd(i, j + 1, board[i][j].value))
+						return true;
+					if (testAdd(i, j - 1, board[i][j].value))
+						return true;
+				}
+			
+			return false;
+		
+		}
+
+		bool testAdd(int i, int j, uint value) {
+		
+			if (i < 0 || i > 3 || j < 0 || j > 3)
+				return false;
+		
+			return board[i][j].value == value;
+		
+		}
+
+	public:
 
         game() : win(false), moved(true), boardFull(false), score(0) {}
         
@@ -149,18 +196,23 @@ class game {
             addTile();
 
             while (1) {
-                if (moved)
+                
+				if (moved)
                     addTile();
-                drawBoard();
-                if (boardFull)
+                
+				drawBoard();
+                
+				if (boardFull)
                     break;
-                input();
-            }
+                
+				input();
+            
+			}
 
         }
 
         tile board[4][4];
-       
+
 };
 
 int main () {
