@@ -42,7 +42,19 @@ class game {
 
         }
 
-        void addTile() {}
+        void addTile() {
+            
+            int a, b;
+            do {
+                a = rand() % 4;
+                b = rand() % 4;
+            } while(!board[a][b].value);
+
+            int twoOrFour = rand() % 100;
+
+            twoOrFour > 89 ? board[a][b].value = 2 : board[a][b].value = 4;
+
+        }
 
         void drawBoard() {
 
