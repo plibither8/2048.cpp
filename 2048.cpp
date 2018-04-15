@@ -1,3 +1,28 @@
+/*
+ *
+ * Game board array is defined as `board[y][x]`
+ *
+ * Game board will follow the following structure:
+ * 'x' => x-axis OR the horizotal line OR rows
+ * 'y' => y-axis OR the vertical line OR columns
+ *
+ * For example (zero-indexed):
+ * board[2][0] refers to the 0th tile (or column) in 2nd
+ * row as in this case, x = 0 and y = 2. The specific tile
+ * is denoted the '@' symbol in the following gameboard
+ *
+ *		+------+------+------+------+
+ *		|      |      |      |      |
+ *		+------+------+------+------+
+ *		|      |      |      |      |
+ *		+------+------+------+------+
+ *		|   @  |      |      |      |
+ *		+------+------+------+------+
+ *		|      |      |      |      |
+ *		+------+------+------+------+
+ *
+ */
+
 #include <iostream>
 #include <string>
 #include <iomanip>
@@ -43,34 +68,33 @@ class game {
 
         }
 
-        void addTile() {
-            
-			std::vector< std::vector<int> > emptyArr;
-			emptyTiles(emptyArr);
+        bool addTile() {
 
-			if(!emptyArr.size())
+			std::vector< std::vector<int> > freeTiles;
+			collectFreeTiles(freeTiles);
+
+			if(!freeTiles.size()) {
 				boardFull = true;
+			}
 
-            int a, b;
-            do {
-                a = rand() % 4;
-                b = rand() % 4;
-            } while(board[a][b].value);
-
-            int twoOrFour = rand() % 100;
-			board[a][b].value = twoOrFour > 89 ? 4 : 2;
+			std::vector<int> randomFreeTile = freeTiles.at(rand() % freeTiles.size());
+			int x = randomFreeTile.at(0);
+			int y = randomFreeTile.at(1);
+			board[x][y].value = rand() % 100 > 89 ? 4 : 2;
 
 			moved = true;
 
+			return canMove();
+
         }
 
-		void emptyTiles(std::vector<std::vector<int> > &emptyArr) {
-			
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-					if (!board[i][j].value) {
-						std::vector<int> newEmpty{ i, j };
-						emptyArr.push_back(newEmpty);
+		void collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
+
+			for (int x = 0; x < 4; x++)
+				for (int y = 0; y < 4; y++)
+					if (!board[x][y].value) {
+						std::vector<int> newEmpty {x, y};
+						freeTiles.push_back(newEmpty);
 					}
 
 		}
@@ -79,15 +103,12 @@ class game {
 
             system(CLEAR);
 
-            std::cout << "SCORE: " << score;
-            endl(1);
-            std::cout << "-----------------------------";
-            endl(4);
+            std::cout << "SCORE: " << score; endl(1);
+            std::cout << "-----------------------------"; endl(4);
 
             for (int i = 0; i < 4; i++) {
 
-                std::cout << " +------+------+------+------+" ;
-                endl(1);
+                std::cout << " +------+------+------+------+" ; endl(1);
 
                 for (int j = 0; j < 4; j++) {
 
@@ -99,13 +120,11 @@ class game {
 
                 }
 
-                std::cout << "| ";
-                endl(1);
+                std::cout << " | "; endl(1);
 
             }
 
-            std::cout << " +------+------+------+------+";
-            endl(4);
+            std::cout << " +------+------+------+------+"; endl(4);
         }
 
         void input(int err = 0) {
@@ -156,7 +175,7 @@ class game {
         }
 
         bool canMove() {
-			
+
 			for (int i = 0; i < 4; i++)
 				for (int j = 0; j < 4; j++)
 					if (!board[i][j].value)
@@ -173,40 +192,106 @@ class game {
 					if (testAdd(i, j - 1, board[i][j].value))
 						return true;
 				}
-			
+
 			return false;
-		
+
 		}
 
 		bool testAdd(int i, int j, uint value) {
-		
+
 			if (i < 0 || i > 3 || j < 0 || j > 3)
 				return false;
-		
+
 			return board[i][j].value == value;
-		
+
+		}
+
+		void move(Directions d) {
+
+			switch (d) {
+
+				case UP:
+
+					for (int x = 0; x < 4; x++) {
+						int y = 1;
+						while (y < 4) {
+							if (board[x][y].value)
+								moveVertical(x, y, -1);
+							y++;
+						}
+					}
+					break;
+
+				case DOWN:
+
+					for (int x = 0; x < 4; x++) {
+						int y = 2;
+						while (y >= 0) {
+							if (board[x][y].value)
+								moveVertical(x, y, 1);
+							y--;
+						}
+					}
+					break;
+
+				case LEFT:
+
+					for (int y = 0; y < 4; y++) {
+						int x = 1;
+						while (x < 4) {
+							if (board[x][y].value)
+								moveHorizontal(x, y, -1);
+							x++;
+						}
+					}
+					break;
+
+				case RIGHT:
+
+					for (int y = 0; y < 4; y++) {
+						int x = 2;
+						while (x >= 0) {
+							if (board[x][y].value)
+								moveHorizontal(x, y, 1);
+							x--;
+						}
+					}
+
+				}
+		}
+
+		void moveVertical(int i, int j, int d) {
+
+
+
+		}
+
+		void moveHorizontal(int i, int j, int d) {
+
+
+
 		}
 
 	public:
 
         game() : win(false), moved(true), boardFull(false), score(0) {}
-        
-        void start() {
+
+        int start() {
 
             addTile();
 
             while (1) {
-                
+
 				if (moved)
-                    addTile();
-                
+                    if(!addTile()) {
+						drawBoard();
+						break;
+					}
+
 				drawBoard();
-                
-				if (boardFull)
-                    break;
-                
+
 				input();
-            
+
 			}
 
         }
