@@ -9,7 +9,7 @@
  * For example (zero-indexed):
  * board[2][0] refers to the 0th tile (or column) in 2nd
  * row as in this case, x = 0 and y = 2. The specific tile
- * is denoted the '@' symbol in the following gameboard
+ * is denoted by the '@' symbol in the following gameboard
  *
  *		+------+------+------+------+
  *		|      |      |      |      |
@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+#include <chrono>
 
 typedef unsigned int uint;
 enum Directions {
@@ -61,7 +62,7 @@ class game {
         bool boardFull;
         uint score;
 
-        void endl(int n) {
+        void endl(int n = 1) {
 
             for (int i = 0; i < n; i++)
                 std::cout << std::endl;
@@ -78,9 +79,9 @@ class game {
             }
 
             std::vector<int> randomFreeTile = freeTiles.at(rand() % freeTiles.size());
-            int x = randomFreeTile.at(0);
-            int y = randomFreeTile.at(1);
-            board[x][y].value = rand() % 100 > 89 ? 4 : 2;
+            int x = randomFreeTile.at(1);
+            int y = randomFreeTile.at(0);
+            board[y][x].value = rand() % 100 > 89 ? 4 : 2;
 
             moved = true;
 
@@ -90,10 +91,10 @@ class game {
 
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
-            for (int x = 0; x < 4; x++)
-                for (int y = 0; y < 4; y++)
-                    if (!board[x][y].value) {
-                        std::vector<int> newEmpty {x, y};
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 4; x++)
+                    if (!board[y][x].value) {
+                        std::vector<int> newEmpty {y, x};
                         freeTiles.push_back(newEmpty);
                     }
 
@@ -103,24 +104,24 @@ class game {
 
             system(CLEAR);
 
-            std::cout << "SCORE: " << score; endl(1);
-            std::cout << "-----------------------------"; endl(4);
+            std::cout << "SCORE: " << score; endl();
+            std::cout << "------------------------------"; endl(4);
 
-            for (int i = 0; i < 4; i++) {
+            for (int y = 0; y < 4; y++) {
 
-                std::cout << " +------+------+------+------+" ; endl(1);
+                std::cout << " +------+------+------+------+" ; endl();
 
-                for (int j = 0; j < 4; j++) {
+                for (int x = 0; x < 4; x++) {
 
                     std::cout << " | ";
-                    if (!board[i][j].value)
+                    if (!board[y][x].value)
                         std::cout << std::setw(7);
                     else
-                        std::cout << std::setw(4) << board[i][j].value;
+                        std::cout << std::setw(4) << board[y][x].value;
 
                 }
 
-                std::cout << " | "; endl(1);
+                std::cout << " | "; endl();
 
             }
 
@@ -129,15 +130,15 @@ class game {
 
         void input(int err = 0) {
 
-            moved = true;
+            moved = false;
             char c;
 
             std::cout << "W => Up";
-            endl(1);
+            endl();
             std::cout << "A => Left";
-            endl(1);
+            endl();
             std::cout << "S => Down";
-            endl(1);
+            endl();
             std::cout << "D => Right";
             endl(4);
 
@@ -170,26 +171,28 @@ class game {
                     input(1);
                     break;
 
-            };
+            }
+
+            unblockTiles();
 
         }
 
         bool canMove() {
 
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++)
-                    if (!board[i][j].value)
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 4; x++)
+                    if (!board[y][x].value)
                         return true;
 
-            for (int i = 0; i < 4; i++)
-                for (int j = 0; j < 4; j++) {
-                    if (testAdd(i + 1, j, board[i][j].value))
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 4; x++) {
+                    if (testAdd(y + 1, x, board[y][x].value))
                         return true;
-                    if (testAdd(i - 1, j, board[i][j].value))
+                    if (testAdd(y - 1, x, board[y][x].value))
                         return true;
-                    if (testAdd(i, j + 1, board[i][j].value))
+                    if (testAdd(y, x + 1, board[y][x].value))
                         return true;
-                    if (testAdd(i, j - 1, board[i][j].value))
+                    if (testAdd(y, x - 1, board[y][x].value))
                         return true;
                 }
 
@@ -197,12 +200,20 @@ class game {
 
         }
 
-        bool testAdd(int i, int j, uint value) {
+        bool testAdd(int y, int x, uint value) {
 
-            if (i < 0 || i > 3 || j < 0 || j > 3)
+            if (y < 0 || y > 3 || x < 0 || x > 3)
                 return false;
 
-            return board[i][j].value == value;
+            return board[y][x].value == value;
+
+        }
+
+        void unblockTiles() {
+
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 4; x++)
+                    board[y][x].blocked = false;
 
         }
 
@@ -215,8 +226,8 @@ class game {
                     for (int x = 0; x < 4; x++) {
                         int y = 1;
                         while (y < 4) {
-                            if (board[x][y].value)
-                                moveVertical(x, y, -1);
+                            if (board[y][x].value)
+                                moveVertical(y, x, -1);
                             y++;
                         }
                     }
@@ -227,8 +238,8 @@ class game {
                     for (int x = 0; x < 4; x++) {
                         int y = 2;
                         while (y >= 0) {
-                            if (board[x][y].value)
-                                moveVertical(x, y, 1);
+                            if (board[y][x].value)
+                                moveVertical(y, x, 1);
                             y--;
                         }
                     }
@@ -239,8 +250,8 @@ class game {
                     for (int y = 0; y < 4; y++) {
                         int x = 1;
                         while (x < 4) {
-                            if (board[x][y].value)
-                                moveHorizontal(x, y, -1);
+                            if (board[y][x].value)
+                                moveHorizontal(y, x, -1);
                             x++;
                         }
                     }
@@ -251,25 +262,97 @@ class game {
                     for (int y = 0; y < 4; y++) {
                         int x = 2;
                         while (x >= 0) {
-                            if (board[x][y].value)
-                                moveHorizontal(x, y, 1);
+                            if (board[y][x].value)
+                                moveHorizontal(y, x, 1);
                             x--;
                         }
                     }
+                    break;
 
                 }
         }
 
-        void moveVertical(int i, int j, int d) {
+        void moveVertical(int y, int x, int k) {
 
+            tile &currentTile = board[y][x];
+            tile &targetTile = board[y + k][x];
 
+            int A = currentTile.value;
+            int B = targetTile.value;
+            int C = currentTile.blocked;
+            int D = targetTile.blocked;
+
+            if (B && A == B && !C && !D) {
+
+                currentTile.value = 0;
+                targetTile.value *= 2;
+                win = targetTile.value == 2048 ? true : false;
+                score += targetTile.value;
+                targetTile.blocked = true;
+
+                moved = true;
+
+            } else if (A && !B) {
+
+                targetTile.value = currentTile.value;
+                currentTile.value = 0;
+
+                moved = true;
+
+            }
+
+            if (k == 1 && y < 2)
+                moveVertical(y + k, x, 1);
+            else if (k == -1 && y > 1)
+                moveVertical(y + k, x, -1);
 
         }
 
-        void moveHorizontal(int i, int j, int d) {
+        void moveHorizontal(int y, int x, int k) {
 
+            tile &currentTile = board[y][x];
+            tile &targetTile = board[y][x + k];
 
+            int A = currentTile.value;
+            int B = targetTile.value;
+            int C = currentTile.blocked;
+            int D = targetTile.blocked;
 
+            if (B && A == B && !C && !D) {
+
+                currentTile.value = 0;
+                targetTile.value *= 2;
+                win = targetTile.value == 2048 ? true : false;
+                score += targetTile.value;
+                targetTile.blocked = true;
+
+                moved = true;
+            }
+
+            else if (A && !B) {
+
+                targetTile.value = currentTile.value;
+                currentTile.value = 0;
+
+                moved = true;
+
+            }
+
+            if (k == 1 && x < 2)
+                moveHorizontal(y, x + k, 1);
+            else if (k == -1 && x > 1)
+                moveHorizontal(y, x + k, -1);
+
+        }
+
+        uint largestTile() {
+            uint max = 2;
+            
+            for (int y = 0; y < 4; y++)
+                for (int x = 0; x < 4; x++)
+                    max = board[y][x].value > max ? board[y][x].value : max;
+            
+            return max;
         }
 
     public:
@@ -277,6 +360,8 @@ class game {
         game() : win(false), moved(true), boardFull(false), score(0) {}
 
         int start() {
+
+            auto start = std::chrono::high_resolution_clock::now();
 
             addTile();
 
@@ -293,6 +378,15 @@ class game {
                 input();
 
             }
+
+            auto finish = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double> elapsed = finish - start;
+
+            std::string msg = win ? "You win!" : "Game over! You lose.";
+            std::cout << msg; endl(2);
+            std::cout << "Largest tile: " << largestTile(); endl();
+            std::cout << "Final score: " << score; endl(2);
+            std::cout << "Time taken: " << elapsed.count() << " seconds" ; endl();
 
         }
 
