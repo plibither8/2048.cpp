@@ -70,34 +70,34 @@ class game {
 
         bool addTile() {
 
-			std::vector< std::vector<int> > freeTiles;
-			collectFreeTiles(freeTiles);
+            std::vector< std::vector<int> > freeTiles;
+            collectFreeTiles(freeTiles);
 
-			if(!freeTiles.size()) {
-				boardFull = true;
-			}
+            if(!freeTiles.size()) {
+                boardFull = true;
+            }
 
-			std::vector<int> randomFreeTile = freeTiles.at(rand() % freeTiles.size());
-			int x = randomFreeTile.at(0);
-			int y = randomFreeTile.at(1);
-			board[x][y].value = rand() % 100 > 89 ? 4 : 2;
+            std::vector<int> randomFreeTile = freeTiles.at(rand() % freeTiles.size());
+            int x = randomFreeTile.at(0);
+            int y = randomFreeTile.at(1);
+            board[x][y].value = rand() % 100 > 89 ? 4 : 2;
 
-			moved = true;
+            moved = true;
 
-			return canMove();
+            return canMove();
 
         }
 
-		void collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
+        void collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
-			for (int x = 0; x < 4; x++)
-				for (int y = 0; y < 4; y++)
-					if (!board[x][y].value) {
-						std::vector<int> newEmpty {x, y};
-						freeTiles.push_back(newEmpty);
-					}
+            for (int x = 0; x < 4; x++)
+                for (int y = 0; y < 4; y++)
+                    if (!board[x][y].value) {
+                        std::vector<int> newEmpty {x, y};
+                        freeTiles.push_back(newEmpty);
+                    }
 
-		}
+        }
 
         void drawBoard() {
 
@@ -176,103 +176,103 @@ class game {
 
         bool canMove() {
 
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++)
-					if (!board[i][j].value)
-						return true;
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++)
+                    if (!board[i][j].value)
+                        return true;
 
-			for (int i = 0; i < 4; i++)
-				for (int j = 0; j < 4; j++) {
-					if (testAdd(i + 1, j, board[i][j].value))
-						return true;
-					if (testAdd(i - 1, j, board[i][j].value))
-						return true;
-					if (testAdd(i, j + 1, board[i][j].value))
-						return true;
-					if (testAdd(i, j - 1, board[i][j].value))
-						return true;
-				}
+            for (int i = 0; i < 4; i++)
+                for (int j = 0; j < 4; j++) {
+                    if (testAdd(i + 1, j, board[i][j].value))
+                        return true;
+                    if (testAdd(i - 1, j, board[i][j].value))
+                        return true;
+                    if (testAdd(i, j + 1, board[i][j].value))
+                        return true;
+                    if (testAdd(i, j - 1, board[i][j].value))
+                        return true;
+                }
 
-			return false;
+            return false;
 
-		}
+        }
 
-		bool testAdd(int i, int j, uint value) {
+        bool testAdd(int i, int j, uint value) {
 
-			if (i < 0 || i > 3 || j < 0 || j > 3)
-				return false;
+            if (i < 0 || i > 3 || j < 0 || j > 3)
+                return false;
 
-			return board[i][j].value == value;
+            return board[i][j].value == value;
 
-		}
+        }
 
-		void move(Directions d) {
+        void move(Directions d) {
 
-			switch (d) {
+            switch (d) {
 
-				case UP:
+                case UP:
 
-					for (int x = 0; x < 4; x++) {
-						int y = 1;
-						while (y < 4) {
-							if (board[x][y].value)
-								moveVertical(x, y, -1);
-							y++;
-						}
-					}
-					break;
+                    for (int x = 0; x < 4; x++) {
+                        int y = 1;
+                        while (y < 4) {
+                            if (board[x][y].value)
+                                moveVertical(x, y, -1);
+                            y++;
+                        }
+                    }
+                    break;
 
-				case DOWN:
+                case DOWN:
 
-					for (int x = 0; x < 4; x++) {
-						int y = 2;
-						while (y >= 0) {
-							if (board[x][y].value)
-								moveVertical(x, y, 1);
-							y--;
-						}
-					}
-					break;
+                    for (int x = 0; x < 4; x++) {
+                        int y = 2;
+                        while (y >= 0) {
+                            if (board[x][y].value)
+                                moveVertical(x, y, 1);
+                            y--;
+                        }
+                    }
+                    break;
 
-				case LEFT:
+                case LEFT:
 
-					for (int y = 0; y < 4; y++) {
-						int x = 1;
-						while (x < 4) {
-							if (board[x][y].value)
-								moveHorizontal(x, y, -1);
-							x++;
-						}
-					}
-					break;
+                    for (int y = 0; y < 4; y++) {
+                        int x = 1;
+                        while (x < 4) {
+                            if (board[x][y].value)
+                                moveHorizontal(x, y, -1);
+                            x++;
+                        }
+                    }
+                    break;
 
-				case RIGHT:
+                case RIGHT:
 
-					for (int y = 0; y < 4; y++) {
-						int x = 2;
-						while (x >= 0) {
-							if (board[x][y].value)
-								moveHorizontal(x, y, 1);
-							x--;
-						}
-					}
+                    for (int y = 0; y < 4; y++) {
+                        int x = 2;
+                        while (x >= 0) {
+                            if (board[x][y].value)
+                                moveHorizontal(x, y, 1);
+                            x--;
+                        }
+                    }
 
-				}
-		}
+                }
+        }
 
-		void moveVertical(int i, int j, int d) {
-
-
-
-		}
-
-		void moveHorizontal(int i, int j, int d) {
+        void moveVertical(int i, int j, int d) {
 
 
 
-		}
+        }
 
-	public:
+        void moveHorizontal(int i, int j, int d) {
+
+
+
+        }
+
+    public:
 
         game() : win(false), moved(true), boardFull(false), score(0) {}
 
@@ -282,17 +282,17 @@ class game {
 
             while (1) {
 
-				if (moved)
+                if (moved)
                     if(!addTile()) {
-						drawBoard();
-						break;
-					}
+                        drawBoard();
+                        break;
+                    }
 
-				drawBoard();
+                drawBoard();
 
-				input();
+                input();
 
-			}
+            }
 
         }
 
