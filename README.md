@@ -15,9 +15,9 @@
 'y' => y-axis OR the vertical line OR columns
 ```
 
-#### For example (zero-indexed):
+### For example (zero-indexed):
 
-board[2][0] refers to the 0th tile (or column) in 2nd row as in this case, x = 0 and y = 2. The specific tile is denoted the '@' symbol in the following gameboard:
+`board[2][0]` refers to the 0th tile (or column) in 2nd row as in this case, x = 0 and y = 2. The specific tile is denoted the '@' symbol in the following gameboard:
 
 ```
 	+------+------+------+------+
