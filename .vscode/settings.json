@@ -27,6 +27,8 @@
 		"type_traits": "cpp",
 		"typeinfo": "cpp",
 		"utility": "cpp",
-		"cmath": "cpp"
+		"cmath": "cpp",
+		"chrono": "cpp",
+		"ratio": "cpp"
 	}
 }

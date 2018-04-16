@@ -6,7 +6,7 @@
 #include <vector>
 #include <chrono>
 
-#ifdef WIN32
+#ifdef _WIN32
 
     #define CLEAR "cls"
     #include <conio.h>
@@ -40,7 +40,7 @@
 
 #endif
 
-typedef unsigned int uint;
+typedef unsigned long long ull;
 enum Directions {
     UP,
     DOWN,
@@ -52,7 +52,7 @@ class tile {
 
     public:
         tile(): value(0), blocked(false) {}
-        uint value;
+        ull value;
         bool blocked;
 
 };
@@ -63,7 +63,9 @@ class game {
         bool moved;
         bool win;
         bool boardFull;
-        uint score;
+        ull score;
+        long long moveCount;
+        double duration;
 
         void endl(int n = 1) {
 
@@ -86,6 +88,7 @@ class game {
             int y = randomFreeTile.at(0);
             board[y][x].value = rand() % 100 > 89 ? 4 : 2;
 
+            moveCount++;
             moved = true;
 
             return canMove();
@@ -103,16 +106,33 @@ class game {
 
         }
 
+		void drawAscii() {
+			endl(2);
+			std::cout << "   /\\\\\\\\\\\\\\\\\\          /\\\\\\\\\\\\\\                /\\\\\\         /\\\\\\\\\\\\\\\\\\    "; endl();
+			std::cout << "  /\\\\\\///////\\\\\\      /\\\\\\/////\\\\\\            /\\\\\\\\\\       /\\\\\\///////\\\\\\  "; endl();
+			std::cout << "  \\///      \\//\\\\\\    /\\\\\\    \\//\\\\\\         /\\\\\\/\\\\\\      \\/\\\\\\     \\/\\\\\\  "; endl();
+			std::cout << "             /\\\\\\/    \\/\\\\\\     \\/\\\\\\       /\\\\\\/\\/\\\\\\      \\///\\\\\\\\\\\\\\\\\\/   "; endl();
+			std::cout << "           /\\\\\\//      \\/\\\\\\     \\/\\\\\\     /\\\\\\/  \\/\\\\\\       /\\\\\\///////\\\\\\  "; endl();
+			std::cout << "         /\\\\\\//         \\/\\\\\\     \\/\\\\\\   /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\   /\\\\\\      \\//\\\\\\ "; endl();
+			std::cout << "        /\\\\\\/            \\//\\\\\\    /\\\\\\   \\///////////\\\\\\//   \\//\\\\\\      /\\\\\\  "; endl();
+			std::cout << "        /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\   \\///\\\\\\\\\\\\\\/              \\/\\\\\\      \\///\\\\\\\\\\\\\\\\\\/   "; endl();
+			std::cout << "        \\///////////////      \\///////                \\///         \\/////////     "; endl(4);
+		}
+
         void drawBoard() {
 
             system(CLEAR);
 
-            std::cout << "SCORE: " << score; endl();
-            std::cout << "------------------------------"; endl(4);
+			drawAscii();
+			std::cout << "  +---------------------------+"; endl();
+			std::cout << "  | SCORE:" << std::setw(19) << score << " |"; endl();
+            std::cout << "  | MOVES:" << std::setw(19) << moveCount << " |"; endl();
+            std::cout << "  +---------------------------+"; endl(2);
 
             for (int y = 0; y < 4; y++) {
 
-                std::cout << " +------+------+------+------+" ; endl();
+                std::cout << "  +------+------+------+------+" ; endl();
+				std::cout << " ";
 
                 for (int x = 0; x < 4; x++) {
 
@@ -128,7 +148,7 @@ class game {
 
             }
 
-            std::cout << " +------+------+------+------+"; endl(4);
+            std::cout << "  +------+------+------+------+"; endl(3);
         }
 
         void input(int err = 0) {
@@ -136,14 +156,14 @@ class game {
             moved = false;
             char c;
 
-            std::cout << "W => Up"; endl();
-            std::cout << "A => Left"; endl();
-            std::cout << "S => Down"; endl();
-            std::cout << "D => Right"; endl(2);
-            std::cout << "Press the keys to start and continue."; endl(4);
+            std::cout << "  W => Up"; endl();
+            std::cout << "  A => Left"; endl();
+            std::cout << "  S => Down"; endl();
+            std::cout << "  D => Right"; endl(2);
+            std::cout << "  Press the keys to start and continue."; endl(4);
 
             if (err) {
-                std::cout << "Invalid input. Please try again."; endl(2);
+                std::cout << "  Invalid input. Please try again."; endl(2);
             }
 
             c = getch();
@@ -198,7 +218,7 @@ class game {
 
         }
 
-        bool testAdd(int y, int x, uint value) {
+        bool testAdd(int y, int x, ull value) {
 
             if (y < 0 || y > 3 || x < 0 || x > 3)
                 return false;
@@ -325,6 +345,7 @@ class game {
                 targetTile.blocked = true;
 
                 moved = true;
+
             }
 
             else if (A && !B) {
@@ -333,7 +354,7 @@ class game {
                 currentTile.value = 0;
 
                 moved = true;
-
+            
             }
 
             if (k == 1 && x < 2)
@@ -343,8 +364,8 @@ class game {
 
         }
 
-        uint largestTile() {
-            uint max = 2;
+        ull largestTile() {
+            ull max = 2;
             
             for (int y = 0; y < 4; y++)
                 for (int x = 0; x < 4; x++)
@@ -353,11 +374,22 @@ class game {
             return max;
         }
 
+		void statistics() {
+
+			std::cout << "  STATISTICS"; endl();
+			std::cout << "  ----------"; endl();
+            std::cout << "  Final score:       " << score; endl();
+            std::cout << "  Largest tile:      " << largestTile(); endl();
+            std::cout << "  Number of moves:   " << moveCount; endl();
+            std::cout << "  Time taken:        " << duration << " seconds"; endl(2);
+
+		}
+
     public:
 
-        game() : win(false), moved(true), boardFull(false), score(0) {}
+        game() : win(false), moved(true), boardFull(false), score(0), moveCount(-2) {}
 
-        int start() {
+        void start() {
 
             auto start = std::chrono::high_resolution_clock::now();
 
@@ -379,12 +411,12 @@ class game {
 
             auto finish = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double> elapsed = finish - start;
+            duration = elapsed.count();
 
-            std::string msg = win ? "You win!" : "Game over! You lose.";
-            std::cout << msg; endl(2);
-            std::cout << "Largest tile: " << largestTile(); endl();
-            std::cout << "Final score: " << score; endl(2);
-            std::cout << "Time taken: " << elapsed.count() << " seconds" ; endl();
+            std::string msg = win ? "  You win!" : "  Game over! You lose.";
+            std::cout << msg; endl(3);
+
+            statistics();
 
         }
 
