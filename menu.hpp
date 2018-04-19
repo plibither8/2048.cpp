@@ -22,7 +22,7 @@ class Menu {
 
 void Menu::startMenu(int err) {
 
-	clear();
+	clearScreen();
 
 	drawAscii();
 	std::cout << "  Welcome to 2048!"; endl(2);

@@ -19,8 +19,8 @@ void endl(int n = 1) {
 
 };
 
-void clear() {
-	system(CLEAR);
+void clearScreen() {
+    system(CLEAR);
 };
 
 void drawAscii() {

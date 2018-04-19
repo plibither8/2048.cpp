@@ -6,8 +6,8 @@ int main () {
     srand(time(NULL));
 
     Menu menu;
-	menu.startMenu();
+    menu.startMenu();
 
-	return 0;
+    return 0;
 
 }
