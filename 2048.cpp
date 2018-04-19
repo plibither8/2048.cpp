@@ -1,10 +1,13 @@
-#include "game.hpp"
+#include "global.hpp"
+#include "menu.hpp"
 
 int main () {
 
     srand(time(NULL));
 
-    Game g;
-    g.start();
+    Menu menu;
+	menu.startMenu();
+
+	return 0;
 
 }

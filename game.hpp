@@ -7,16 +7,14 @@
 #include <ctime>
 #include <vector>
 #include <chrono>
+#include "global.hpp"
 
 #ifdef _WIN32
 
-    #define CLEAR "cls"
     #include <conio.h>
 
 #else
 
-    #define CLEAR "clear"
-    
     #include <unistd.h>
     #include <termios.h>
     
@@ -70,10 +68,8 @@ class Game {
         long long moveCount;
         double duration;
 
-        void endl(int n = 1);
         bool addTile();
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
-        void drawAscii();
         void drawBoard();
         void input(int err = 0);
         bool canMove();
@@ -88,18 +84,11 @@ class Game {
 
         Game() : win(false), moved(true), boardFull(false), score(0), moveCount(-2), largestTile(2) {}
 
-        void start();
+        void startGame();
 
         std::vector<std::vector <Tile> > board{4, std::vector<Tile>(4)};
 
 };
-
-void Game::endl(int n) {
-
-    for (int i = 0; i < n; i++)
-        std::cout << std::endl;
-
-}
 
 bool Game::addTile() {
 
@@ -134,22 +123,9 @@ void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
 }
 
-void Game::drawAscii() {
-    endl();
-    std::cout << "   /\\\\\\\\\\\\\\\\\\          /\\\\\\\\\\\\\\                /\\\\\\         /\\\\\\\\\\\\\\\\\\    "; endl();
-    std::cout << "  /\\\\\\///////\\\\\\      /\\\\\\/////\\\\\\            /\\\\\\\\\\       /\\\\\\///////\\\\\\  "; endl();
-    std::cout << "  \\///      \\//\\\\\\    /\\\\\\    \\//\\\\\\         /\\\\\\/\\\\\\      \\/\\\\\\     \\/\\\\\\  "; endl();
-    std::cout << "             /\\\\\\/    \\/\\\\\\     \\/\\\\\\       /\\\\\\/\\/\\\\\\      \\///\\\\\\\\\\\\\\\\\\/   "; endl();
-    std::cout << "           /\\\\\\//      \\/\\\\\\     \\/\\\\\\     /\\\\\\/  \\/\\\\\\       /\\\\\\///////\\\\\\  "; endl();
-    std::cout << "         /\\\\\\//         \\/\\\\\\     \\/\\\\\\   /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\   /\\\\\\      \\//\\\\\\ "; endl();
-    std::cout << "        /\\\\\\/            \\//\\\\\\    /\\\\\\   \\///////////\\\\\\//   \\//\\\\\\      /\\\\\\  "; endl();
-    std::cout << "        /\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\   \\///\\\\\\\\\\\\\\/              \\/\\\\\\      \\///\\\\\\\\\\\\\\\\\\/   "; endl();
-    std::cout << "        \\///////////////      \\///////                \\///         \\/////////     "; endl(4);
-}
-
 void Game::drawBoard() {
 
-    system(CLEAR);
+    clear();
 
     drawAscii();
     std::cout << "  +---------------------------+"; endl();
@@ -408,7 +384,7 @@ void Game::statistics() {
 
 }
 
-void Game::start() {
+void Game::startGame() {
 
     auto startTime = std::chrono::high_resolution_clock::now();
 
