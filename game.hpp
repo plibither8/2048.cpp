@@ -95,8 +95,7 @@ bool Game::addTile() {
     std::vector<std::vector<int>> freeTiles;
     collectFreeTiles(freeTiles);
 
-    if (!freeTiles.size())
-    {
+    if (!freeTiles.size()) {
         boardFull = true;
     }
 
@@ -125,7 +124,7 @@ void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
 void Game::drawBoard() {
 
-    clear();
+    clearScreen();
 
     drawAscii();
     std::cout << "  +---------------------------+"; endl();
@@ -309,7 +308,8 @@ void Game::moveVertical(int y, int x, int k) {
 
         currentTile.value = 0;
         targetTile.value *= 2;
-        win = targetTile.value == 2048 ? true : false;
+        if (!win)
+            win = targetTile.value == 2048 ? true : false;
         score += targetTile.value;
         targetTile.blocked = true;
 
@@ -317,7 +317,9 @@ void Game::moveVertical(int y, int x, int k) {
 
         moved = true;
 
-    } else if (A && !B) {
+    }
+    
+    else if (A && !B) {
 
         targetTile.value = currentTile.value;
         currentTile.value = 0;
@@ -347,7 +349,8 @@ void Game::moveHorizontal(int y, int x, int k) {
 
         currentTile.value = 0;
         targetTile.value *= 2;
-        win = targetTile.value == 2048 ? true : false;
+        if (!win)
+            win = targetTile.value == 2048 ? true : false;
         score += targetTile.value;
         targetTile.blocked = true;
 
