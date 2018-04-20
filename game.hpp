@@ -45,8 +45,8 @@ class Game {
         bool testAdd(int y, int x, ull value);
         void unblockTiles();
         void move(Directions d);
-        void moveVertical(int y, int x, int k);
-        void moveHorizontal(int y, int x, int k);
+        void startMove(int y, int x, int k, int l);
+        // void moveHorizontal(int y, int x, int k);
         void statistics();
 
     public:
@@ -218,7 +218,7 @@ void Game::move(Directions d) {
                 int y = 1;
                 while (y < 4) {
                     if (board[y][x].value)
-                        moveVertical(y, x, -1);
+                        startMove(y, x, -1, 0);
                     y++;
                 }
             }
@@ -230,7 +230,7 @@ void Game::move(Directions d) {
                 int y = 2;
                 while (y >= 0) {
                     if (board[y][x].value)
-                        moveVertical(y, x, 1);
+                        startMove(y, x, 1, 0);
                     y--;
                 }
             }
@@ -242,7 +242,7 @@ void Game::move(Directions d) {
                 int x = 1;
                 while (x < 4) {
                     if (board[y][x].value)
-                        moveHorizontal(y, x, -1);
+                        startMove(y, x, 0, -1);
                     x++;
                 }
             }
@@ -254,7 +254,7 @@ void Game::move(Directions d) {
                 int x = 2;
                 while (x >= 0) {
                     if (board[y][x].value)
-                        moveHorizontal(y, x, 1);
+                        startMove(y, x, 0, 1);
                     x--;
                 }
             }
@@ -263,10 +263,10 @@ void Game::move(Directions d) {
         }
 }
 
-void Game::moveVertical(int y, int x, int k) {
+void Game::startMove(int y, int x, int k, int l) {
 
     Tile &currentTile = board[y][x];
-    Tile &targetTile = board[y + k][x];
+    Tile &targetTile = board[y + k][x + l];
 
     int A = currentTile.value;
     int B = targetTile.value;
@@ -298,52 +298,52 @@ void Game::moveVertical(int y, int x, int k) {
     }
 
     if (k == 1 && y < 2)
-        moveVertical(y + k, x, 1);
+        startMove(y + k, x + l, k, l);
     else if (k == -1 && y > 1)
-        moveVertical(y + k, x, -1);
+        startMove(y + k, x + l, k, l);
 
 }
 
-void Game::moveHorizontal(int y, int x, int k) {
+// void Game::moveHorizontal(int y, int x, int k) {
 
-    Tile &currentTile = board[y][x];
-    Tile &targetTile = board[y][x + k];
+//     Tile &currentTile = board[y][x];
+//     Tile &targetTile = board[y][x + k];
 
-    int A = currentTile.value;
-    int B = targetTile.value;
-    int C = currentTile.blocked;
-    int D = targetTile.blocked;
+//     int A = currentTile.value;
+//     int B = targetTile.value;
+//     int C = currentTile.blocked;
+//     int D = targetTile.blocked;
 
-    if (B && A == B && !C && !D) {
+//     if (B && A == B && !C && !D) {
 
-        currentTile.value = 0;
-        targetTile.value *= 2;
-        if (!win)
-            win = targetTile.value == 2048 ? true : false;
-        score += targetTile.value;
-        targetTile.blocked = true;
+//         currentTile.value = 0;
+//         targetTile.value *= 2;
+//         if (!win)
+//             win = targetTile.value == 2048 ? true : false;
+//         score += targetTile.value;
+//         targetTile.blocked = true;
 
-        largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
+//         largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
 
-        moved = true;
+//         moved = true;
 
-    }
+//     }
 
-    else if (A && !B) {
+//     else if (A && !B) {
 
-        targetTile.value = currentTile.value;
-        currentTile.value = 0;
+//         targetTile.value = currentTile.value;
+//         currentTile.value = 0;
 
-        moved = true;
+//         moved = true;
     
-    }
+//     }
 
-    if (k == 1 && x < 2)
-        moveHorizontal(y, x + k, 1);
-    else if (k == -1 && x > 1)
-        moveHorizontal(y, x + k, -1);
+//     if (k == 1 && x < 2)
+//         moveHorizontal(y, x + k, 1);
+//     else if (k == -1 && x > 1)
+//         moveHorizontal(y, x + k, -1);
 
-}
+// }
 
 void Game::statistics() {
 
