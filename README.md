@@ -2,6 +2,12 @@
 
 #### Console version of the game "2048" for GNU/Linux written in C++
 
+## To-Do:
+- [x] Add start menu
+- [ ] Save highscore / score
+- [ ] Save a game state and play from a saved game state
+- [ ] AI
+
 ## Notes:
 
 
