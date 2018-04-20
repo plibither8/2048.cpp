@@ -8,6 +8,35 @@
 - [ ] Save a game state and play from a saved game state
 - [ ] AI
 
+## Setup Instructions
+The game and code is natively made to run on the GNU/Linux platform, but cross-platform compatibility for Windows has been added too.
+
+### Requirements:
+* g++ or gcc compiler
+* Linux OR Windows with a working terminal
+
+### Instructions:
+1. Open your terminal in your prefered directory and clone this project:
+```bash
+$ git clone https://github.com/plibither8/2048.cpp
+```
+2. Enter the project directory:
+```bash
+$ cd 2048.cpp
+```
+3. Create a `build` folder (Optional)
+```bash
+$ mkdir build
+```
+4. Compile the 2048.cpp file and create output
+```bash
+$ g++ --std=c++11 2048.cpp -o ./build/2048.out
+```
+5. Run the program and play the game!
+```bash
+$ ./build/2048.out
+```
+
 ## Notes:
 
 
