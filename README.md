@@ -16,7 +16,7 @@ The game and code is natively made to run on the GNU/Linux platform, but cross-p
 * Linux OR Windows with a working terminal
 
 ### Instructions:
-1. Open your terminal in your prefered directory and clone this project:
+1. Open your terminal in your preferred directory and clone this project:
 ```bash
 $ git clone https://github.com/plibither8/2048.cpp
 ```
@@ -24,11 +24,11 @@ $ git clone https://github.com/plibither8/2048.cpp
 ```bash
 $ cd 2048.cpp
 ```
-3. Create a `build` folder (Optional)
+3. Create a `build` folder (Optional):
 ```bash
 $ mkdir build
 ```
-4. Compile the 2048.cpp file and create output
+4. Compile the `2048.cpp` file and create an output:
 ```bash
 $ g++ --std=c++11 2048.cpp -o ./build/2048.out
 ```
