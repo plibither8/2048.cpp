@@ -3,7 +3,7 @@
 #### Console version of the game "2048" for GNU/Linux written in C++
 
 ## To-Do:
-- [x] Add start menu
+- [x] Add start menu [19/04/2018]
 - [ ] Save highscore / score
 - [ ] Save a game state and play from a saved game state
 - [ ] AI
@@ -12,12 +12,10 @@
 
 
 * Game board array is defined as `board[y][x]`
-
 * Game board will follow the following structure:
 
 ```
 'x' => x-axis OR the horizotal line OR rows
-
 'y' => y-axis OR the vertical line OR columns
 ```
 
