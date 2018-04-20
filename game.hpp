@@ -32,6 +32,7 @@ class Game {
         bool moved;
         bool win;
         bool boardFull;
+        bool exit;
         ull score;
         ull largestTile;
         long long moveCount;
@@ -39,6 +40,8 @@ class Game {
 
         bool addTile();
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
+        void padding(uint value);
+        int tileColor(uint value);
         void drawBoard();
         void input(int err = 0);
         bool canMove();
@@ -50,7 +53,7 @@ class Game {
 
     public:
 
-        Game() : win(false), moved(true), boardFull(false), score(0), moveCount(-2), largestTile(2) {}
+        Game() : win(false), moved(true), boardFull(false), exit(false), score(0), moveCount(-2), largestTile(2) {}
 
         void startGame();
 
@@ -75,6 +78,10 @@ bool Game::addTile() {
     moveCount++;
     moved = true;
 
+    if (exit) {
+        return !exit;
+    }
+
     return canMove();
 
 }
@@ -90,6 +97,27 @@ void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
         }
     }
 
+}
+
+void Game::padding(uint value) {
+    int length = 0;
+    while (value) {
+        value /= 10;
+        length++;
+    }
+    while (4 - length++) {
+        std::cout << " ";
+    }
+}
+
+int Game::tileColor(uint value) {
+    if (value <= 64) {
+        return 1;
+    }
+    if (value <= 1024) {
+        return 2;
+    }
+    return 3;
 }
 
 void Game::drawBoard() {
@@ -114,7 +142,9 @@ void Game::drawBoard() {
                 std::cout << std::setw(7);
             }
             else {
-                std::cout << std::setw(4) << board[y][x].value;
+                padding(board[y][x].value);
+                std::cout << (tileColor(board[y][x].value) == 1 ? red : (tileColor(board[y][x].value) == 2 ? blue : green))
+                        << bold_on << board[y][x].value << bold_off << def;
             }
 
         }
@@ -139,7 +169,7 @@ void Game::input(int err) {
     std::cout << "  Press the keys to start and continue."; endl(4);
 
     if (err) {
-        std::cout << "  Invalid input. Please try again."; endl(2);
+        std::cout << red << "  Invalid input. Please try again." << def; endl(2);
     }
 
     c = getch();
@@ -300,7 +330,19 @@ void Game::move(int y, int x, int k, int l) {
 
         largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
         if (!win) {
-            win = targetTile.value == 2048 ? true : false;
+            if (targetTile.value == 2048) {
+                win = true;
+                std::cout << green << bold_on << "  You win! Press any key to continue or 'x' to exit: " << bold_off << def;
+                char c;
+                std::cin >> c;
+                switch (toupper(c)) {
+                    case 'X':
+                        exit = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
 
         moved = true;
@@ -327,12 +369,12 @@ void Game::move(int y, int x, int k, int l) {
 
 void Game::statistics() {
 
-    std::cout << "  STATISTICS"; endl();
-    std::cout << "  ----------"; endl();
-    std::cout << "  Final score:       " << score; endl();
-    std::cout << "  Largest Tile:      " << largestTile; endl();
-    std::cout << "  Number of moves:   " << moveCount; endl();
-    std::cout << "  Time taken:        " << duration << " seconds"; endl();
+    std::cout << bold_on << "  STATISTICS" << bold_off; endl();
+    std::cout << bold_on << "  ----------" << bold_off; endl();
+    std::cout << "  Final score:       " << bold_on << score << bold_off; endl();
+    std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off; endl();
+    std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off; endl();
+    std::cout << "  Time taken:        " << bold_on << duration << " seconds" << bold_off; endl();
 
 }
 
@@ -361,7 +403,13 @@ void Game::startGame() {
     duration = elapsed.count();
 
     std::string msg = win ? "  You win!" : "  Game over! You lose.";
-    std::cout << msg; endl(3);
+
+    if (win) {
+        std::cout << green << bold_on << msg << def << bold_off; endl(3);
+    }
+    else {
+        std::cout << red << bold_on << msg << def << bold_off; endl(3);
+    }
 
     statistics();
 

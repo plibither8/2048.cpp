@@ -25,7 +25,7 @@ void Menu::startMenu(int err) {
 	clearScreen();
 
 	drawAscii();
-	std::cout << "  Welcome to 2048!"; endl(2);
+	std::cout << "  Welcome to " << blue << "2048!" << def; endl(2);
 	std::cout << "  	1. Play a New Game"; endl();
 	std::cout << "  	2. View Highscores"; endl(2);
 
@@ -36,7 +36,7 @@ void Menu::startMenu(int err) {
 void Menu::input(int err) {
 
 	if (err) {
-		std::cout << "  Invalid input. Please try again."; endl(2);
+		std::cout << red << "  Invalid input. Please try again." << def; endl(2);
 	}
 
 	std::cout << "  Enter Choice: ";
