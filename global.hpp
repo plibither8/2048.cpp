@@ -38,8 +38,9 @@
 
 void endl(int n = 1) {
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++) {
         std::cout << std::endl;
+    }
 
 };
 

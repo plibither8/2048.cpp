@@ -35,8 +35,9 @@ void Menu::startMenu(int err) {
 
 void Menu::input(int err) {
 
-	if (err)
+	if (err) {
 		std::cout << "  Invalid input. Please try again."; endl(2);
+	}
 
 	std::cout << "  Enter Choice: ";
 	char c;

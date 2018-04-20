@@ -81,12 +81,14 @@ bool Game::addTile() {
 
 void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
-    for (int y = 0; y < 4; y++)
-        for (int x = 0; x < 4; x++)
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
             if (!board[y][x].value) {
                 std::vector<int> newEmpty {y, x};
                 freeTiles.push_back(newEmpty);
             }
+        }
+    }
 
 }
 
@@ -108,10 +110,12 @@ void Game::drawBoard() {
         for (int x = 0; x < 4; x++) {
 
             std::cout << " | ";
-            if (!board[y][x].value)
+            if (!board[y][x].value) {
                 std::cout << std::setw(7);
-            else
+            }
+            else {
                 std::cout << std::setw(4) << board[y][x].value;
+            }
 
         }
 
@@ -169,22 +173,30 @@ void Game::input(int err) {
 
 bool Game::canMove() {
 
-    for (int y = 0; y < 4; y++)
-        for (int x = 0; x < 4; x++)
-            if (!board[y][x].value)
-                return true;
-
-    for (int y = 0; y < 4; y++)
+    for (int y = 0; y < 4; y++) {
         for (int x = 0; x < 4; x++) {
-            if (testAdd(y + 1, x, board[y][x].value))
+            if (!board[y][x].value) {
                 return true;
-            if (testAdd(y - 1, x, board[y][x].value))
-                return true;
-            if (testAdd(y, x + 1, board[y][x].value))
-                return true;
-            if (testAdd(y, x - 1, board[y][x].value))
-                return true;
+            }
         }
+    }
+
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
+            if (testAdd(y + 1, x, board[y][x].value)) {
+                return true;
+            }
+            if (testAdd(y - 1, x, board[y][x].value)) {
+                return true;
+            }
+            if (testAdd(y, x + 1, board[y][x].value)) {
+                return true;
+            }
+            if (testAdd(y, x - 1, board[y][x].value)) {
+                return true;
+            }
+        }
+    }
 
     return false;
 
@@ -192,8 +204,9 @@ bool Game::canMove() {
 
 bool Game::testAdd(int y, int x, ull value) {
 
-    if (y < 0 || y > 3 || x < 0 || x > 3)
+    if (y < 0 || y > 3 || x < 0 || x > 3) {
         return false;
+    }
 
     return board[y][x].value == value;
 
@@ -201,9 +214,11 @@ bool Game::testAdd(int y, int x, ull value) {
 
 void Game::unblockTiles() {
 
-    for (int y = 0; y < 4; y++)
-        for (int x = 0; x < 4; x++)
+    for (int y = 0; y < 4; y++) {
+        for (int x = 0; x < 4; x++) {
             board[y][x].blocked = false;
+        }
+    }
 
 }
 
@@ -216,8 +231,9 @@ void Game::decideMove(Directions d) {
             for (int x = 0; x < 4; x++) {
                 int y = 1;
                 while (y < 4) {
-                    if (board[y][x].value)
+                    if (board[y][x].value) {
                         move(y, x, -1, 0);
+                    }
                     y++;
                 }
             }
@@ -228,8 +244,9 @@ void Game::decideMove(Directions d) {
             for (int x = 0; x < 4; x++) {
                 int y = 2;
                 while (y >= 0) {
-                    if (board[y][x].value)
+                    if (board[y][x].value) {
                         move(y, x, 1, 0);
+                    }
                     y--;
                 }
             }
@@ -240,8 +257,9 @@ void Game::decideMove(Directions d) {
             for (int y = 0; y < 4; y++) {
                 int x = 1;
                 while (x < 4) {
-                    if (board[y][x].value)
+                    if (board[y][x].value) {
                         move(y, x, 0, -1);
+                    }
                     x++;
                 }
             }
@@ -252,8 +270,9 @@ void Game::decideMove(Directions d) {
             for (int y = 0; y < 4; y++) {
                 int x = 2;
                 while (x >= 0) {
-                    if (board[y][x].value)
+                    if (board[y][x].value) {
                         move(y, x, 0, 1);
+                    }
                     x--;
                 }
             }
@@ -280,8 +299,9 @@ void Game::move(int y, int x, int k, int l) {
         targetTile.blocked = true;
 
         largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
-        if (!win)
+        if (!win) {
             win = targetTile.value == 2048 ? true : false;
+        }
 
         moved = true;
 
@@ -296,10 +316,12 @@ void Game::move(int y, int x, int k, int l) {
 
     }
     
-    if (k + l == 1 && (k == 1 ? y : x) < 2)
+    if (k + l == 1 && (k == 1 ? y : x) < 2) {
         move(y + k, x + l, k, l);
-    else if (k + l == -1 && (k == -1 ? y : x) > 1)
+    }
+    else if (k + l == -1 && (k == -1 ? y : x) > 1) {
         move(y + k, x + l, k, l);
+    }
 
 }
 
@@ -322,14 +344,14 @@ void Game::startGame() {
 
     while (1) {
 
-        if (moved)
-            if(!addTile()) {
+        if (moved) {
+            if (!addTile()) {
                 drawBoard();
                 break;
             }
+        }
 
         drawBoard();
-
         input();
 
     }

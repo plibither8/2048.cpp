@@ -1,7 +1,7 @@
 #include "global.hpp"
 #include "menu.hpp"
 
-int main () {
+int main() {
 
     srand(time(NULL));
 
