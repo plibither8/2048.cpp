@@ -7,6 +7,7 @@
 #include <ctime>
 #include <vector>
 #include <chrono>
+#include <math.h>
 #include "global.hpp"
 
 typedef unsigned long long ull;
@@ -40,8 +41,8 @@ class Game {
 
         bool addTile();
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
-        void padding(uint value);
-        int tileColor(uint value);
+        void padding(ull value);
+        Color::Modifier tileColor(ull value);
         void drawBoard();
         void input(int err = 0);
         bool canMove();
@@ -99,7 +100,7 @@ void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
 }
 
-void Game::padding(uint value) {
+void Game::padding(ull value) {
     int length = 0;
     while (value) {
         value /= 10;
@@ -110,14 +111,26 @@ void Game::padding(uint value) {
     }
 }
 
-int Game::tileColor(uint value) {
-    if (value <= 64) {
-        return 1;
-    }
-    if (value <= 1024) {
-        return 2;
-    }
-    return 3;
+Color::Modifier Game::tileColor(ull value) {
+
+    std::vector<Color::Modifier> colors {
+        red,
+        yellow,
+        magenta,
+        blue,
+        cyan,
+        yellow,
+        red,
+        yellow,
+        magenta,
+        blue,
+        green
+    };
+    
+    int index = log2(value) - 1;
+
+    return colors[index];
+
 }
 
 void Game::drawBoard() {
@@ -143,8 +156,7 @@ void Game::drawBoard() {
             }
             else {
                 padding(board[y][x].value);
-                std::cout << (tileColor(board[y][x].value) == 1 ? red : (tileColor(board[y][x].value) == 2 ? blue : green))
-                        << bold_on << board[y][x].value << bold_off << def;
+                std::cout << tileColor(board[y][x].value) << bold_on << board[y][x].value << bold_off << def;
             }
 
         }
