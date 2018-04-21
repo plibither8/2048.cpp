@@ -413,7 +413,7 @@ void Game::saveScorePrompt() {
 }
 
 void Game::saveScore() {
-    Score s;
+    Scoreboard s;
     s.score = score;
     s.save();
     return;

@@ -67,8 +67,8 @@ void Menu::startGame() {
 
 void Menu::showScores() {
 
-	Score s;
-	s.readFile();
+	Scoreboard s;
+	s.printScore();
 	return;
 
 }
