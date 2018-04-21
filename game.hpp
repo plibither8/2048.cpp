@@ -9,8 +9,8 @@
 #include <chrono>
 #include <math.h>
 #include "global.hpp"
+#include "scores.hpp"
 
-typedef unsigned long long ull;
 enum Directions {
     UP,
     DOWN,
@@ -24,8 +24,29 @@ class Tile {
         Tile(): value(0), blocked(false) {}
         ull value;
         bool blocked;
+        Color::Modifier tileColor(ull);
 
 };
+
+Color::Modifier Tile::tileColor(ull value) {
+    std::vector<Color::Modifier> colors{
+        red,
+        yellow,
+        magenta,
+        blue,
+        cyan,
+        yellow,
+        red,
+        yellow,
+        magenta,
+        blue,
+        green
+    };
+    int log = log2(value);
+    int index = log < 12 ? log - 1 : 10;
+
+    return colors[index];
+}
 
 class Game {
 
@@ -41,16 +62,17 @@ class Game {
 
         bool addTile();
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
-        void padding(ull value);
-        Color::Modifier tileColor(ull value);
+        void padding(ull);
         void drawBoard();
         void input(int err = 0);
         bool canMove();
-        bool testAdd(int y, int x, ull value);
+        bool testAdd(int, int, ull);
         void unblockTiles();
-        void decideMove(Directions d);
-        void move(int y, int x, int k, int l);
+        void decideMove(Directions);
+        void move(int, int, int, int);
         void statistics();
+        void saveScorePrompt();
+        void saveScore();
 
     public:
 
@@ -111,28 +133,6 @@ void Game::padding(ull value) {
     }
 }
 
-Color::Modifier Game::tileColor(ull value) {
-
-    std::vector<Color::Modifier> colors {
-        red,
-        yellow,
-        magenta,
-        blue,
-        cyan,
-        yellow,
-        red,
-        yellow,
-        magenta,
-        blue,
-        green
-    };
-    
-    int index = log2(value) - 1;
-
-    return colors[index];
-
-}
-
 void Game::drawBoard() {
 
     clearScreen();
@@ -150,13 +150,15 @@ void Game::drawBoard() {
 
         for (int x = 0; x < 4; x++) {
 
+            Tile currentTile = board[y][x];
+
             std::cout << " | ";
-            if (!board[y][x].value) {
+            if (!currentTile.value) {
                 std::cout << std::setw(7);
             }
             else {
-                padding(board[y][x].value);
-                std::cout << tileColor(board[y][x].value) << bold_on << board[y][x].value << bold_off << def;
+                padding(currentTile.value);
+                std::cout << currentTile.tileColor(currentTile.value) << bold_on << currentTile.value << bold_off << def;
             }
 
         }
@@ -178,17 +180,17 @@ void Game::input(int err) {
     std::cout << "  A => Left"; endl();
     std::cout << "  S => Down"; endl();
     std::cout << "  D => Right"; endl(2);
-    std::cout << "  Press the keys to start and continue."; endl(4);
+    std::cout << "  Press the keys to start and continue."; endl();
 
     if (err) {
         std::cout << red << "  Invalid input. Please try again." << def; endl(2);
     }
 
     c = getch();
+    
+    endl(4);
 
-    c = toupper(c);
-
-    switch(c) {
+    switch(toupper(c)) {
 
         case 'W':
             decideMove(UP);
@@ -381,13 +383,40 @@ void Game::move(int y, int x, int k, int l) {
 
 void Game::statistics() {
 
-    std::cout << bold_on << "  STATISTICS" << bold_off; endl();
-    std::cout << bold_on << "  ----------" << bold_off; endl();
+    std::cout << yellow << "  STATISTICS" << def; endl();
+    std::cout << yellow << "  ----------" << def; endl();
     std::cout << "  Final score:       " << bold_on << score << bold_off; endl();
     std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off; endl();
     std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off; endl();
     std::cout << "  Time taken:        " << bold_on << duration << " seconds" << bold_off; endl();
 
+}
+
+void Game::saveScorePrompt() {
+
+    std::cout << green << bold_on << "  Do you want to save this score?" << bold_off << def; endl();
+    std::cout << green << "  Press 'y' for YES or any other key to exit: " << def;
+    char c;
+    std::cin >> c;
+
+    switch(toupper(c)) {
+        case 'Y':
+            endl();
+            saveScore();
+            break;
+        default:
+            endl();
+            std::cout << yellow << "  Goodbye!" << def; endl();
+            break;
+    }
+
+}
+
+void Game::saveScore() {
+    Score s;
+    s.score = score;
+    s.save();
+    return;
 }
 
 void Game::startGame() {
@@ -424,5 +453,7 @@ void Game::startGame() {
     }
 
     statistics();
+    endl(2);
+    saveScorePrompt();
 
 }

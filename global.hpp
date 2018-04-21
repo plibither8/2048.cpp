@@ -38,6 +38,8 @@
 
 #endif
 
+typedef unsigned long long ull;
+
 void endl(int n = 1) {
 
     for (int i = 0; i < n; i++) {

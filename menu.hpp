@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include "game.hpp"
+#include "scores.hpp"
 #include "global.hpp"
 
 class Menu {
@@ -66,6 +67,8 @@ void Menu::startGame() {
 
 void Menu::showScores() {
 
+	Score s;
+	s.readFile();
 	return;
 
 }
