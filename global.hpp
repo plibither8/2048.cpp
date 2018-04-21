@@ -12,10 +12,10 @@
 
 #else
     #define CLEAR "clear"
-    
+
     #include <unistd.h>
     #include <termios.h>
-    
+
     char getch() {
         char buf = 0;
         struct termios old = {0};

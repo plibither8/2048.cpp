@@ -90,10 +90,12 @@ void Scoreboard::printScore() {
 }
 
 void Scoreboard::padding(std::string name) {
+
     int length = name.length();
     while (18 - length++) {
         std::cout << " ";
     }
+
 }
 
 void Scoreboard::readFile() {

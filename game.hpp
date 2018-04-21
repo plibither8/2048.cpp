@@ -187,7 +187,7 @@ void Game::input(int err) {
     }
 
     c = getch();
-    
+
     endl(4);
 
     switch(toupper(c)) {
@@ -362,7 +362,7 @@ void Game::move(int y, int x, int k, int l) {
         moved = true;
 
     }
-    
+
     else if (A && !B) {
 
         targetTile.value = currentTile.value;
@@ -371,7 +371,7 @@ void Game::move(int y, int x, int k, int l) {
         moved = true;
 
     }
-    
+
     if (k + l == 1 && (k == 1 ? y : x) < 2) {
         move(y + k, x + l, k, l);
     }
