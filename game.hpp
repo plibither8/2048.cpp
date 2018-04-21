@@ -415,6 +415,10 @@ void Game::saveScorePrompt() {
 void Game::saveScore() {
     Scoreboard s;
     s.score = score;
+    s.win = win;
+    s.moveCount = moveCount;
+    s.largestTile = largestTile;
+    s.duration = duration;
     s.save();
     return;
 }
