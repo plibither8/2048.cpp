@@ -26,7 +26,7 @@ void Menu::startMenu(int err) {
 	clearScreen();
 
 	drawAscii();
-	std::cout << "  Welcome to " << blue << "2048!" << def; endl(2);
+	std::cout << bold_on << "  Welcome to " << blue << "2048!" << def << bold_off; endl(2);
 	std::cout << "  	1. Play a New Game"; endl();
 	std::cout << "  	2. View Highscores and Statistics"; endl(2);
 

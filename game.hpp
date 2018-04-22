@@ -74,7 +74,6 @@ class Game {
         void move(int, int, int, int);
         void statistics();
         void saveStats();
-        void saveScorePrompt();
         void saveScore();
 
     public:
@@ -138,14 +137,12 @@ void Game::padding(ull value) {
 
 void Game::drawBoard() {
 
-    bestScore = bestScore < score ? score : bestScore;
-
     clearScreen();
 
     drawAscii();
     std::cout << "  +---------------------------+"; endl();
     std::cout << "  | " << bold_on << "SCORE:" << bold_off << std::setw(19) << score << " |"; endl();
-    std::cout << "  | " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << bestScore << " |"; endl();
+    std::cout << "  | " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << (bestScore < score ? score : bestScore) << " |"; endl();
     std::cout << "  | " << bold_on << "MOVES:" << bold_off << std::setw(19) << moveCount << " |"; endl();
     std::cout << "  +---------------------------+"; endl(2);
 
@@ -418,26 +415,6 @@ void Game::saveStats() {
 
 }
 
-void Game::saveScorePrompt() {
-
-    std::cout << green << bold_on << "  Do you want to save this score?" << bold_off << def; endl();
-    std::cout << green << "  Press 'y' for YES or any other key to exit: " << def;
-    char c;
-    std::cin >> c;
-
-    switch(toupper(c)) {
-        case 'Y':
-            endl();
-            saveScore();
-            break;
-        default:
-            endl();
-            std::cout << yellow << "  Goodbye!" << def; endl();
-            break;
-    }
-
-}
-
 void Game::saveScore() {
     Scoreboard s;
     s.score = score;
@@ -489,6 +466,6 @@ void Game::startGame() {
     statistics();
     saveStats();
     endl(2);
-    saveScorePrompt();
+    saveScore();
 
 }

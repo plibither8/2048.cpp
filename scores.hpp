@@ -44,7 +44,7 @@ class Scoreboard {
 
 void Scoreboard::prompt() {
 
-    std::cout << "  Please enter your name: ";
+    std::cout << bold_on << "  Please enter your name to save this score: " << bold_off;
     std::cin >> name;
 
 }
