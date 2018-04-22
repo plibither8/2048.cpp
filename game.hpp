@@ -4,6 +4,8 @@
 #include <string>
 #include <iomanip>
 #include <cstdlib>
+#include <cstdint>
+#include <limits>
 #include <ctime>
 #include <vector>
 #include <chrono>
@@ -61,10 +63,12 @@ class Game {
         ull largestTile;
         long long moveCount;
         double duration;
+        ull BOARD_SIZE;
+        std::vector<std::vector <Tile> > board;
 
+        void initialiseBoardArray();
         bool addTile();
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
-        void padding(ull);
         void drawBoard();
         void input(int err = 0);
         bool canMove();
@@ -79,12 +83,20 @@ class Game {
     public:
 
         Game() : win(false), moved(true), boardFull(false), exit(false), score(0), moveCount(-2), largestTile(2) {}
-
-        void startGame();
-
-        std::vector<std::vector <Tile> > board{4, std::vector<Tile>(4)};
+        void startGame(int err = 0);
 
 };
+
+void Game::initialiseBoardArray() {
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        std::vector<Tile> bufferArray;
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            Tile bufferTile;
+            bufferArray.push_back(bufferTile);
+        }
+        board.push_back(bufferArray);
+    }
+}
 
 bool Game::addTile() {
 
@@ -113,8 +125,8 @@ bool Game::addTile() {
 
 void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < BOARD_SIZE; y++) {
+        for (int x = 0; x < BOARD_SIZE; x++) {
             if (!board[y][x].value) {
                 std::vector<int> newEmpty {y, x};
                 freeTiles.push_back(newEmpty);
@@ -124,17 +136,6 @@ void Game::collectFreeTiles(std::vector<std::vector<int> > &freeTiles) {
 
 }
 
-void Game::padding(ull value) {
-    int length = 0;
-    while (value) {
-        value /= 10;
-        length++;
-    }
-    while (4 - length++) {
-        std::cout << " ";
-    }
-}
-
 void Game::drawBoard() {
 
     clearScreen();
@@ -142,26 +143,31 @@ void Game::drawBoard() {
     drawAscii();
     std::cout << "  +---------------------------+"; endl();
     std::cout << "  | " << bold_on << "SCORE:" << bold_off << std::setw(19) << score << " |"; endl();
-    std::cout << "  | " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << (bestScore < score ? score : bestScore) << " |"; endl();
+    if (BOARD_SIZE == 4) {
+        std::cout << "  | " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << (bestScore < score ? score : bestScore) << " |"; endl();
+    }
     std::cout << "  | " << bold_on << "MOVES:" << bold_off << std::setw(19) << moveCount << " |"; endl();
     std::cout << "  +---------------------------+"; endl(2);
 
-    for (int y = 0; y < 4; y++) {
+    for (int y = 0; y < BOARD_SIZE; y++) {
 
-        std::cout << "  +------+------+------+------+" ; endl();
+        std::cout << "  +";
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            std::cout << "------+";
+        }
+        endl();
         std::cout << " ";
 
-        for (int x = 0; x < 4; x++) {
+        for (int x = 0; x < BOARD_SIZE; x++) {
 
             Tile currentTile = board[y][x];
 
             std::cout << " | ";
             if (!currentTile.value) {
-                std::cout << std::setw(7);
+                std::cout << "    ";
             }
             else {
-                padding(currentTile.value);
-                std::cout << currentTile.tileColor(currentTile.value) << bold_on << currentTile.value << bold_off << def;
+                std::cout << currentTile.tileColor(currentTile.value) << bold_on << std::setw(4) << currentTile.value << bold_off << def;
             }
 
         }
@@ -170,7 +176,11 @@ void Game::drawBoard() {
 
     }
 
-    std::cout << "  +------+------+------+------+"; endl(3);
+    std::cout << "  +";
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        std::cout << "------+";
+    }
+    endl(3);
 
 }
 
@@ -220,16 +230,16 @@ void Game::input(int err) {
 
 bool Game::canMove() {
 
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < BOARD_SIZE; y++) {
+        for (int x = 0; x < BOARD_SIZE; x++) {
             if (!board[y][x].value) {
                 return true;
             }
         }
     }
 
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < BOARD_SIZE; y++) {
+        for (int x = 0; x < BOARD_SIZE; x++) {
             if (testAdd(y + 1, x, board[y][x].value)) {
                 return true;
             }
@@ -251,7 +261,7 @@ bool Game::canMove() {
 
 bool Game::testAdd(int y, int x, ull value) {
 
-    if (y < 0 || y > 3 || x < 0 || x > 3) {
+    if (y < 0 || y > BOARD_SIZE - 1 || x < 0 || x > BOARD_SIZE - 1) {
         return false;
     }
 
@@ -261,8 +271,8 @@ bool Game::testAdd(int y, int x, ull value) {
 
 void Game::unblockTiles() {
 
-    for (int y = 0; y < 4; y++) {
-        for (int x = 0; x < 4; x++) {
+    for (int y = 0; y < BOARD_SIZE; y++) {
+        for (int x = 0; x < BOARD_SIZE; x++) {
             board[y][x].blocked = false;
         }
     }
@@ -275,9 +285,9 @@ void Game::decideMove(Directions d) {
 
         case UP:
 
-            for (int x = 0; x < 4; x++) {
+            for (int x = 0; x < BOARD_SIZE; x++) {
                 int y = 1;
-                while (y < 4) {
+                while (y < BOARD_SIZE) {
                     if (board[y][x].value) {
                         move(y, x, -1, 0);
                     }
@@ -288,8 +298,8 @@ void Game::decideMove(Directions d) {
 
         case DOWN:
 
-            for (int x = 0; x < 4; x++) {
-                int y = 2;
+            for (int x = 0; x < BOARD_SIZE; x++) {
+                int y = BOARD_SIZE - 2;
                 while (y >= 0) {
                     if (board[y][x].value) {
                         move(y, x, 1, 0);
@@ -301,9 +311,9 @@ void Game::decideMove(Directions d) {
 
         case LEFT:
 
-            for (int y = 0; y < 4; y++) {
+            for (int y = 0; y < BOARD_SIZE; y++) {
                 int x = 1;
-                while (x < 4) {
+                while (x < BOARD_SIZE) {
                     if (board[y][x].value) {
                         move(y, x, 0, -1);
                     }
@@ -314,8 +324,8 @@ void Game::decideMove(Directions d) {
 
         case RIGHT:
 
-            for (int y = 0; y < 4; y++) {
-                int x = 2;
+            for (int y = 0; y < BOARD_SIZE; y++) {
+                int x = BOARD_SIZE - 2;
                 while (x >= 0) {
                     if (board[y][x].value) {
                         move(y, x, 0, 1);
@@ -375,7 +385,7 @@ void Game::move(int y, int x, int k, int l) {
 
     }
 
-    if (k + l == 1 && (k == 1 ? y : x) < 2) {
+    if (k + l == 1 && (k == 1 ? y : x) < BOARD_SIZE - 2) {
         move(y + k, x + l, k, l);
     }
     else if (k + l == -1 && (k == -1 ? y : x) > 1) {
@@ -426,11 +436,29 @@ void Game::saveScore() {
     return;
 }
 
-void Game::startGame() {
+void Game::startGame(int err) {
+
 
     Stats stats;
     stats.collectStatistics();
     bestScore = stats.bestScore;
+
+    clearScreen();
+    drawAscii();
+
+    if (err) {
+        std::cout << red << "  Invalid input. Gameboard size should range from 3 to 6." << def; endl(2);
+    }
+
+    std::cout << bold_on << "  Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): " << bold_off;
+
+    if(!(std::cin >> BOARD_SIZE) || BOARD_SIZE < 3 || BOARD_SIZE > 10) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
+        startGame(1);
+    }
+
+    initialiseBoardArray();
 
     auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -463,9 +491,11 @@ void Game::startGame() {
         std::cout << red << bold_on << msg << def << bold_off; endl(3);
     }
 
-    statistics();
-    saveStats();
-    endl(2);
-    saveScore();
+    if (BOARD_SIZE == 4) {
+        statistics();
+        saveStats();
+        endl(2);
+        saveScore();
+    }
 
 }
