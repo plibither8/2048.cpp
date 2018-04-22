@@ -5,7 +5,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+
 #include "global.hpp"
+#include "statistics.hpp"
 
 struct Score {
     std::string name;
@@ -36,6 +38,7 @@ class Scoreboard {
         long long moveCount;
         double duration;
         void printScore();
+        void printStats();
         void save();
 };
 
@@ -95,6 +98,7 @@ void Scoreboard::printScore() {
                             << std::setw(12) << largestTile << " | "
                             << std::setw(12) << duration << " | ";
         endl();
+
     }
 
     if (!size) {
@@ -107,10 +111,29 @@ void Scoreboard::printScore() {
 
     endl(3);
 
+}
+
+void Scoreboard::printStats() {
+
+    Stats stats;
+    stats.collectStatistics();
+    std::cout << green << bold_on << "  STATISTICS" << bold_off << def; endl();
+    std::cout << green << bold_on << "  ----------" << bold_off << def; endl(2);
+    std::cout << "  +--------------------+------------+"; endl();
+    std::cout << "  | " << bold_on << "Best Score        " << bold_off << " | " << std::setw(10) << stats.bestScore << " |"; endl();
+    std::cout << "  | " << bold_on << "Game Count        " << bold_off << " | " << std::setw(10) << stats.gameCount << " |"; endl();
+    std::cout << "  | " << bold_on << "Number of Wins    " << bold_off << " | " << std::setw(10) << stats.winCount << " |"; endl();
+    std::cout << "  | " << bold_on << "Total Moves Played" << bold_off << " | " << std::setw(10) << stats.totalMoveCount << " |"; endl();
+    std::cout << "  | " << bold_on << "Total Duration (s)" << bold_off << " | " << std::setw(10) << stats.totalDuration << " |"; endl();
+    std::cout << "  +--------------------+------------+"; endl();
+    
+    endl(3);
+
     std::cout << "  Press any key to exit: ";
     char c;
     std::cin >> c;
     exit(1);
+
 }
 
 void Scoreboard::padding(std::string name) {

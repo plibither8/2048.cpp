@@ -28,7 +28,7 @@ void Menu::startMenu(int err) {
 	drawAscii();
 	std::cout << "  Welcome to " << blue << "2048!" << def; endl(2);
 	std::cout << "  	1. Play a New Game"; endl();
-	std::cout << "  	2. View Highscores"; endl(2);
+	std::cout << "  	2. View Highscores and Statistics"; endl(2);
 
 	input(err);
 
@@ -69,6 +69,7 @@ void Menu::showScores() {
 
 	Scoreboard s;
 	s.printScore();
+	s.printStats();
 	return;
 
 }

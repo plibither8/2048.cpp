@@ -10,6 +10,7 @@
 #include <math.h>
 #include "global.hpp"
 #include "scores.hpp"
+#include "statistics.hpp"
 
 enum Directions {
     UP,
@@ -56,6 +57,7 @@ class Game {
         bool boardFull;
         bool exit;
         ull score;
+        ull bestScore;
         ull largestTile;
         long long moveCount;
         double duration;
@@ -71,6 +73,7 @@ class Game {
         void decideMove(Directions);
         void move(int, int, int, int);
         void statistics();
+        void saveStats();
         void saveScorePrompt();
         void saveScore();
 
@@ -135,12 +138,15 @@ void Game::padding(ull value) {
 
 void Game::drawBoard() {
 
+    bestScore = bestScore < score ? score : bestScore;
+
     clearScreen();
 
     drawAscii();
     std::cout << "  +---------------------------+"; endl();
-    std::cout << "  | SCORE:" << std::setw(19) << score << " |"; endl();
-    std::cout << "  | MOVES:" << std::setw(19) << moveCount << " |"; endl();
+    std::cout << "  | " << bold_on << "SCORE:" << bold_off << std::setw(19) << score << " |"; endl();
+    std::cout << "  | " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << bestScore << " |"; endl();
+    std::cout << "  | " << bold_on << "MOVES:" << bold_off << std::setw(19) << moveCount << " |"; endl();
     std::cout << "  +---------------------------+"; endl(2);
 
     for (int y = 0; y < 4; y++) {
@@ -392,6 +398,26 @@ void Game::statistics() {
 
 }
 
+void Game::saveStats() {
+    Stats stats;
+    stats.collectStatistics();
+    stats.bestScore = stats.bestScore < score ? score : stats.bestScore; 
+    stats.gameCount++;
+    stats.winCount = win ? stats.winCount + 1 : stats.winCount; 
+    stats.totalMoveCount += moveCount;
+    stats.totalDuration += duration;
+
+    std::fstream statistics("./data/statistics.txt");
+    statistics << stats.bestScore
+                << std::endl << stats.gameCount
+                << std::endl << stats.winCount
+                << std::endl << stats.totalMoveCount
+                << std::endl << stats.totalDuration;
+
+    statistics.close();
+
+}
+
 void Game::saveScorePrompt() {
 
     std::cout << green << bold_on << "  Do you want to save this score?" << bold_off << def; endl();
@@ -425,6 +451,10 @@ void Game::saveScore() {
 
 void Game::startGame() {
 
+    Stats stats;
+    stats.collectStatistics();
+    bestScore = stats.bestScore;
+
     auto startTime = std::chrono::high_resolution_clock::now();
 
     addTile();
@@ -457,6 +487,7 @@ void Game::startGame() {
     }
 
     statistics();
+    saveStats();
     endl(2);
     saveScorePrompt();
 
