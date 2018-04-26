@@ -13,7 +13,7 @@ The game and code is natively made to run on the GNU/Linux platform, but cross-p
 
 ### Requirements:
 * g++ or gcc compiler
-* Linux OR Windows with a working terminal (Cygwin or Git bash for Windows is recommended)
+* Linux OR Windows with a working terminal (Cygwin or Git bash is recommended for Windows)
 
 ### Instructions:
 1. Open your terminal in your preferred directory and clone this project:
