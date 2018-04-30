@@ -66,4 +66,6 @@ $ ./build/2048.out
 
 # License
 
-[MIT](LICENSE)
+Copyright (c) Mihir Chaturvedi. All rights reserved.
+
+Licensed under the [MIT](LICENSE) License.
