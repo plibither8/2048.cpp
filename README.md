@@ -13,7 +13,7 @@ The game and code is natively made to run on the GNU/Linux platform, but cross-p
 
 ### Requirements:
 * g++ or gcc compiler
-* Linux OR Windows with a working terminal (Cygwin or Git bash is recommended for Windows)
+* Linux, macOS OR Windows with a working terminal (Cygwin or Git bash is recommended for Windows)
 
 ### Instructions:
 1. Open your terminal in your preferred directory and clone this project:
@@ -28,9 +28,9 @@ $ cd 2048.cpp
 ```bash
 $ mkdir build
 ```
-4. Compile the `2048.cpp` file and create an output:
+4. Compile the `2048.cpp` file and create an output using the Makefile:
 ```bash
-$ g++ --std=c++11 2048.cpp -o ./build/2048.out
+$ make
 ```
 5. Run the program and play the game!
 ```bash
