@@ -199,7 +199,9 @@ void Game::input(int err) {
         std::cout << red << "  Invalid input. Please try again." << def; endl(2);
     }
 
-    c = getch();
+    // c = getch();
+
+    getInput(c);
 
     endl(4);
 

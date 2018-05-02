@@ -7,12 +7,12 @@
 #include "color.hpp"
 
 #ifdef _WIN32
-    #define CLEAR "cls"
-    #include <conio.h>
+
+    void getInput(char &c) {
+        std::cin >> c;
+    }
 
 #else
-    #define CLEAR "clear"
-
     #include <unistd.h>
     #include <termios.h>
 
@@ -36,6 +36,10 @@
         return (buf);
     }
 
+    void getInput(char &c) {
+        c = getch();
+    }
+
 #endif
 
 typedef unsigned long long ull;
@@ -49,7 +53,7 @@ void endl(int n = 1) {
 };
 
 void clearScreen() {
-    system(CLEAR);
+    system("clear");
 };
 
 std::ostream &bold_on(std::ostream &os) {
