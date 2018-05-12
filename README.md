@@ -1,12 +1,16 @@
 # 2048.cpp
 
-#### Console version of the game "2048" for GNU/Linux written in C++
+Console version of the game "2048" for GNU/Linux written in C++.
+
+Ability to save scores, choose board size and view statistics!
+
+![Demo of usage](assets/demo.gif)
 
 ## To-Do:
 - [x] Add start menu [19/04/2018]
 - [x] Save highscore / score [21/04/2018]
-- [ ] Save a game state and play from a saved game state
-- [ ] AI
+- [ ] ~~Save a game state and play from a saved game state~~ (Abandoned indefinitely)
+- [ ] ~~AI~~ (Abandoned indefinitely)
 
 ## Setup Instructions
 The game and code is natively made to run on the GNU/Linux platform, but cross-platform compatibility for Windows has been added too.
