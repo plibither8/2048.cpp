@@ -8,9 +8,13 @@ git:
 os:
   - linux
   - osx
+  
+compiler:
+  - clang
+  - gcc
 
 install: 
   - make
 
 script:
-  - cat EOF | ./build/2048.out
+  - echo "" | ./build/2048.out

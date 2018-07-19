@@ -7,7 +7,7 @@ EXE = build/2048.out
 
 #COMPILER_FLAGS specifies the additional compilation options we're using
 # -w suppresses all warnings
-CXXFLAGS = -std=c++11
+CXXFLAGS = -std=c++11 #-Wall
 #  CXXFLAGS += -w
 
 
