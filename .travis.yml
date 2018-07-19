@@ -1,0 +1,16 @@
+language: cpp
+group: travis_latest
+
+git:
+  depth: 3
+  quiet: true
+
+os:
+  - linux
+  - osx
+
+install: 
+  - make
+
+script:
+  - cat EOF | ./build/2048.out

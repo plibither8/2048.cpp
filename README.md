@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/fortran-gaming/2048.cpp.svg?branch=master)](https://travis-ci.com/fortran-gaming/2048.cpp)
+
 # 2048.cpp
 
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
