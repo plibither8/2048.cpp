@@ -9,6 +9,6 @@ int main() {
     Menu menu;
     menu.startMenu();
 
-    return 0;
+    return EXIT_SUCCESS;
 
 }

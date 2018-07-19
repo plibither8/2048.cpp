@@ -1,7 +1,7 @@
 
 #SRC specifies which files to compile as part of the project
 SRC = 2048.cpp
-
+EXE = build/2048.out
 #CXX specifies C++ compiler
 #CXX = g++
 
@@ -12,5 +12,8 @@ CXXFLAGS = -std=c++11
 
 
 #This is the target that compiles our executable
-build/2048.out: $(SRC)
-		$(CXX) $^ $(CXXFLAGS) -o $@
+$(EXE): $(SRC)
+	$(CXX) $^ $(CXXFLAGS) -o $@
+		
+clean:
+	$(RM) *.o $(EXE)

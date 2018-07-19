@@ -57,7 +57,7 @@ class Game {
         bool moved;
         bool win;
         bool boardFull;
-        bool exit;
+        bool rexit;
         ull score;
         ull bestScore;
         ull largestTile;
@@ -82,7 +82,7 @@ class Game {
 
     public:
 
-        Game() : win(false), moved(true), boardFull(false), exit(false), score(0), moveCount(-2), largestTile(2) {}
+        Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2) {}
         void startGame(int err = 0);
 
 };
@@ -115,8 +115,8 @@ bool Game::addTile() {
     moveCount++;
     moved = true;
 
-    if (exit) {
-        return !exit;
+    if (rexit) {
+        return !rexit;
     }
 
     return canMove();
@@ -198,11 +198,11 @@ void Game::input(int err) {
     if (err) {
         std::cout << red << "  Invalid input. Please try again." << def; endl(2);
     }
-
+    
     getInput(c);
 
     endl(4);
-
+    
     switch(toupper(c)) {
 
         case 'W':
@@ -364,7 +364,7 @@ void Game::move(int y, int x, int k, int l) {
                 std::cin >> c;
                 switch (toupper(c)) {
                     case 'X':
-                        exit = true;
+                        rexit = true;
                         break;
                     default:
                         break;
