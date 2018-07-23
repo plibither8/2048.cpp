@@ -1,0 +1,20 @@
+language: cpp
+group: travis_latest
+
+git:
+  depth: 3
+  quiet: true
+
+os:
+  - linux
+  - osx
+  
+compiler:
+  - clang
+  - gcc
+
+install: 
+  - make
+
+script:
+  - echo "" | ./build/2048.out

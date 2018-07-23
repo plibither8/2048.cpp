@@ -132,7 +132,7 @@ void Scoreboard::printStats() {
     std::cout << "  Press any key to exit: ";
     char c;
     std::cin >> c;
-    exit(1);
+    exit(EXIT_SUCCESS);
 
 }
 

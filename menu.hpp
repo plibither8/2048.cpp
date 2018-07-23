@@ -43,7 +43,13 @@ void Menu::input(int err) {
 	std::cout << "  Enter Choice: ";
 	char c;
 	std::cin >> c;
-
+	
+	if (std::cin.eof())
+	{
+	    std::cout << std::endl;
+	    exit(EXIT_SUCCESS);
+  }
+  
 	switch(c) {
 		case '1':
 			startGame();

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/fortran-gaming/2048.cpp.svg?branch=master)](https://travis-ci.com/fortran-gaming/2048.cpp)
+
 # 2048.cpp
 
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
@@ -15,11 +17,11 @@
 - [ ] ~~AI~~ *(Abandoned indefinitely)*
 
 ## Setup Instructions
-The game and code is natively made to run on the GNU/Linux platform, but cross-platform compatibility for Windows has been added too.
+The game and code is natively made to run on the GNU/Linux and MacOS platforms, but cross-platform compatibility for Windows has been added too.
 
 ### Requirements:
-* g++ or gcc compiler
-* Linux, macOS OR Windows with a working terminal (Cygwin or Git bash is recommended for Windows)
+* C++ compiler (e.g. `g++`, `clang++`, etc.)
+* Linux, MacOS OR Windows with a working terminal (Cygwin, Windows Subsystem for Linux or Git bash is recommended for Windows)
 
 ### Instructions:
 1. Open your terminal in your preferred directory and clone this project:
