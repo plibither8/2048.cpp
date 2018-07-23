@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/travis/plibither8/2048.cpp.svg)](https://travis-ci.com/plibither8/2048.cpp)
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
 
-> Console version of the game "2048" for GNU/Linux written in C++.
+> Terminal version of the game "2048" for GNU/Linux written in C++.
 
 ![Demo of usage](assets/demo.gif)
 
