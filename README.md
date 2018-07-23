@@ -5,6 +5,8 @@
 
 > Terminal version of the game "2048" written in C++.
 
+:tada: Featured on GitHub's [Twitter](https://twitter.com/github/status/1017094930991370240) and [Facebook](https://www.facebook.com/GitHub/videos/1433491453419807/) pages! :tada:
+
 ![Demo of usage](assets/demo.gif)
 
 ## To-Do
