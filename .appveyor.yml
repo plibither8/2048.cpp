@@ -11,12 +11,11 @@ build: off
 
 init:
 - cmd: set PATH=%MINGW_DIR%;%PY_DIR%;%PY_DIR%\Scripts;%PATH%
+- cmd: mklink %MINGW_DIR%\make.exe %MINGW_DIR%\mingw32-make.exe
 
 install:
-- cmd: mklink make.exe %MINGW_DIR%\mingw32-make.exe
-
 - make
-  
+
 test_script:
 - make test
 
