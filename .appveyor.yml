@@ -10,7 +10,7 @@ clone_depth: 3
 build: off
 
 init:
-- cmd: set PATH=%MINGW_DIR%;%PY_DIR%;%PY_DIR%\Scripts;%PATH%
+- cmd: set PATH=%MINGW_DIR%;%PATH%
 - cmd: mklink %MINGW_DIR%\make.exe %MINGW_DIR%\mingw32-make.exe
 
 install:
