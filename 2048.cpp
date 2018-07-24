@@ -1,6 +1,4 @@
-#include "global.hpp"
-#include "menu.hpp"
-
+#include "2048.h"
 
 int main() {
 

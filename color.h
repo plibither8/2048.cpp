@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COLOR_H
+#define COLOR_H
 
 #include <ostream>
 
@@ -41,18 +42,20 @@ namespace Color {
 
 }
 
-Color::Modifier def(Color::FG_DEFAULT);
-Color::Modifier red(Color::FG_RED);
-Color::Modifier green(Color::FG_GREEN);
-Color::Modifier yellow(Color::FG_YELLOW);
-Color::Modifier blue(Color::FG_BLUE);
-Color::Modifier magenta(Color::FG_MAGENTA);
-Color::Modifier cyan(Color::FG_CYAN);
-Color::Modifier lightGray(Color::FG_LIGHT_GRAY);
-Color::Modifier darkGray(Color::FG_DARK_GRAY);
-Color::Modifier lightRed(Color::FG_LIGHT_RED);
-Color::Modifier lightGreen(Color::FG_LIGHT_GREEN);
-Color::Modifier lightYellow(Color::FG_LIGHT_YELLOW);
-Color::Modifier lightBlue(Color::FG_LIGHT_BLUE);
-Color::Modifier lightMagenta(Color::FG_LIGHT_MAGENTA);
-Color::Modifier lightCyan(Color::FG_LIGHT_CYAN);
+static Color::Modifier def(Color::FG_DEFAULT);
+static Color::Modifier red(Color::FG_RED);
+static Color::Modifier green(Color::FG_GREEN);
+static Color::Modifier yellow(Color::FG_YELLOW);
+static Color::Modifier blue(Color::FG_BLUE);
+static Color::Modifier magenta(Color::FG_MAGENTA);
+static Color::Modifier cyan(Color::FG_CYAN);
+static Color::Modifier lightGray(Color::FG_LIGHT_GRAY);
+static Color::Modifier darkGray(Color::FG_DARK_GRAY);
+static Color::Modifier lightRed(Color::FG_LIGHT_RED);
+static Color::Modifier lightGreen(Color::FG_LIGHT_GREEN);
+static Color::Modifier lightYellow(Color::FG_LIGHT_YELLOW);
+static Color::Modifier lightBlue(Color::FG_LIGHT_BLUE);
+static Color::Modifier lightMagenta(Color::FG_LIGHT_MAGENTA);
+static Color::Modifier lightCyan(Color::FG_LIGHT_CYAN);
+
+#endif
