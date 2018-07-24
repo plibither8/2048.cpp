@@ -1,0 +1,21 @@
+image:
+- Visual Studio 2017
+- Ubuntu
+
+environment:
+  MINGW_DIR: C:\mingw-w64\x86_64-7.2.0-posix-seh-rt_v5-rev1\mingw64\bin
+
+clone_depth: 3
+
+build: off
+
+init:
+- cmd: set PATH=%MINGW_DIR%;%PATH%
+- cmd: mklink %MINGW_DIR%\make.exe %MINGW_DIR%\mingw32-make.exe
+
+install:
+- make
+
+test_script:
+- make test
+

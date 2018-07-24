@@ -1,46 +1,10 @@
-#pragma once
+#include "scores.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <algorithm>
-
-#include "global.hpp"
-#include "statistics.hpp"
-
-struct Score {
-    std::string name;
-    ull score;
-    bool win;
-    ull largestTile;
-    long long moveCount;
-    double duration;
-};
 
 bool compare(const Score &a, const Score &b) {
     return a.score < b.score;
 };
 
-class Scoreboard {
-    private:
-        std::string name;
-        std::vector<Score> scoreList;
-        void prompt();
-        void writeToFile();
-        void readFile();
-        void padding(std::string name);
-
-    public:
-        ull score = 0;
-        bool win;
-        ull largestTile;
-        long long moveCount;
-        double duration;
-        void printScore();
-        void printStats();
-        void save();
-};
 
 void Scoreboard::prompt() {
 
@@ -90,7 +54,7 @@ void Scoreboard::printScore() {
             std::cout << "  +-----+--------------------+----------+------+-------+--------------+--------------+"; endl();
         }
 
-        std::cout << "  | " << std::setw(2) << size - i << ". | " 
+        std::cout << "  | " << std::setw(2) << size - i << ". | "
                             << playerName; padding(playerName);
         std::cout << " | " << std::setw(8) << playerScore << " | "
                             << std::setw(4) << won << " | "
@@ -126,7 +90,7 @@ void Scoreboard::printStats() {
     std::cout << "  | " << bold_on << "Total Moves Played" << bold_off << " | " << std::setw(10) << stats.totalMoveCount << " |"; endl();
     std::cout << "  | " << bold_on << "Total Duration (s)" << bold_off << " | " << std::setw(10) << stats.totalDuration << " |"; endl();
     std::cout << "  +--------------------+------------+"; endl();
-    
+
     endl(3);
 
     std::cout << "  Press any key to exit: ";

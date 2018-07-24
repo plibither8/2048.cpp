@@ -1,6 +1,7 @@
 # 2048.cpp
 
 [![Build Status](https://img.shields.io/travis/plibither8/2048.cpp.svg)](https://travis-ci.com/plibither8/2048.cpp)
+[![Build status](https://ci.appveyor.com/api/projects/status/6jga06vlnaggj15r?svg=true)](https://ci.appveyor.com/project/scivision/2048-cpp)
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
 
 > Terminal version of the game "2048" written in C++.

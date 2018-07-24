@@ -1,35 +1,4 @@
-#pragma once
-
-#include <iostream>
-#include <string>
-#include <iomanip>
-#include <cstdlib>
-#include <cstdint>
-#include <limits>
-#include <ctime>
-#include <vector>
-#include <chrono>
-#include <math.h>
-#include "global.hpp"
-#include "scores.hpp"
-#include "statistics.hpp"
-
-enum Directions {
-    UP,
-    DOWN,
-    RIGHT,
-    LEFT
-};
-
-class Tile {
-
-    public:
-        Tile(): value(0), blocked(false) {}
-        ull value;
-        bool blocked;
-        Color::Modifier tileColor(ull);
-
-};
+#include "game.h"
 
 Color::Modifier Tile::tileColor(ull value) {
     std::vector<Color::Modifier> colors{
@@ -51,41 +20,6 @@ Color::Modifier Tile::tileColor(ull value) {
     return colors[index];
 }
 
-class Game {
-
-    private:
-        bool moved;
-        bool win;
-        bool boardFull;
-        bool rexit;
-        ull score;
-        ull bestScore;
-        ull largestTile;
-        long long moveCount;
-        double duration;
-        ull BOARD_SIZE;
-        std::vector<std::vector <Tile> > board;
-
-        void initialiseBoardArray();
-        bool addTile();
-        void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
-        void drawBoard();
-        void input(int err = 0);
-        bool canMove();
-        bool testAdd(int, int, ull);
-        void unblockTiles();
-        void decideMove(Directions);
-        void move(int, int, int, int);
-        void statistics();
-        void saveStats();
-        void saveScore();
-
-    public:
-
-        Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2) {}
-        void startGame(int err = 0);
-
-};
 
 void Game::initialiseBoardArray() {
     for (int i = 0; i < BOARD_SIZE; i++) {
@@ -198,11 +132,11 @@ void Game::input(int err) {
     if (err) {
         std::cout << red << "  Invalid input. Please try again." << def; endl(2);
     }
-    
+
     getInput(c);
 
     endl(4);
-    
+
     switch(toupper(c)) {
 
         case 'W':
@@ -408,9 +342,9 @@ void Game::statistics() {
 void Game::saveStats() {
     Stats stats;
     stats.collectStatistics();
-    stats.bestScore = stats.bestScore < score ? score : stats.bestScore; 
+    stats.bestScore = stats.bestScore < score ? score : stats.bestScore;
     stats.gameCount++;
-    stats.winCount = win ? stats.winCount + 1 : stats.winCount; 
+    stats.winCount = win ? stats.winCount + 1 : stats.winCount;
     stats.totalMoveCount += moveCount;
     stats.totalDuration += duration;
 
@@ -464,7 +398,7 @@ void Game::startGame(int err) {
 
     addTile();
 
-    while (1) {
+    while (true) {
 
         if (moved) {
             if (!addTile()) {
