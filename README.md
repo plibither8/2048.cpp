@@ -1,29 +1,32 @@
-[![Build Status](https://travis-ci.com/fortran-gaming/2048.cpp.svg?branch=master)](https://travis-ci.com/fortran-gaming/2048.cpp)
-
 # 2048.cpp
 
+[![Build Status](https://img.shields.io/travis/plibither8/2048.cpp.svg)](https://travis-ci.com/plibither8/2048.cpp)
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
 
-> Console version of the game "2048" for GNU/Linux written in C++.
->
-> Ability to save scores, choose board size and view statistics!
+> Terminal version of the game "2048" written in C++.
+
+:tada: Featured on GitHub's [Twitter](https://twitter.com/github/status/1017094930991370240) and [Facebook](https://www.facebook.com/GitHub/videos/1433491453419807/) pages! :tada:
 
 ![Demo of usage](assets/demo.gif)
 
-## To-Do:
+## To-Do
+
 - [x] Add start menu [19/04/2018]
 - [x] Save highscore / score [21/04/2018]
 - [ ] ~~Save a game state and play from a saved game state~~ *(Abandoned indefinitely)*
 - [ ] ~~AI~~ *(Abandoned indefinitely)*
 
-## Setup Instructions
+## Setup
+
 The game and code is natively made to run on the GNU/Linux and MacOS platforms, but cross-platform compatibility for Windows has been added too.
 
-### Requirements:
+### Requirements
+
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
 * Linux, MacOS OR Windows with a working terminal (Cygwin, Windows Subsystem for Linux or Git bash is recommended for Windows)
 
-### Instructions:
+### Instructions
+
 1. Open your terminal in your preferred directory and clone this project:
 ```bash
 $ git clone https://github.com/plibither8/2048.cpp
@@ -45,7 +48,7 @@ $ make
 $ ./build/2048.out
 ```
 
-## Notes:
+## Notes
 
 
 * Game board array is defined as `board[y][x]`
@@ -56,7 +59,7 @@ $ ./build/2048.out
 'y' => y-axis OR the vertical line OR columns
 ```
 
-### For example (zero-indexed):
+### For example (zero-indexed)
 
 `board[2][0]` refers to the 0th tile (or column) in 2nd row as in this case, x = 0 and y = 2. The specific tile is denoted the by '@' symbol in the following gameboard:
 
@@ -72,7 +75,7 @@ $ ./build/2048.out
 +------+------+------+------+
 ```
 
-# License
+## License
 
 Copyright (c) Mihir Chaturvedi. All rights reserved.
 
