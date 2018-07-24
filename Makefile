@@ -29,5 +29,8 @@ scores.o: scores.cpp
 statistics.o: statistics.cpp
 	$(CXX) -c $^ $(CXXFLAGS) -o $@
 
+test:
+	echo "" | ./$(EXE)
+
 clean:
 	$(RM) *.o $(EXE)

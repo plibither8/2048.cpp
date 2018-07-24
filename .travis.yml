@@ -13,8 +13,8 @@ compiler:
   - clang
   - gcc
 
-install: 
+install:
   - make
 
 script:
-  - echo "" | ./build/2048.out
+  - make test
