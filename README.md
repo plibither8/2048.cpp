@@ -56,8 +56,8 @@ $ ./build/2048.out
 * Game board will follow the following structure:
 
 ```
-'x' => x-axis OR the horizotal line OR rows
-'y' => y-axis OR the vertical line OR columns
+'x' => x-axis OR the horizontal line OR columns
+'y' => y-axis OR the vertical line OR rows
 ```
 
 ### For example (zero-indexed)
