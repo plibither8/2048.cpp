@@ -123,10 +123,10 @@ void Game::input(int err) {
     moved = false;
     char c;
 
-    std::cout << "  W => Up"; endl();
-    std::cout << "  A => Left"; endl();
-    std::cout << "  S => Down"; endl();
-    std::cout << "  D => Right"; endl(2);
+    std::cout << "  W or K => Up"; endl();
+    std::cout << "  A or H => Left"; endl();
+    std::cout << "  S or J => Down"; endl();
+    std::cout << "  D or L => Right"; endl(2);
     std::cout << "  Press the keys to start and continue."; endl();
 
     if (err) {
@@ -140,15 +140,19 @@ void Game::input(int err) {
     switch(toupper(c)) {
 
         case 'W':
+        case 'K':
             decideMove(UP);
             break;
         case 'A':
+        case 'H':
             decideMove(LEFT);
             break;
         case 'S':
+        case 'J':
             decideMove(DOWN);
             break;
         case 'D':
+        case 'L':
             decideMove(RIGHT);
             break;
         default:
