@@ -41,10 +41,10 @@ bool Game::addTile() {
         boardFull = true;
     }
 
-    std::vector<int> randomFreeTile = freeTiles.at(rand() % freeTiles.size());
+    std::vector<int> randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
     int x = randomFreeTile.at(1);
     int y = randomFreeTile.at(0);
-    board[y][x].value = rand() % 100 > 89 ? 4 : 2;
+    board[y][x].value = randInt() % 100 > 89 ? 4 : 2;
 
     moveCount++;
     moved = true;
