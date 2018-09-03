@@ -142,6 +142,30 @@ void Game::input(int err) {
 
     getInput(c);
 
+    if(c=='\e'){
+        getInput(c);
+        if(c=='['){
+            getInput(c);
+            endl(4);
+            switch(c){
+              case 'A':
+                  decideMove(UP);
+                  goto next;
+              case 'B':
+                  decideMove(DOWN);
+                  goto next;
+              case 'C':
+                  decideMove(RIGHT);
+                  goto next;
+              case 'D':
+                  decideMove(LEFT);
+                  goto next;
+            }
+        }
+        endl(4);
+        goto suite;
+    }
+
     endl(4);
 
     switch(toupper(c)) {
@@ -173,6 +197,7 @@ void Game::input(int err) {
             break;
 
     }
+next:
     unblockTiles();
 
 }
