@@ -119,9 +119,9 @@ void Game::drawBoard() {
 
 }
 
+
 void Game::boss(){
-    // ISO6429 (ANSI Codes) RIS - RESET TO INITIAL STATE = ESC c
-    std::cout<<"\ec";
+    clearScreen();
     // The boss_command should display something entreprisey on the screen,
     // to show how busy the employee is.  By default, we just run a shell.
     const char* boss_command=getenv("BOSS_COMMAND");
@@ -134,7 +134,11 @@ void Game::boss(){
     getInput(c);
 }
 
+
+
 void Game::input(int err) {
+
+    static const char ESC=27;
 
     moved = false;
     char c;
@@ -151,7 +155,7 @@ void Game::input(int err) {
 
     getInput(c);
 
-    if(c=='\e'){
+    if(c==ESC){
         getInput(c);
         if(c=='['){
             getInput(c);
@@ -170,8 +174,9 @@ void Game::input(int err) {
                   decideMove(LEFT);
                   goto next;
             }
+        }else{
+            endl(4);
         }
-        endl(4);
         goto suite;
     }
 
