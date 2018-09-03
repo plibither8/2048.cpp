@@ -88,24 +88,24 @@ void Game::drawBoard() {
         std::cout << "  ";
 
         if (y == 0) {
-          std::cout << "┌";
+            std::cout << "┌";
         } else {
-          std::cout << "├";
+            std::cout << "├";
         }
         for (int i = 0; i < BOARD_SIZE; i++) {
             std::cout << "──────";
             if (i < BOARD_SIZE - 1) {
-              if (y == 0) {
-                std::cout << "┬";
-              } else {
-                std::cout << "┼";
-              }
+                if (y == 0) {
+                    std::cout << "┬";
+                } else {
+                    std::cout << "┼";
+                }
             } else {
-              if (y == 0) {
-                std::cout << "┐";
-              } else {
-                std::cout << "┤";
-              }
+                if (y == 0) {
+                    std::cout << "┐";
+                } else {
+                    std::cout << "┤";
+                }
             }
         }
         endl();
@@ -131,12 +131,12 @@ void Game::drawBoard() {
 
     std::cout << "  └";
     for (int i = 0; i < BOARD_SIZE; i++) {
-      std::cout << "──────";
-      if (i < BOARD_SIZE - 1) {
-        std::cout << "┴";
-      } else {
-        std::cout << "┘";
-      }
+        std::cout << "──────";
+        if (i < BOARD_SIZE - 1) {
+            std::cout << "┴";
+        } else {
+            std::cout << "┘";
+        }
     }
     endl(3);
 

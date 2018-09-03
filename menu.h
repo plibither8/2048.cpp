@@ -10,14 +10,14 @@
 
 class Menu {
 
-        private:
-                void startGame();
-                void showScores();
-                void printMenu();
-                void input(int err);
+    private:
+        void startGame();
+        void showScores();
+        void printMenu();
+        void input(int err);
 
-        public:
-                void startMenu(int err = 0);
+    public:
+        void startMenu(int err = 0);
 
 };
 

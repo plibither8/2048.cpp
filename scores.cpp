@@ -28,7 +28,7 @@ void Scoreboard::printScore() {
     clearScreen();
     drawAscii();
     std::cout << green << bold_on << "  SCOREBOARD" << bold_off << def; endl();
-    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl(2);
+    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl();
 
     int size = scoreList.size();
 
@@ -83,7 +83,7 @@ void Scoreboard::printStats() {
     Stats stats;
     stats.collectStatistics();
     std::cout << green << bold_on << "  STATISTICS" << bold_off << def; endl();
-    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl(2);
+    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl();
     std::cout << "  ┌────────────────────┬────────────┐"; endl();
     std::cout << "  │ " << bold_on << "Best Score        " << bold_off << " │ " << std::setw(10) << stats.bestScore << " │"; endl();
     std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ " << std::setw(10) << stats.gameCount << " │"; endl();
