@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "game.h"
 
 Color::Modifier Tile::tileColor(ull value) {
@@ -119,8 +120,16 @@ void Game::drawBoard() {
 }
 
 void Game::boss(){
+    // ISO6429 (ANSI Codes) RIS - RESET TO INITIAL STATE = ESC c
     std::cout<<"\ec";
-    system("top -b -n 1");
+    // The boss_command should display something entreprisey on the screen,
+    // to show how busy the employee is.  By default, we just run a shell.
+    const char* boss_command=getenv("BOSS_COMMAND");
+    if(!boss_command){
+        boss_command="sh";
+    }
+    system(boss_command);
+    // Pause until some more input is given.
     char c;
     getInput(c);
 }
