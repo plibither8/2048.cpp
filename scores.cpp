@@ -28,7 +28,7 @@ void Scoreboard::printScore() {
     clearScreen();
     drawAscii();
     std::cout << green << bold_on << "  SCOREBOARD" << bold_off << def; endl();
-    std::cout << green << bold_on << "  ----------" << bold_off << def; endl(2);
+    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl(2);
 
     int size = scoreList.size();
 
@@ -42,25 +42,25 @@ void Scoreboard::printScore() {
         double duration = scoreList[i].duration;
 
         if (i == size - 1) {
-            std::cout << "  +-----+--------------------+----------+------+-------+--------------+--------------+"; endl();
-            std::cout << "  | " << bold_on << "No." << bold_off << " | "
-                        << bold_on << "Name" << bold_off << "               | "
-                        << bold_on << "Score" << bold_off << "    | "
-                        << bold_on << "Won?" << bold_off << " | "
-                        << bold_on << "Moves" << bold_off << " | "
-                        << bold_on << "Largest Tile" << bold_off << " | "
-                        << bold_on << "Duration (s)" << bold_off << " |";
+            std::cout << "  ┌─────┬────────────────────┬──────────┬──────┬───────┬──────────────┬──────────────┐"; endl();
+            std::cout << "  │ " << bold_on << "No." << bold_off << " │ "
+                        << bold_on << "Name" << bold_off << "               │ "
+                        << bold_on << "Score" << bold_off << "    │ "
+                        << bold_on << "Won?" << bold_off << " │ "
+                        << bold_on << "Moves" << bold_off << " │ "
+                        << bold_on << "Largest Tile" << bold_off << " │ "
+                        << bold_on << "Duration (s)" << bold_off << " │";
             endl();
-            std::cout << "  +-----+--------------------+----------+------+-------+--------------+--------------+"; endl();
+            std::cout << "  └─────┴────────────────────┴──────────┴──────┴───────┴──────────────┴──────────────┘"; endl();
         }
 
-        std::cout << "  | " << std::setw(2) << size - i << ". | "
+        std::cout << "  │ " << std::setw(2) << size - i << ". │ "
                             << playerName; padding(playerName);
-        std::cout << " | " << std::setw(8) << playerScore << " | "
-                            << std::setw(4) << won << " | "
-                            << std::setw(5) << moveCount << " | "
-                            << std::setw(12) << largestTile << " | "
-                            << std::setw(12) << duration << " | ";
+        std::cout << " │ " << std::setw(8) << playerScore << " │ "
+                            << std::setw(4) << won << " │ "
+                            << std::setw(5) << moveCount << " │ "
+                            << std::setw(12) << largestTile << " │ "
+                            << std::setw(12) << duration << " │ ";
         endl();
 
     }
@@ -70,7 +70,7 @@ void Scoreboard::printScore() {
         endl();
     }
     else {
-        std::cout << "  +-----+--------------------+----------+------+-------+--------------+--------------+";
+        std::cout << "  ┌─────┬────────────────────┬──────────┬──────┬───────┬──────────────┬──────────────┐";
     }
 
     endl(3);
@@ -82,14 +82,14 @@ void Scoreboard::printStats() {
     Stats stats;
     stats.collectStatistics();
     std::cout << green << bold_on << "  STATISTICS" << bold_off << def; endl();
-    std::cout << green << bold_on << "  ----------" << bold_off << def; endl(2);
-    std::cout << "  +--------------------+------------+"; endl();
-    std::cout << "  | " << bold_on << "Best Score        " << bold_off << " | " << std::setw(10) << stats.bestScore << " |"; endl();
-    std::cout << "  | " << bold_on << "Game Count        " << bold_off << " | " << std::setw(10) << stats.gameCount << " |"; endl();
-    std::cout << "  | " << bold_on << "Number of Wins    " << bold_off << " | " << std::setw(10) << stats.winCount << " |"; endl();
-    std::cout << "  | " << bold_on << "Total Moves Played" << bold_off << " | " << std::setw(10) << stats.totalMoveCount << " |"; endl();
-    std::cout << "  | " << bold_on << "Total Duration (s)" << bold_off << " | " << std::setw(10) << stats.totalDuration << " |"; endl();
-    std::cout << "  +--------------------+------------+"; endl();
+    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl(2);
+    std::cout << "  ┌────────────────────┬────────────┐"; endl();
+    std::cout << "  │ " << bold_on << "Best Score        " << bold_off << " │ " << std::setw(10) << stats.bestScore << " │"; endl();
+    std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ " << std::setw(10) << stats.gameCount << " │"; endl();
+    std::cout << "  │ " << bold_on << "Number of Wins    " << bold_off << " │ " << std::setw(10) << stats.winCount << " │"; endl();
+    std::cout << "  │ " << bold_on << "Total Moves Played" << bold_off << " │ " << std::setw(10) << stats.totalMoveCount << " │"; endl();
+    std::cout << "  │ " << bold_on << "Total Duration (s)" << bold_off << " │ " << std::setw(10) << stats.totalDuration << " │"; endl();
+    std::cout << "  └────────────────────┴────────────┘"; endl();
 
     endl(3);
 
