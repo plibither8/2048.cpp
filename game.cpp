@@ -75,19 +75,38 @@ void Game::drawBoard() {
     clearScreen();
 
     drawAscii();
-    std::cout << "  +---------------------------+"; endl();
-    std::cout << "  | " << bold_on << "SCORE:" << bold_off << std::setw(19) << score << " |"; endl();
+    std::cout << "  ┌───────────────────────────┐"; endl();
+    std::cout << "  │ " << bold_on << "SCORE:" << bold_off << std::setw(19) << score << " │"; endl();
     if (BOARD_SIZE == 4) {
-        std::cout << "  | " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << (bestScore < score ? score : bestScore) << " |"; endl();
+        std::cout << "  │ " << bold_on << "BEST SCORE:" <<bold_off << std::setw(14) << (bestScore < score ? score : bestScore) << " │"; endl();
     }
-    std::cout << "  | " << bold_on << "MOVES:" << bold_off << std::setw(19) << moveCount << " |"; endl();
-    std::cout << "  +---------------------------+"; endl(2);
+    std::cout << "  │ " << bold_on << "MOVES:" << bold_off << std::setw(19) << moveCount << " │"; endl();
+    std::cout << "  └───────────────────────────┘"; endl(2);
 
     for (int y = 0; y < BOARD_SIZE; y++) {
 
-        std::cout << "  +";
+        std::cout << "  ";
+
+        if (y == 0) {
+          std::cout << "┌";
+        } else {
+          std::cout << "├";
+        }
         for (int i = 0; i < BOARD_SIZE; i++) {
-            std::cout << "------+";
+            std::cout << "──────";
+            if (i < BOARD_SIZE - 1) {
+              if (y == 0) {
+                std::cout << "┬";
+              } else {
+                std::cout << "┼";
+              }
+            } else {
+              if (y == 0) {
+                std::cout << "┐";
+              } else {
+                std::cout << "┤";
+              }
+            }
         }
         endl();
         std::cout << " ";
@@ -96,7 +115,7 @@ void Game::drawBoard() {
 
             Tile currentTile = board[y][x];
 
-            std::cout << " | ";
+            std::cout << " │ ";
             if (!currentTile.value) {
                 std::cout << "    ";
             }
@@ -106,13 +125,18 @@ void Game::drawBoard() {
 
         }
 
-        std::cout << " | "; endl();
+        std::cout << " │ "; endl();
 
     }
 
-    std::cout << "  +";
+    std::cout << "  └";
     for (int i = 0; i < BOARD_SIZE; i++) {
-        std::cout << "------+";
+      std::cout << "──────";
+      if (i < BOARD_SIZE - 1) {
+        std::cout << "┴";
+      } else {
+        std::cout << "┘";
+      }
     }
     endl(3);
 
@@ -335,7 +359,7 @@ void Game::move(int y, int x, int k, int l) {
 void Game::statistics() {
 
     std::cout << yellow << "  STATISTICS" << def; endl();
-    std::cout << yellow << "  ----------" << def; endl();
+    std::cout << yellow << "  ──────────" << def; endl();
     std::cout << "  Final score:       " << bold_on << score << bold_off; endl();
     std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off; endl();
     std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off; endl();
