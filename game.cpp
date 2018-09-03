@@ -120,6 +120,8 @@ void Game::drawBoard() {
 
 void Game::input(int err) {
 
+    static const char ESC=27;
+
     moved = false;
     char c;
 
@@ -135,7 +137,7 @@ void Game::input(int err) {
 
     getInput(c);
 
-    if(c=='\e'){
+    if(c==ESC){
         getInput(c);
         if(c=='['){
             getInput(c);
@@ -154,9 +156,9 @@ void Game::input(int err) {
                   decideMove(LEFT);
                   goto next;
             }
+        }else{
+            endl(4);
         }
-        endl(4);
-        goto suite;
     }
 
     endl(4);
