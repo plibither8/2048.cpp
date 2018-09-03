@@ -118,6 +118,13 @@ void Game::drawBoard() {
 
 }
 
+void Game::boss(){
+    std::cout<<"\ec";
+    system("top -b -n 1");
+    char c;
+    getInput(c);
+}
+
 void Game::input(int err) {
 
     moved = false;
@@ -139,6 +146,10 @@ void Game::input(int err) {
 
     switch(toupper(c)) {
 
+      case '\b':
+      case 127:
+          boss();
+          goto suite;
         case 'W':
         case 'K':
             decideMove(UP);
@@ -156,12 +167,12 @@ void Game::input(int err) {
             decideMove(RIGHT);
             break;
         default:
+      suite:
             drawBoard();
             input(1);
             break;
 
     }
-
     unblockTiles();
 
 }
