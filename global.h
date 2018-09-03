@@ -14,7 +14,4 @@ void endl(int n=1);
 
 void clearScreen();
 
-std::ostream &bold_on();
-std::ostream &bold_off();
-
 #endif
