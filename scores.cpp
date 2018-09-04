@@ -49,7 +49,7 @@ void Scoreboard::printScore() {
                         << bold_on << "Won?" << bold_off << " │ "
                         << bold_on << "Moves" << bold_off << " │ "
                         << bold_on << "Largest Tile" << bold_off << " │ "
-                        << bold_on << "Duration (s)" << bold_off << " │";
+                        << bold_on << "Duration    " << bold_off << " │";
             endl();
             std::cout << "  ├─────┼────────────────────┼──────────┼──────┼───────┼──────────────┼──────────────┤";
             endl();
@@ -61,7 +61,7 @@ void Scoreboard::printScore() {
                             << std::setw(4) << won << " │ "
                             << std::setw(5) << moveCount << " │ "
                             << std::setw(12) << largestTile << " │ "
-                            << std::setw(12) << duration << " │ ";
+                            << std::setw(12) << secondsFormat(duration) << " │ ";
         endl();
 
     }
@@ -89,7 +89,7 @@ void Scoreboard::printStats() {
     std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ " << std::setw(10) << stats.gameCount << " │"; endl();
     std::cout << "  │ " << bold_on << "Number of Wins    " << bold_off << " │ " << std::setw(10) << stats.winCount << " │"; endl();
     std::cout << "  │ " << bold_on << "Total Moves Played" << bold_off << " │ " << std::setw(10) << stats.totalMoveCount << " │"; endl();
-    std::cout << "  │ " << bold_on << "Total Duration (s)" << bold_off << " │ " << std::setw(10) << stats.totalDuration << " │"; endl();
+    std::cout << "  │ " << bold_on << "Total Duration    " << bold_off << " │ " << std::setw(10) << secondsFormat(stats.totalDuration) << " │"; endl();
     std::cout << "  └────────────────────┴────────────┘"; endl();
 
     endl(3);

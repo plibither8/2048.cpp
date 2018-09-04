@@ -363,7 +363,7 @@ void Game::statistics() {
     std::cout << "  Final score:       " << bold_on << score << bold_off; endl();
     std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off; endl();
     std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off; endl();
-    std::cout << "  Time taken:        " << bold_on << duration << " seconds" << bold_off; endl();
+    std::cout << "  Time taken:        " << bold_on << secondsFormat(duration) << bold_off; endl();
 
 }
 
