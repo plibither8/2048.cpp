@@ -36,15 +36,11 @@ $ git clone https://github.com/plibither8/2048.cpp
 ```bash
 $ cd 2048.cpp
 ```
-3. Create a `build` folder (Optional):
-```bash
-$ mkdir build
-```
-4. Compile the `2048.cpp` file and create an output using the Makefile:
+3. Compile the `2048.cpp` file and create an output using the Makefile:
 ```bash
 $ make
 ```
-5. Run the program and play the game!
+4. Run the program and play the game!
 ```bash
 $ ./build/2048.out
 ```
