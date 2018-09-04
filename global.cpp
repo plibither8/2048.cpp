@@ -1,4 +1,5 @@
 #include "global.h"
+#include <sstream>
 
 #ifdef _WIN32
 
@@ -47,3 +48,17 @@ void endl(int n) {
 void clearScreen() {
     system("clear");
 };
+
+
+std::string secondsFormat(double sec) {
+    double s = sec;
+    int m = s / 60; s -= m * 60;
+    int h = m / 60; m %= 60;
+    std::ostringstream oss;
+    if (h)
+        oss << h << " h ";
+    if (m)
+        oss << m << " m ";
+    oss << s << " s";
+    return oss.str();
+}

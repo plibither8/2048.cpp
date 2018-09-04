@@ -14,4 +14,6 @@ void endl(int n=1);
 
 void clearScreen();
 
+std::string secondsFormat(double);
+
 #endif
