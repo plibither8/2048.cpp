@@ -1,3 +1,4 @@
+PREFIX = /usr/local
 
 #SRC specifies which files to compile as part of the project
 EXE = build/2048.out
@@ -34,3 +35,6 @@ test:
 
 clean:
 	$(RM) *.o $(EXE)
+
+install: $(EXE)
+	cp build/2048.out $(PREFIX)/bin/2048

@@ -144,6 +144,8 @@ void Game::drawBoard() {
 
 void Game::input(int err) {
 
+    static const char ESC=27;
+
     moved = false;
     char c;
 
@@ -158,6 +160,30 @@ void Game::input(int err) {
     }
 
     getInput(c);
+
+    if(c==ESC){
+        getInput(c);
+        if(c=='['){
+            getInput(c);
+            endl(4);
+            switch(c){
+              case 'A':
+                  decideMove(UP);
+                  goto next;
+              case 'B':
+                  decideMove(DOWN);
+                  goto next;
+              case 'C':
+                  decideMove(RIGHT);
+                  goto next;
+              case 'D':
+                  decideMove(LEFT);
+                  goto next;
+            }
+        }else{
+            endl(4);
+        }
+    }
 
     endl(4);
 
@@ -183,9 +209,9 @@ void Game::input(int err) {
             drawBoard();
             input(1);
             break;
-
     }
 
+next:
     unblockTiles();
 
 }
