@@ -49,16 +49,18 @@ void clearScreen() {
     system("clear");
 };
 
-
 std::string secondsFormat(double sec) {
     double s = sec;
     int m = s / 60; s -= m * 60;
     int h = m / 60; m %= 60;
+    s = (int)s;
     std::ostringstream oss;
-    if (h)
-        oss << h << " h ";
-    if (m)
-        oss << m << " m ";
-    oss << s << " s";
+    if (h) {
+        oss << h << "h ";
+    }
+    if (m) {
+        oss << m << "m ";
+    }
+    oss << s << "s";
     return oss.str();
 }
