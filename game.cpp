@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "game.h"
 
 Color::Modifier Tile::tileColor(ull value) {
@@ -142,7 +143,26 @@ void Game::drawBoard() {
 
 }
 
+
+void Game::boss(){
+    clearScreen();
+    // The boss_command should display something entreprisey on the screen,
+    // to show how busy the employee is.  By default, we just run a shell.
+    const char* boss_command=getenv("BOSS_COMMAND");
+    if(!boss_command){
+        boss_command="sh";
+    }
+    system(boss_command);
+    // Pause until some more input is given.
+    char c;
+    getInput(c);
+}
+
+
+
 void Game::input(int err) {
+
+    static const char ESC=27;
 
     moved = false;
     char c;
@@ -159,10 +179,39 @@ void Game::input(int err) {
 
     getInput(c);
 
+    if(c==ESC){
+        getInput(c);
+        if(c=='['){
+            getInput(c);
+            endl(4);
+            switch(c){
+              case 'A':
+                  decideMove(UP);
+                  goto next;
+              case 'B':
+                  decideMove(DOWN);
+                  goto next;
+              case 'C':
+                  decideMove(RIGHT);
+                  goto next;
+              case 'D':
+                  decideMove(LEFT);
+                  goto next;
+            }
+        }else{
+            endl(4);
+        }
+        goto suite;
+    }
+
     endl(4);
 
     switch(toupper(c)) {
 
+      case '\b':
+      case 127:
+          boss();
+          goto suite;
         case 'W':
         case 'K':
             decideMove(UP);
@@ -180,12 +229,13 @@ void Game::input(int err) {
             decideMove(RIGHT);
             break;
         default:
+      suite:
             drawBoard();
             input(1);
             break;
 
     }
-
+next:
     unblockTiles();
 
 }

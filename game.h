@@ -76,7 +76,7 @@ class Game {
         void statistics();
         void saveStats();
         void saveScore();
-
+        void boss();
     public:
 
         Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2) {}
