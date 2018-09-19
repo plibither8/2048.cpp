@@ -23,12 +23,72 @@ Color::Modifier Tile::tileColor(ull value) {
 
 void Game::initialiseBoardArray() {
     for (int i = 0; i < BOARD_SIZE; i++) {
-        std::vector<Tile> bufferArray;
+    	    std::vector<Tile> bufferArray;
         for (int j = 0; j < BOARD_SIZE; j++) {
             Tile bufferTile;
             bufferArray.push_back(bufferTile);
         }
         board.push_back(bufferArray);
+    }
+}
+
+int GetLines(){
+    int noOfLines = 0;
+    std::string tempLine;
+    std::ifstream stateFile ("./data/previousGame");
+    while(std::getline (stateFile,tempLine, '\n')) {
+            noOfLines++;
+    }
+    stateFile.close();
+    return noOfLines;
+}
+
+void Game::initialiseContinueBoardArray() {
+    
+    std::string temp, tempLine, tempBlock;
+    std::ifstream stateFile ("./data/previousGame");
+    BOARD_SIZE = GetLines();
+    initialiseBoardArray();
+    std::string tempArr[BOARD_SIZE][BOARD_SIZE];
+    int i = 0, j, k;
+    while(std::getline (stateFile,tempLine, '\n') && i < BOARD_SIZE) {
+	    std::stringstream line(tempLine);
+	    j = 0;
+	    while( std::getline(line, temp, ',') && j < BOARD_SIZE){
+		    tempArr[i][j] = temp;
+		    j++;
+	    }
+	    i++;
+    }
+
+    for (int i = 0; i < BOARD_SIZE; i++) {
+	std::vector<Tile> bufferArray;
+        for (int j = 0; j < BOARD_SIZE; j++) {
+	    std::stringstream blocks(tempArr[i][j]);
+	    k = 0;
+	    Tile bufferTile;
+	    while( std::getline(blocks, tempBlock, ':')){
+	        if ( k == 0 ){
+		     board[i][j].value = std::stoi(tempBlock);
+                }else if( k == 1 ){
+		     board[i][j].blocked = std::stoi(tempBlock);
+                }
+		k++;
+	    }
+	}
+    }
+    stateFile.close();
+    std::ifstream stats ("./data/previousGameStats");
+    while(std::getline (stats,tempLine, '\n')){
+         std::stringstream line(tempLine);
+	 k=0;
+	 while( std::getline(line, temp, ':')){
+	     if(k == 0)
+		score = std::stoi(temp);
+	     else if(k == 1)
+		moveCount = std::stoi(temp) - 1;
+	     k++;
+	 }
     }
 }
 
@@ -152,7 +212,8 @@ void Game::input(int err) {
     std::cout << "  W or K => Up"; endl();
     std::cout << "  A or H => Left"; endl();
     std::cout << "  S or J => Down"; endl();
-    std::cout << "  D or L => Right"; endl(2);
+    std::cout << "  D or L => Right"; endl();
+    std::cout << "  Z or P => Save"; endl(2);
     std::cout << "  Press the keys to start and continue."; endl();
 
     if (err) {
@@ -205,6 +266,11 @@ void Game::input(int err) {
         case 'L':
             decideMove(RIGHT);
             break;
+	case 'Z':
+	case 'P':
+	    saveState();
+	    stateSaved = true;
+	    break;
         default:
             drawBoard();
             input(1);
@@ -424,33 +490,25 @@ void Game::saveScore() {
     return;
 }
 
-void Game::startGame(int err) {
+void Game::saveState(){
+   std::remove( "./data/previousGame");
+   std::remove( "./data/previousGameStats");
+   std::fstream stats("./data/previousGameStats", std::ios_base::app);
+   std::fstream stateFile("./data/previousGame", std::ios_base::app);
+   for (int y = 0; y < BOARD_SIZE; y++) {
+        for (int x = 0; x < BOARD_SIZE; x++) {
+	   stateFile << board[y][x].value << ":" << board[y][x].blocked << "," ; endl();
+	}
+	stateFile << "\n";
+   }
+   stateFile.close();
+   stats << score << ":" << moveCount;
+   stats.close();
+}
 
-
-    Stats stats;
-    stats.collectStatistics();
-    bestScore = stats.bestScore;
-
-    clearScreen();
-    drawAscii();
-
-    if (err) {
-        std::cout << red << "  Invalid input. Gameboard size should range from 3 to 6." << def; endl(2);
-    }
-
-    std::cout << bold_on << "  Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): " << bold_off;
-
-    if(!(std::cin >> BOARD_SIZE) || BOARD_SIZE < 3 || BOARD_SIZE > 10) {
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
-        startGame(1);
-    }
-
-    initialiseBoardArray();
-
+void Game::playGame(int cont){
+    
     auto startTime = std::chrono::high_resolution_clock::now();
-
-    addTile();
 
     while (true) {
 
@@ -462,6 +520,10 @@ void Game::startGame(int err) {
         }
 
         drawBoard();
+	if(stateSaved){
+	   std::cout << green << bold_on << "The game has been saved feel free to take a break." << def << bold_off; endl(2); 
+	   stateSaved = false;
+	}
         input();
 
     }
@@ -479,11 +541,52 @@ void Game::startGame(int err) {
         std::cout << red << bold_on << msg << def << bold_off; endl(3);
     }
 
-    if (BOARD_SIZE == 4) {
+    if (BOARD_SIZE == 4 && !cont) {
         statistics();
         saveStats();
         endl(2);
         saveScore();
     }
+}
 
+void Game::startGame(int err) {
+
+    Stats stats;
+    stats.collectStatistics();
+    bestScore = stats.bestScore;
+    
+    clearScreen();
+    drawAscii();
+    
+    if (err) {
+        std::cout << red << "  Invalid input. Gameboard size should range from 3 to 6." << def; endl(2);
+    }
+
+    std::cout << bold_on << "  Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): " << bold_off;
+
+    if(!(std::cin >> BOARD_SIZE) || BOARD_SIZE < 3 || BOARD_SIZE > 10) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
+        startGame(1);
+    }
+    
+    initialiseBoardArray();
+    addTile();
+
+    playGame(0);
+
+}
+
+void Game::continueGame() {
+ 
+    Stats stats;
+    stats.collectStatistics();
+    bestScore = stats.bestScore;
+
+    clearScreen();
+    drawAscii();
+    
+    initialiseContinueBoardArray();
+    
+    playGame(1);
 }

@@ -2,3 +2,4 @@
 *.out
 /build
 /.vscode
+/data/previous*

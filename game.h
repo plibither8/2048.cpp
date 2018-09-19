@@ -9,6 +9,9 @@
 #include <chrono>
 #include <math.h>
 #include <random>
+#include <fstream>
+#include <iterator>
+#include <sstream>
 #include "global.h"
 #include "color.h"
 #include "scores.h"
@@ -62,9 +65,11 @@ class Game {
         ull BOARD_SIZE;
         std::vector<std::vector <Tile> > board;
         RandInt randInt;
+	bool stateSaved;
 
         void initialiseBoardArray();
-        bool addTile();
+        void initialiseContinueBoardArray();
+       	bool addTile();
         void collectFreeTiles(std::vector<std::vector<int> > &freeTiles);
         void drawBoard();
         void input(int err = 0);
@@ -76,11 +81,14 @@ class Game {
         void statistics();
         void saveStats();
         void saveScore();
+	void saveState();
+        void playGame(int);
 
     public:
 
-        Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2) {}
+        Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2), stateSaved(false) {}
         void startGame(int err = 0);
+	void continueGame();
 
 };
 
