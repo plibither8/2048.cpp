@@ -66,6 +66,7 @@ class Game {
         std::vector<std::vector <Tile> > board;
         RandInt randInt;
 	bool stateSaved;
+	bool noSave;
 
         void initialiseBoardArray();
         void initialiseContinueBoardArray();
@@ -83,11 +84,12 @@ class Game {
         void saveScore();
 	void saveState();
         void playGame(int);
+	void setBoardSize();
 
     public:
 
-        Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2), stateSaved(false) {}
-        void startGame(int err = 0);
+        Game() : win(false), moved(true), boardFull(false), rexit(false), score(0), moveCount(-2), largestTile(2), stateSaved(false), noSave(false) {}
+        void startGame();
 	void continueGame();
 
 };
