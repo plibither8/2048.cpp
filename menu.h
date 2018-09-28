@@ -15,6 +15,7 @@ class Menu {
         void showScores();
         void printMenu();
         void input(int err);
+	void continueGame();
 
     public:
         void startMenu(int err = 0);
