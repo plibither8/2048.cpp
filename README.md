@@ -14,7 +14,7 @@
 
 - [x] Add start menu [19/04/2018]
 - [x] Save highscore / score [21/04/2018]
-- [ ] ~~Save a game state and play from a saved game state~~ *(Abandoned indefinitely)*
+- [x] Save a game state and play from a saved game state
 - [ ] ~~AI~~ *(Abandoned indefinitely)*
 
 ## Setup
