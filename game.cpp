@@ -1,5 +1,38 @@
 #include "game.h"
 
+namespace {
+namespace Keypress { namespace Code {
+
+enum {CODE_ESC=27
+     ,CODE_LSQUAREBRACKET='['};
+
+// Hotkey bindings:
+// Style: ANSI (Arrow Keys)
+enum {CODE_ANSI_TRIGGER_1=CODE_ESC
+     ,CODE_ANSI_TRIGGER_2=CODE_LSQUAREBRACKET};
+enum {CODE_ANSI_UP = 'A'
+     , CODE_ANSI_DOWN = 'B'
+     , CODE_ANSI_LEFT = 'D'
+     , CODE_ANSI_RIGHT = 'C' };
+
+// Style: WASD
+enum {CODE_WASD_UP = 'W'
+     , CODE_WASD_DOWN = 'S'
+     , CODE_WASD_LEFT = 'A'
+     , CODE_WASD_RIGHT = 'D' };
+
+// Style: Vim
+enum {CODE_VIM_UP = 'K'
+     , CODE_VIM_DOWN = 'J'
+     , CODE_VIM_LEFT = 'H'
+     , CODE_VIM_RIGHT = 'L' };
+
+enum {CODE_HOTKEY_ACTION_SAVE = 'Z'
+     , CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P' };
+
+}} // End of [Keypress::Code::] namespace
+} // End of [ANONYMOUS] namespace
+
 Color::Modifier Tile::tileColor(ull value) {
     std::vector<Color::Modifier> colors{
         red,
@@ -209,8 +242,7 @@ void Game::drawBoard() {
 
 void Game::input(int err) {
 
-    static const char ESC=27;
-
+    using namespace Keypress::Code;
     moved = false;
     char c;
 
@@ -227,22 +259,22 @@ void Game::input(int err) {
 
     getInput(c);
 
-    if(c==ESC){
+    if(c==CODE_ANSI_TRIGGER_1){
         getInput(c);
-        if(c=='['){
+        if(c==CODE_ANSI_TRIGGER_2){
             getInput(c);
             endl(4);
             switch(c){
-              case 'A':
+              case CODE_ANSI_UP:
                   decideMove(UP);
                   goto next;
-              case 'B':
+              case CODE_ANSI_DOWN:
                   decideMove(DOWN);
                   goto next;
-              case 'C':
+              case CODE_ANSI_RIGHT:
                   decideMove(RIGHT);
                   goto next;
-              case 'D':
+              case CODE_ANSI_LEFT:
                   decideMove(LEFT);
                   goto next;
             }
@@ -255,24 +287,24 @@ void Game::input(int err) {
 
     switch(toupper(c)) {
 
-        case 'W':
-        case 'K':
+        case CODE_WASD_UP:
+        case CODE_VIM_UP:
             decideMove(UP);
             break;
-        case 'A':
-        case 'H':
+        case CODE_WASD_LEFT:
+        case CODE_VIM_LEFT:
             decideMove(LEFT);
             break;
-        case 'S':
-        case 'J':
+        case CODE_WASD_DOWN:
+        case CODE_VIM_DOWN:
             decideMove(DOWN);
             break;
-        case 'D':
-        case 'L':
+        case CODE_WASD_RIGHT:
+        case CODE_VIM_RIGHT:
             decideMove(RIGHT);
             break;
-	case 'Z':
-	case 'P':
+    case CODE_HOTKEY_ACTION_SAVE:
+    case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
 	    saveState();
 	    stateSaved = true;
 	    break;
