@@ -6,12 +6,12 @@
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
-#include <cmath>
 #include <random>
 #include <sstream>
 #include <string>
