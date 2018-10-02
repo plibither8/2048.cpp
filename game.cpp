@@ -532,7 +532,6 @@ void Game::saveScore() {
   s.largestTile = largestTile;
   s.duration = duration;
   s.save();
-  return;
 }
 
 void Game::saveState() {
