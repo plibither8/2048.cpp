@@ -614,8 +614,9 @@ void Game::setBoardSize(){
 void Game::startGame() {
 
     Stats stats;
-    stats.collectStatistics();
-    bestScore = stats.bestScore;
+    if(stats.collectStatistics()) {
+        bestScore = stats.bestScore;
+    }
     
     setBoardSize();
     
@@ -628,8 +629,9 @@ void Game::startGame() {
 void Game::continueGame() {
  
     Stats stats;
-    stats.collectStatistics();
-    bestScore = stats.bestScore;
+    if(stats.collectStatistics()) {
+        bestScore = stats.bestScore;
+    }
 
     clearScreen();
     drawAscii();

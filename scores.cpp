@@ -81,24 +81,30 @@ void Scoreboard::printScore() {
 void Scoreboard::printStats() {
 
     Stats stats;
-    stats.collectStatistics();
-    std::cout << green << bold_on << "  STATISTICS" << bold_off << def; endl();
-    std::cout << green << bold_on << "  ──────────" << bold_off << def; endl();
-    std::cout << "  ┌────────────────────┬─────────────┐"; endl();
-    std::cout << "  │ " << bold_on << "Best Score        " << bold_off << " │ " << std::setw(11) << stats.bestScore << " │"; endl();
-    std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ " << std::setw(11) << stats.gameCount << " │"; endl();
-    std::cout << "  │ " << bold_on << "Number of Wins    " << bold_off << " │ " << std::setw(11) << stats.winCount << " │"; endl();
-    std::cout << "  │ " << bold_on << "Total Moves Played" << bold_off << " │ " << std::setw(11) << stats.totalMoveCount << " │"; endl();
-    std::cout << "  │ " << bold_on << "Total Duration    " << bold_off << " │ " << std::setw(11) << secondsFormat(stats.totalDuration) << " │"; endl();
-    std::cout << "  └────────────────────┴─────────────┘"; endl();
-
+    if(stats.collectStatistics()) {
+    
+        std::cout << green << bold_on << "  STATISTICS" << bold_off << def; endl();
+        std::cout << green << bold_on << "  ──────────" << bold_off << def; endl();
+        std::cout << "  ┌────────────────────┬─────────────┐"; endl();
+        std::cout << "  │ " << bold_on << "Best Score        " << bold_off << " │ " << std::setw(11) << stats.bestScore << " │"; endl();
+        std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ " << std::setw(11) << stats.gameCount << " │"; endl();
+        std::cout << "  │ " << bold_on << "Number of Wins    " << bold_off << " │ " << std::setw(11) << stats.winCount << " │"; endl();
+        std::cout << "  │ " << bold_on << "Total Moves Played" << bold_off << " │ " << std::setw(11) << stats.totalMoveCount << " │"; endl();
+        std::cout << "  │ " << bold_on << "Total Duration    " << bold_off << " │ " << std::setw(11) << secondsFormat(stats.totalDuration) << " │"; endl();
+        std::cout << "  └────────────────────┴─────────────┘"; endl();
+        
+    } else {
+    
+        std::cout << "  No saved statistics."; endl();
+        
+    }
+    
     endl(3);
 
     std::cout << "  Press any key to exit: ";
     char c;
     std::cin >> c;
     exit(EXIT_SUCCESS);
-
 }
 
 void Scoreboard::padding(std::string name) {
@@ -113,6 +119,9 @@ void Scoreboard::padding(std::string name) {
 void Scoreboard::readFile() {
 
     std::ifstream scores("./data/scores.txt");
+    if(scores.fail()) {
+        return;
+    }
 
     std::string playerName;
     ull playerScore;
