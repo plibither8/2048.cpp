@@ -9,10 +9,10 @@
 #include <ctime>
 #include <vector>
 #include <chrono>
-#include <math.h>
-#include "global.hpp"
-#include "scores.hpp"
-#include "statistics.hpp"
+#include <math.hpp>
+#include "global.hpppp"
+#include "scores.hpppp"
+#include "statistics.hpppp"
 
 enum Directions {
     UP,

@@ -1,10 +1,9 @@
-#include "2048.h"
+#include "2048.hpp"
 
 int main() {
 
-    Menu menu;
-    menu.startMenu();
+  Menu menu;
+  menu.startMenu();
 
-    return EXIT_SUCCESS;
-
+  return EXIT_SUCCESS;
 }
