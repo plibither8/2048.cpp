@@ -11,7 +11,7 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
-#include <math.h>
+#include <cmath>
 #include <random>
 #include <sstream>
 #include <string>
