@@ -65,7 +65,6 @@ void Menu::showScores() {
   Scoreboard s;
   s.printScore();
   s.printStats();
-  return;
 }
 
 void drawAscii() {
