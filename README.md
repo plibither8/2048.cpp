@@ -25,8 +25,9 @@ The game and code is natively made to run on the GNU/Linux and MacOS platforms, 
 
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
 * Linux, MacOS OR Windows with a working terminal (Cygwin, Windows Subsystem for Linux or Git bash is recommended for Windows)
+* [CMake](https://cmake.org/)
 
-### Instructions
+### Installation
 
 1. Open your terminal in your preferred directory and clone this project:
 ```bash
@@ -36,13 +37,21 @@ $ git clone https://github.com/plibither8/2048.cpp
 ```bash
 $ cd 2048.cpp
 ```
-3. Compile the `2048.cpp` file and create an output using the Makefile:
+3. Create and enter the build directory:
+```bash
+$ mkdir build && cd build
+```
+4. Compile the program with cmake
+```bash
+$ cmake ..
+```
+5. Build the executable
 ```bash
 $ make
 ```
-4. Run the program and play the game!
+6. Run the program and play the game!
 ```bash
-$ ./build/2048.out
+$ ./2048.out
 ```
 
 ## Notes
