@@ -6,8 +6,8 @@
 void getInput(char &c) { std::cin >> c; }
 
 #else
-#include <termios.hpp>
-#include <unistd.hpp>
+#include <termios.h>
+#include <unistd.h>
 
 char getch() {
   char buf = 0;
