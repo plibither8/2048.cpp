@@ -166,23 +166,8 @@ void Game::collectFreeTiles(std::vector<std::vector<int>> &freeTiles) {
 void Game::drawBoard() {
 
   clearScreen();
-
   drawAscii();
-  std::cout << "  ┌───────────────────────────┐";
-  endl();
-  std::cout << "  │ " << bold_on << "SCORE:" << bold_off << std::setw(19)
-            << score << " │";
-  endl();
-  if (BOARD_SIZE == 4) {
-    std::cout << "  │ " << bold_on << "BEST SCORE:" << bold_off << std::setw(14)
-              << (bestScore < score ? score : bestScore) << " │";
-    endl();
-  }
-  std::cout << "  │ " << bold_on << "MOVES:" << bold_off << std::setw(19)
-            << moveCount << " │";
-  endl();
-  std::cout << "  └───────────────────────────┘";
-  endl(2);
+  drawScoreBoard(std::cout);
 
   for (int y = 0; y < BOARD_SIZE; y++) {
 
@@ -239,6 +224,66 @@ void Game::drawBoard() {
     }
   }
   endl(3);
+}
+
+void Game::drawScoreBoard(std::ostream &out_stream) {
+  constexpr auto score_text_label = "SCORE:";
+  constexpr auto bestscore_text_label = "BEST SCORE:";
+  constexpr auto moves_text_label = "MOVES:";
+
+  // * border padding: vvv
+  // | l-outer: 2, r-outer: 0
+  // | l-inner: 1, r-inner: 1
+  // * top border / bottom border: vvv
+  // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
+  // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
+  enum {
+    UI_SCOREBOARD_SIZE = 27,
+    UI_BORDER_OUTER_PADDING = 2,
+    UI_BORDER_INNER_PADDING = 1
+  }; // length of horizontal board - (corners + border padding)
+  constexpr auto border_padding_char = ' ';
+  constexpr auto vertical_border_pattern = "│";
+  constexpr auto top_board =
+      "┌───────────────────────────┐"; // Multibyte character set
+  constexpr auto bottom_board =
+      "└───────────────────────────┘"; // Multibyte character set
+  const auto outer_border_padding =
+      std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
+  const auto inner_border_padding =
+      std::string(UI_BORDER_INNER_PADDING, border_padding_char);
+  const auto inner_padding_length =
+      UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
+  out_stream << outer_border_padding << top_board << "\n";
+  out_stream << outer_border_padding << vertical_border_pattern
+             << inner_border_padding << bold_on << score_text_label << bold_off
+             << std::string(inner_padding_length -
+                                std::string{score_text_label}.length() -
+                                std::to_string(score).length(),
+                            border_padding_char)
+             << score << inner_border_padding << vertical_border_pattern
+             << "\n";
+  if (BOARD_SIZE == 4) {
+    const auto tempBestScore = (bestScore < score ? score : bestScore);
+    out_stream << outer_border_padding << vertical_border_pattern
+               << inner_border_padding << bold_on << bestscore_text_label
+               << bold_off
+               << std::string(inner_padding_length -
+                                  std::string{bestscore_text_label}.length() -
+                                  std::to_string(tempBestScore).length(),
+                              border_padding_char)
+               << tempBestScore << inner_border_padding
+               << vertical_border_pattern << "\n";
+  }
+  out_stream << outer_border_padding << vertical_border_pattern
+             << inner_border_padding << bold_on << moves_text_label << bold_off
+             << std::string(inner_padding_length -
+                                std::string{moves_text_label}.length() -
+                                std::to_string(moveCount).length(),
+                            border_padding_char)
+             << moveCount << inner_border_padding << vertical_border_pattern
+             << "\n";
+  out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
 void Game::input(int err) {
@@ -532,7 +577,6 @@ void Game::saveScore() {
   s.largestTile = largestTile;
   s.duration = duration;
   s.save();
-  return;
 }
 
 void Game::saveState() {
@@ -603,7 +647,6 @@ void Game::setBoardSize() {
   bool err = false;
   BOARD_SIZE = 0;
   while ((BOARD_SIZE < 3 || BOARD_SIZE > 10)) {
-    std::cout << "InSide While";
     clearScreen();
     drawAscii();
 

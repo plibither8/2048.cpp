@@ -6,12 +6,12 @@
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <chrono>
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <limits>
-#include <cmath>
 #include <random>
 #include <sstream>
 #include <string>
@@ -68,6 +68,7 @@ private:
   bool addTile();
   void collectFreeTiles(std::vector<std::vector<int>> &freeTiles);
   void drawBoard();
+  void drawScoreBoard(std::ostream &out_stream);
   void input(int err = 0);
   bool canMove();
   bool testAdd(int, int, ull);
