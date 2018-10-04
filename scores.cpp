@@ -1,14 +1,37 @@
-#include "scores.hpp"
+﻿#include "scores.hpp"
 
 bool compare(const Score &a, const Score &b) { return a.score < b.score; };
 
 void Scoreboard::prompt() {
 
   std::cout << bold_on
-            << "  Please enter your name to save this score: " << bold_off;
-  std::cin >> name;
+            << "  Please enter your name to save this score (3-17 characters, a-z,A-Z,0-9): " << bold_off;
+  bool nameIsGood = false;
+  while (!nameIsGood) {
+	  std::cin >> name;
+	  nameIsGood = true;
+	  for (int i = 0; i < name.size(); ++i) {
+		  if (!(name[i] >= 'a' && name[i] <= 'z') && !(name[i] >= 'A' && name[i] <= 'Z') &&
+			  !(name[i] >= '0' && name[i] <= '9')) {
+			  nameIsGood = false;
+		  }
+	  }
+	  if (name.size() <= 2 || name.size() >= 18) {
+		  clearScreen();
+		  drawAscii();
+		  std::cout << bold_on << red
+			  << "  Your name must be 3-17 characters! Try again: "
+			  << bold_off << def;
+	  }
+	  else if (!nameIsGood) {
+			clearScreen();
+			drawAscii();
+			std::cout << bold_on << red 
+				<< "  Please use only English letters and arabic numbers in your name! Try again: "
+				<< bold_off << def;
+	  }
+  }
 }
-
 void Scoreboard::writeToFile() {
 
   std::fstream scores("./data/scores.txt", std::ios_base::app);
