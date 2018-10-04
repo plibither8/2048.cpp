@@ -3,11 +3,13 @@
 
 #ifdef _WIN32
 
-void getInput(char &c) { std::cin >> c; }
+void getInput(char &c) {
+  std::cin >> c;
+}
 
 #else
-#include <termios.h>
-#include <unistd.h>
+#  include <termios.h>
+#  include <unistd.h>
 
 char getch() {
   char buf = 0;
@@ -29,7 +31,9 @@ char getch() {
   return (buf);
 }
 
-void getInput(char &c) { c = getch(); }
+void getInput(char &c) {
+  c = getch();
+}
 
 #endif
 
@@ -40,7 +44,9 @@ void endl(int n) {
   }
 };
 
-void clearScreen() { system("clear"); };
+void clearScreen() {
+  system("clear");
+};
 
 std::string secondsFormat(double sec) {
   double s = sec;
