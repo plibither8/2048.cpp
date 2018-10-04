@@ -4,6 +4,7 @@ int main() {
 
   Menu menu;
   menu.startMenu();
+  cout<<"New to coding world";
 
   return EXIT_SUCCESS;
 }
