@@ -1,6 +1,8 @@
 #include "scores.hpp"
 
-bool compare(const Score &a, const Score &b) { return a.score < b.score; };
+bool compare(const Score &a, const Score &b) {
+  return a.score < b.score;
+};
 
 void Scoreboard::prompt() {
 
