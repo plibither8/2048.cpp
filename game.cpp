@@ -292,13 +292,13 @@ void Game::input(int err) {
   moved = false;
   char c;
 
-  std::cout << "  W or K => Up";
+  std::cout << "  W or K or \u2191 => Up";
   endl();
-  std::cout << "  A or H => Left";
+  std::cout << "  A or H or \u2190 => Left";
   endl();
-  std::cout << "  S or J => Down";
+  std::cout << "  S or J or \u2193 => Down";
   endl();
-  std::cout << "  D or L => Right";
+  std::cout << "  D or L or \u2192 => Right";
   endl();
   std::cout << "  Z or P => Save";
   endl(2);
