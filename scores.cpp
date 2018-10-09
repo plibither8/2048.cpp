@@ -1,14 +1,32 @@
 #include "scores.hpp"
 
-bool compare(const Score &a, const Score &b) {
-  return a.score < b.score;
-};
+bool compare(const Score &a, const Score &b) { return a.score < b.score; };
 
 void Scoreboard::prompt() {
+  bool bRetry = false;
+  
+  do
+  {
+    if ( bRetry )
+          std::cout << red << "  Invalid input. Please try again." << def;
 
-  std::cout << bold_on
-            << "  Please enter your name to save this score: " << bold_off;
-  std::cin >> name;
+    std::cout << bold_on
+              << "  Please enter your name to save this score ( A-Z, 0 - 9 without spaces): " << bold_off;
+    std::cin >> name;
+
+    for ( auto n : name )
+    {
+      if ( !isalnum(n) )
+      {
+        bRetry = true;
+        break;
+      }
+      else
+      {
+        bRetry = false;
+      }
+    }
+  } while( bRetry );
 }
 
 void Scoreboard::writeToFile() {
