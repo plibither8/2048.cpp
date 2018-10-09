@@ -63,13 +63,17 @@ private:
   bool stateSaved;
   bool noSave;
 
+  enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
+  enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
+  enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
+
   void initialiseBoardArray();
   void initialiseContinueBoardArray();
   bool addTile();
   void collectFreeTiles(std::vector<std::vector<int>> &freeTiles);
   void drawBoard();
   void drawScoreBoard(std::ostream &out_stream);
-  void input(int err = 0);
+  void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
   bool canMove();
   bool testAdd(int, int, ull);
   void unblockTiles();
@@ -79,13 +83,20 @@ private:
   void saveStats();
   void saveScore();
   void saveState();
-  void playGame(int);
+  void playGame(ContinueStatus);
   void setBoardSize();
 
 public:
   Game()
-      : win(false), moved(true), boardFull(false), rexit(false), score(0),
-        bestScore(0), moveCount(-2), largestTile(2), stateSaved(false),
+      : win(false),
+        moved(true),
+        boardFull(false),
+        rexit(false),
+        score(0),
+        bestScore(0),
+        moveCount(-2),
+        largestTile(2),
+        stateSaved(false),
         noSave(false) {}
   void startGame();
   void continueGame();

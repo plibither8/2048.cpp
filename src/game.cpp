@@ -129,6 +129,7 @@ void Game::initialiseContinueBoardArray() {
 
 bool Game::addTile() {
 
+  constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
   std::vector<std::vector<int>> freeTiles;
   collectFreeTiles(freeTiles);
 
@@ -139,7 +140,7 @@ bool Game::addTile() {
   std::vector<int> randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
   int x = randomFreeTile.at(1);
   int y = randomFreeTile.at(0);
-  board[y][x].value = randInt() % 100 > 89 ? 4 : 2;
+  board[y][x].value = randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
 
   moveCount++;
   moved = true;
@@ -263,7 +264,7 @@ void Game::drawScoreBoard(std::ostream &out_stream) {
                             border_padding_char)
              << score << inner_border_padding << vertical_border_pattern
              << "\n";
-  if (BOARD_SIZE == 4) {
+  if (BOARD_SIZE == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     const auto tempBestScore = (bestScore < score ? score : bestScore);
     out_stream << outer_border_padding << vertical_border_pattern
                << inner_border_padding << bold_on << bestscore_text_label
@@ -286,7 +287,7 @@ void Game::drawScoreBoard(std::ostream &out_stream) {
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
-void Game::input(int err) {
+void Game::input(KeyInputErrorStatus err) {
 
   using namespace Keypress::Code;
   moved = false;
@@ -305,7 +306,7 @@ void Game::input(int err) {
   std::cout << "  Press the keys to start and continue.";
   endl();
 
-  if (err) {
+  if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
     std::cout << red << "  Invalid input. Please try again." << def;
     endl(2);
   }
@@ -363,7 +364,7 @@ void Game::input(int err) {
     break;
   default:
     drawBoard();
-    input(1);
+    input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
     break;
   }
 
@@ -479,6 +480,7 @@ void Game::decideMove(Directions d) {
 
 void Game::move(int y, int x, int k, int l) {
 
+  constexpr auto GAME_TILE_WINNING_SCORE = 2048;
   Tile &currentTile = board[y][x];
   Tile &targetTile = board[y + k][x + l];
 
@@ -497,7 +499,7 @@ void Game::move(int y, int x, int k, int l) {
     largestTile =
         largestTile < targetTile.value ? targetTile.value : largestTile;
     if (!win) {
-      if (targetTile.value == 2048) {
+      if (targetTile.value == GAME_TILE_WINNING_SCORE) {
         win = true;
         std::cout << green << bold_on
                   << "  You win! Press any key to continue or 'x' to exit: "
@@ -596,7 +598,7 @@ void Game::saveState() {
   stats.close();
 }
 
-void Game::playGame(int cont) {
+void Game::playGame(ContinueStatus cont) {
 
   auto startTime = std::chrono::high_resolution_clock::now();
 
@@ -634,7 +636,8 @@ void Game::playGame(int cont) {
     endl(3);
   }
 
-  if (BOARD_SIZE == 4 && !cont) {
+  if (BOARD_SIZE == COMPETITION_GAME_BOARD_PLAY_SIZE &&
+      cont == ContinueStatus::STATUS_END_GAME) {
     statistics();
     saveStats();
     endl(2);
@@ -644,16 +647,18 @@ void Game::playGame(int cont) {
 
 void Game::setBoardSize() {
 
+  enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
   bool err = false;
   BOARD_SIZE = 0;
-  while ((BOARD_SIZE < 3 || BOARD_SIZE > 10)) {
+  while ((BOARD_SIZE < MIN_GAME_BOARD_PLAY_SIZE ||
+          BOARD_SIZE > MAX_GAME_BOARD_PLAY_SIZE)) {
     clearScreen();
     drawAscii();
 
     if (err) {
-      std::cout << red
-                << "  Invalid input. Gameboard size should range from 3 to 6."
-                << def;
+      std::cout << red << "  Invalid input. Gameboard size should range from "
+                << MIN_GAME_BOARD_PLAY_SIZE << " to "
+                << MAX_GAME_BOARD_PLAY_SIZE << "." << def;
       endl(2);
     } else if (noSave) {
       std::cout << red << bold_on << "No save game exist, Starting a new game."
@@ -686,7 +691,7 @@ void Game::startGame() {
   initialiseBoardArray();
   addTile();
 
-  playGame(0);
+  playGame(ContinueStatus::STATUS_END_GAME);
 }
 
 void Game::continueGame() {
@@ -701,5 +706,5 @@ void Game::continueGame() {
 
   initialiseContinueBoardArray();
 
-  playGame(1);
+  playGame(ContinueStatus::STATUS_CONTINUE);
 }
