@@ -19,8 +19,7 @@
 
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
-class Tile
-{
+class Tile {
 
 public:
   Tile() : value(0), blocked(false) {}
@@ -29,8 +28,7 @@ public:
   Color::Modifier tileColor(ull);
 };
 
-class RandInt
-{
+class RandInt {
 public:
   using clock = std::chrono::system_clock;
   RandInt() : dist{0, std::numeric_limits<int>::max()} {
@@ -47,8 +45,7 @@ private:
   std::uniform_int_distribution<> dist;
 };
 
-class Game
-{
+class Game {
 
 private:
   bool moved;
@@ -87,15 +84,8 @@ private:
 
 public:
   Game()
-      : win(false),
-        moved(true),
-        boardFull(false),
-        rexit(false),
-        score(0),
-        bestScore(0),
-        moveCount(-2),
-        largestTile(2),
-        stateSaved(false),
+      : win(false), moved(true), boardFull(false), rexit(false), score(0),
+        bestScore(0), moveCount(-2), largestTile(2), stateSaved(false),
         noSave(false) {}
   void startGame();
   void continueGame();

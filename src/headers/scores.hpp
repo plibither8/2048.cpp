@@ -19,8 +19,7 @@ struct Score {
   double duration;
 };
 
-class Scoreboard
-{
+class Scoreboard {
 private:
   std::string name;
   std::vector<Score> scoreList;
