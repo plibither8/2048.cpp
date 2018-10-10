@@ -559,7 +559,7 @@ void Game::saveStats() {
   stats.totalMoveCount += moveCount;
   stats.totalDuration += duration;
 
-  std::fstream statistics("./data/statistics.txt");
+  std::fstream statistics("../data/statistics.txt");
   statistics << stats.bestScore << std::endl
              << stats.gameCount << std::endl
              << stats.winCount << std::endl
@@ -580,10 +580,10 @@ void Game::saveScore() {
 }
 
 void Game::saveState() {
-  std::remove("./data/previousGame");
-  std::remove("./data/previousGameStats");
-  std::fstream stats("./data/previousGameStats", std::ios_base::app);
-  std::fstream stateFile("./data/previousGame", std::ios_base::app);
+  std::remove("../data/previousGame");
+  std::remove("../data/previousGameStats");
+  std::fstream stats("../data/previousGameStats", std::ios_base::app);
+  std::fstream stateFile("../data/previousGame", std::ios_base::app);
   for (int y = 0; y < BOARD_SIZE; y++) {
     for (int x = 0; x < BOARD_SIZE; x++) {
       stateFile << board[y][x].value << ":" << board[y][x].blocked << ",";
