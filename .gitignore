@@ -36,6 +36,7 @@
 /data/*
 2048
 /.vscode
+.DS_Store
 
 # CMake
 CMakeCache.txt
