@@ -30,7 +30,8 @@ enum Code {
   FG_YELLOW = 33,
 };
 
-class Modifier {
+class Modifier
+{
 
   Code code;
 

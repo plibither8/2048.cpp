@@ -8,7 +8,8 @@
 #include <iostream>
 #include <string>
 
-class Menu {
+class Menu
+{
 
 private:
   void startGame();

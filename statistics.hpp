@@ -4,7 +4,8 @@
 #include "global.hpp"
 #include <fstream>
 
-class Stats {
+class Stats
+{
 
 public:
   bool collectStatistics();

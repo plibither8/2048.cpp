@@ -1,15 +1,14 @@
 #ifndef SCORES_H
 #define SCORES_H
 
+#include "global.hpp"
+#include "menu.hpp"
+#include "statistics.hpp"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "global.hpp"
-#include "menu.hpp"
-#include "statistics.hpp"
 
 struct Score {
   std::string name;
@@ -20,7 +19,8 @@ struct Score {
   double duration;
 };
 
-class Scoreboard {
+class Scoreboard
+{
 private:
   std::string name;
   std::vector<Score> scoreList;
