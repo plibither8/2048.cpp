@@ -404,7 +404,8 @@ bool Game::canMove() {
 
 bool Game::testAdd(int y, int x, ull value) {
 
-  if (y < 0 || y > gameBoardPlaySize - 1 || x < 0 || x > gameBoardPlaySize - 1) {
+  if (y < 0 || y > gameBoardPlaySize - 1 || x < 0 ||
+      x > gameBoardPlaySize - 1) {
     return false;
   }
 
