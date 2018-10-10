@@ -16,8 +16,7 @@
 
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
-class Tile
-{
+class Tile {
 
 public:
   Tile() : value(0), blocked(false) {}
@@ -35,8 +34,7 @@ Color::Modifier Tile::tileColor(ull value) {
   return colors[index];
 }
 
-class Game
-{
+class Game {
 
 private:
   bool moved;
@@ -67,13 +65,8 @@ private:
 
 public:
   Game()
-      : win(false),
-        moved(true),
-        boardFull(false),
-        rexit(false),
-        score(0),
-        moveCount(-2),
-        largestTile(2) {}
+      : win(false), moved(true), boardFull(false), rexit(false), score(0),
+        moveCount(-2), largestTile(2) {}
   void startGame(int err = 0);
 };
 
