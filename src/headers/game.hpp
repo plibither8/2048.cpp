@@ -57,7 +57,7 @@ private:
   ull largestTile;
   long long moveCount;
   double duration;
-  ull BOARD_SIZE;
+  ull gameBoardPlaySize;
   std::vector<std::vector<Tile>> board;
   RandInt randInt;
   bool stateSaved;
