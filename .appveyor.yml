@@ -14,7 +14,6 @@ init:
 
 install:
 - make
-
-test_script:
-- make test
-
+- mkdir build
+- cd build
+- cmake ..
