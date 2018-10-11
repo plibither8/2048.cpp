@@ -19,7 +19,7 @@
 
 ## Setup
 
-The game and code is natively made to run on the GNU/Linux and MacOS platforms, but cross-platform compatibility for Windows has been added too.
+The game and code is natively made to run on the GNU/Linux and macOS platforms, but cross-platform compatibility for Windows has been added too.
 
 ### Requirements
 
@@ -49,9 +49,9 @@ $ cmake ..
 ```bash
 $ make
 ```
-6. Run the program and play the game!
+6. Run the program and play the game! :tada:
 ```bash
-$ ./2048.out
+$ ./2048
 ```
 
 ## Notes
