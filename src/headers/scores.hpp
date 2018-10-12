@@ -14,7 +14,7 @@ struct Score {
   std::string name;
   ull score;
   bool win;
-  ull largestTile;
+  std::string largestTile;
   long long moveCount;
   double duration;
 };
@@ -31,7 +31,7 @@ private:
 public:
   ull score = 0;
   bool win;
-  ull largestTile;
+  std::string largestTile;
   long long moveCount;
   double duration;
   void printScore();
