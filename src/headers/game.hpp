@@ -63,7 +63,8 @@ private:
   RandInt randInt;
   bool stateSaved;
   bool noSave;
-  Themes themes;
+  Theme theme;
+  ThemeController themeController;
 
   enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
   enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };

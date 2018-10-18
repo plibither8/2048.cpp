@@ -1,24 +1,23 @@
 #include "themes.hpp"
 #include "menu.hpp"
 
-std::string Themes::themedOutput(ull value) {
-  switch (themeCode) {
-  case 1:
-    return std::to_string(value);
-  case 2:
-    return elements[log2(value) - 1];
-  case 3:
-    return std::to_string(fibonacci_numbers[log2(value) - 1]);
-  case 4:
-    return programming_languages[log2(value) - 1];
-  default:
-    return "ERR";
-  }
+std::string Theme::themedOutput(ull value) {
+  return themed_output[log2(value) - 1];
 }
 
-void Themes::chooseTheme() {
+std::string Theme::menuentry() {
+  std::ostringstream ret;
+  ret << theme_name << ": ";
+  for (int i = 0; i < 3; ++i)
+    ret << themed_output[i] << ", ";
+  ret << "...";
+  return ret.str();
+}
+
+Theme ThemeController::chooseTheme() {
   bool err = false;
-  while ((themeCode > themeCount || themeCode < 1)) {
+  ull themeCount = registry.size();
+  while ((theme_code > themeCount || theme_code < 1)) {
     clearScreen();
     drawAscii();
 
@@ -29,15 +28,45 @@ void Themes::chooseTheme() {
       endl(2);
     }
 
-    std::cout << bold_on << "  1. Standard: 2, 4, 8, ..." << std::endl
-              << "  2. Elements: H, He, Li, ..." << std::endl
-              << "  3. Fibonacci Numbers: 1, 2, 3, ..." << std::endl
-              << "  4. Programming Languages: C, C++, PHP, ..." << std::endl
-              << "  Enter theme number: " << bold_off;
+    std::cout << bold_on;
+    for (int i = 1; i <= themeCount; ++i)
+      std::cout << "  " << i << ". " << registry[i - 1].menuentry()
+                << std::endl;
+    std::cout << "  Enter theme number: " << bold_off;
 
-    std::cin >> themeCode;
+    std::cin >> theme_code;
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
     err = true;
   }
+  return registry[theme_code - 1];
+}
+
+void ThemeController::addTheme(Theme xTheme) {
+  for (auto &r : registry)
+    if (r == xTheme)
+      return;
+  registry.push_back(xTheme);
+}
+
+std::vector<std::string> intv_to_strv(std::vector<int> intv) {
+  std::vector<std::string> strv;
+  strv.reserve(intv.size());
+  for (auto &i : intv) {
+    strv.push_back(std::to_string(i));
+  }
+  return strv;
+}
+
+void loadThemes(ThemeController &controller) {
+  controller.addTheme(Theme("Standard", {2, 4, 8, 16, 32, 64, 128, 256, 512,
+                                         1024, 2048, 4096, 8192}));
+
+  controller.addTheme(Theme("Elements", {"H", "He", "Li", "Be", "B", "C", "N",
+                                         "O", "F", "Ne", "Na", "Ca", "Sc"}));
+  controller.addTheme(Theme(
+      "Fibonacci Numbers", {1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 377, 610}));
+  controller.addTheme(Theme("Programming Languages",
+                            {"C", "C++", "PHP", "C#", "Py", "Bash", "Java",
+                             "SQL", "CSS", "HTML", "JS", "Go", "Rust"}));
 }

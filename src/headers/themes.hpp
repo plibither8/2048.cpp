@@ -6,24 +6,42 @@
 #include <cmath>
 #include <limits>
 #include <vector>
+#include <sstream>
+#include <string>
 
-class Themes {
+std::vector<std::string> intv_to_strv(std::vector<int> intv);
+
+class Theme {
 public:
-  Themes()
-      : fibonacci_numbers{1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 377, 610},
-        elements{"H", "He", "Li", "Be", "B",  "C", "N",
-                 "O", "F",  "Ne", "Na", "Ca", "Sc"},
-        programming_languages{"C",   "C++", "PHP",  "C#", "Py", "Bash", "Java",
-                              "SQL", "CSS", "HTML", "JS", "Go", "Rust"} {}
+  Theme() = default;
+  Theme(std::string _theme_name, std::vector<std::string> _themed_output)
+      : theme_name(std::move(_theme_name)),
+        themed_output(std::move(_themed_output)){};
+  Theme(std::string _theme_name, std::vector<int> _themed_output)
+      : theme_name(std::move(_theme_name)),
+        themed_output(intv_to_strv(_themed_output)){};
+  bool operator==(const Theme &t) const {
+    return themed_output == t.themed_output;
+  }
   std::string themedOutput(ull value);
-  void chooseTheme();
+  std::string menuentry();
 
 private:
-  int themeCode = 0;
-  const int themeCount = 4;
-  std::vector<std::string> elements;
-  std::vector<std::string> programming_languages;
-  std::vector<int> fibonacci_numbers;
+  std::string theme_name;
+  std::vector<std::string> themed_output;
 };
+
+class ThemeController {
+public:
+  ThemeController() = default;
+  Theme chooseTheme();
+  void addTheme(Theme xTheme);
+
+private:
+  int theme_code = 0;
+  std::vector<Theme> registry;
+};
+
+void loadThemes(ThemeController &controller);
 
 #endif
