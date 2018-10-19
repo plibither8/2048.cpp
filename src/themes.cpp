@@ -1,15 +1,22 @@
 #include "themes.hpp"
 #include "menu.hpp"
+#include <exception>
 
 std::string Theme::themedOutput(ull value) {
-  return themed_output[log2(value) - 1];
+  return themedOutputByIndex(int(log2(value) - 1));
+}
+
+std::string Theme::themedOutputByIndex(int index) {
+  if (!themed_output_vector.empty())
+    return themed_output_vector[index];
+  return themed_output_function(index);
 }
 
 std::string Theme::menuentry() {
   std::ostringstream ret;
   ret << theme_name << ": ";
   for (int i = 0; i < 3; ++i)
-    ret << themed_output[i] << ", ";
+    ret << themedOutputByIndex(i) << ", ";
   ret << "...";
   return ret.str();
 }
@@ -59,13 +66,19 @@ std::vector<std::string> intv_to_strv(std::vector<int> intv) {
 }
 
 void loadThemes(ThemeController &controller) {
-  controller.addTheme(Theme("Standard", {2, 4, 8, 16, 32, 64, 128, 256, 512,
-                                         1024, 2048, 4096, 8192}));
+  controller.addTheme(Theme(
+      "Standard", [](int index) { return std::to_string(ull(2) << index); }));
 
   controller.addTheme(Theme("Elements", {"H", "He", "Li", "Be", "B", "C", "N",
                                          "O", "F", "Ne", "Na", "Ca", "Sc"}));
-  controller.addTheme(Theme(
-      "Fibonacci Numbers", {1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 377, 610}));
+  controller.addTheme(Theme("Fibonacci Numbers", [](int index) {
+    ull DP[index + 2];
+    DP[0] = 1;
+    DP[1] = 2;
+    for (int i = 2; i <= index; ++i)
+      DP[i] = DP[i - 1] + DP[i - 2];
+    return std::to_string(DP[index]);
+  }));
   controller.addTheme(Theme("Programming Languages",
                             {"C", "C++", "PHP", "C#", "Py", "Bash", "Java",
                              "SQL", "CSS", "HTML", "JS", "Go", "Rust"}));
