@@ -19,7 +19,7 @@
 
 ## Setup
 
-The game and code is natively made to run on the GNU/Linux and macOS platforms, but cross-platform compatibility for Windows has been added too.
+The game and code is made to run natively on the GNU/Linux and macOS platforms, but cross-platform compatibility for Windows has been added too.
 
 ### Requirements
 
