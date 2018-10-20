@@ -45,6 +45,10 @@ private:
   std::uniform_int_distribution<> dist;
 };
 
+struct GameBoard {
+  std::vector<std::vector<Tile>> board;
+};
+
 class Game {
 
 private:
@@ -58,7 +62,7 @@ private:
   long long moveCount;
   double duration;
   ull gameBoardPlaySize;
-  std::vector<std::vector<Tile>> board;
+  GameBoard gamePlayBoard;
   RandInt randInt;
   bool stateSaved;
   bool noSave;
