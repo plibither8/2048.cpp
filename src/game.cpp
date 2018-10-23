@@ -166,10 +166,21 @@ void Game::collectFreeTiles(std::vector<std::vector<int>> &freeTiles) {
 
 void Game::drawBoard() {
 
+  // The number of spaces between the border of a cell and a number
+  enum { CELL_BORDER = 1 };
+
   clearScreen();
   drawAscii();
   drawScoreBoard(std::cout);
 
+  int numlen = std::to_string(largestTile).length();
+
+  std::string border;
+  // Multiple cell border enum by 2 so it applies the same padding
+  // to both sides
+  for(int i = 0; i < numlen+( CELL_BORDER * 2); i++){
+    border.append("─");
+  }  
   for (int y = 0; y < gameBoardPlaySize; y++) {
 
     std::cout << "  ";
@@ -180,7 +191,7 @@ void Game::drawBoard() {
       std::cout << "├";
     }
     for (int i = 0; i < gameBoardPlaySize; i++) {
-      std::cout << "──────";
+      std::cout << border;
       if (i < gameBoardPlaySize - 1) {
         if (y == 0) {
           std::cout << "┬";
@@ -197,17 +208,16 @@ void Game::drawBoard() {
     }
     endl();
     std::cout << " ";
-
     for (int x = 0; x < gameBoardPlaySize; x++) {
 
       Tile currentTile = board[y][x];
 
       std::cout << " │ ";
       if (!currentTile.value) {
-        std::cout << "    ";
+        std::cout << std::setw(numlen) << " ";
       } else {
         std::cout << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
+                  << std::setw(numlen) << currentTile.value << bold_off << def;
       }
     }
 
@@ -216,8 +226,9 @@ void Game::drawBoard() {
   }
 
   std::cout << "  └";
+
   for (int i = 0; i < gameBoardPlaySize; i++) {
-    std::cout << "──────";
+    std::cout << border;
     if (i < gameBoardPlaySize - 1) {
       std::cout << "┴";
     } else {
