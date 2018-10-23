@@ -45,6 +45,21 @@ private:
   std::uniform_int_distribution<> dist;
 };
 
+class GameBoard {
+  std::vector<std::vector<Tile>> board;
+
+public:
+  Tile getTile(int y, int x) const { return board[y][x]; }
+  void setTile(int y, int x, Tile tile) { board[y][x] = tile; }
+  ull getTileValue(int y, int x) const { return board[y][x].value; }
+  void setTileValue(int y, int x, ull value) { board[y][x].value = value; }
+  bool getTileBlocked(int y, int x) const { return board[y][x].blocked; }
+  void setTileBlocked(int y, int x, bool blocked) {
+    board[y][x].blocked = blocked;
+  }
+  void pushBackRowData(std::vector<Tile> rowData) { board.push_back(rowData); }
+};
+
 class Game {
 
 private:
@@ -58,7 +73,7 @@ private:
   long long moveCount;
   double duration;
   ull gameBoardPlaySize;
-  std::vector<std::vector<Tile>> board;
+  GameBoard gamePlayBoard;
   RandInt randInt;
   bool stateSaved;
   bool noSave;
