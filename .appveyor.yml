@@ -13,8 +13,7 @@ init:
 - cmd: mklink %MINGW_DIR%\make.exe %MINGW_DIR%\mingw32-make.exe
 
 install:
+- mkdir build
+- cd build
+- cmake ..
 - make
-
-test_script:
-- make test
-
