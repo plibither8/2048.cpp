@@ -55,6 +55,8 @@ private:
   ull score;
   ull bestScore;
   ull largestTile;
+  int cellWidth;
+  std::string horizontalBorder;
   long long moveCount;
   double duration;
   ull gameBoardPlaySize;
@@ -89,8 +91,8 @@ private:
 public:
   Game()
       : win(false), moved(true), boardFull(false), rexit(false), score(0),
-        bestScore(0), moveCount(-2), largestTile(2), stateSaved(false),
-        noSave(false) {}
+        bestScore(0), moveCount(-2), largestTile(2), cellWidth(4),
+        horizontalBorder("──────"), stateSaved(false), noSave(false) {}
   void startGame();
   void continueGame();
 };

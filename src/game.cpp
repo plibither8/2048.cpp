@@ -39,6 +39,9 @@ enum { CODE_HOTKEY_ACTION_SAVE = 'Z', CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P' };
 
 } // namespace Code
 } // namespace Keypress
+
+enum { CELL_BORDER_PADDING = 1, MINIMUM_CELL_WIDTH = 4 };
+
 } // namespace
 
 Color::Modifier Tile::tileColor(ull value) {
@@ -166,21 +169,10 @@ void Game::collectFreeTiles(std::vector<std::vector<int>> &freeTiles) {
 
 void Game::drawBoard() {
 
-  // The number of spaces between the border of a cell and a number
-  enum { CELL_BORDER = 1 };
-
   clearScreen();
   drawAscii();
   drawScoreBoard(std::cout);
 
-  int numlen = std::to_string(largestTile).length();
-
-  std::string border;
-  // Multiple cell border enum by 2 so it applies the same padding
-  // to both sides
-  for(int i = 0; i < numlen+( CELL_BORDER * 2); i++){
-    border.append("─");
-  }  
   for (int y = 0; y < gameBoardPlaySize; y++) {
 
     std::cout << "  ";
@@ -191,7 +183,7 @@ void Game::drawBoard() {
       std::cout << "├";
     }
     for (int i = 0; i < gameBoardPlaySize; i++) {
-      std::cout << border;
+      std::cout << horizontalBorder;
       if (i < gameBoardPlaySize - 1) {
         if (y == 0) {
           std::cout << "┬";
@@ -214,10 +206,10 @@ void Game::drawBoard() {
 
       std::cout << " │ ";
       if (!currentTile.value) {
-        std::cout << std::setw(numlen) << " ";
+        std::cout << std::setw(cellWidth) << " ";
       } else {
         std::cout << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(numlen) << currentTile.value << bold_off << def;
+                  << std::setw(cellWidth) << currentTile.value << bold_off << def;
       }
     }
 
@@ -228,7 +220,7 @@ void Game::drawBoard() {
   std::cout << "  └";
 
   for (int i = 0; i < gameBoardPlaySize; i++) {
-    std::cout << border;
+    std::cout << horizontalBorder;
     if (i < gameBoardPlaySize - 1) {
       std::cout << "┴";
     } else {
@@ -508,8 +500,20 @@ void Game::move(int y, int x, int k, int l) {
     score += targetTile.value;
     targetTile.blocked = true;
 
-    largestTile =
-        largestTile < targetTile.value ? targetTile.value : largestTile;
+    if (largestTile < targetTile.value) {
+      largestTile = targetTile.value;
+
+      /**
+       * Default border length is 4. When largestTileLength exceeds 4
+       * then increase the border and cell width by 1
+      */
+      int largestTileLength = std::to_string(largestTile).length();
+      if (cellWidth > MINIMUM_CELL_WIDTH) {
+        cellWidth = largestTileLength;
+        horizontalBorder.append("─");
+      }
+    }
+
     if (!win) {
       if (targetTile.value == GAME_TILE_WINNING_SCORE) {
         win = true;
