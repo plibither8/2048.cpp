@@ -40,7 +40,7 @@ enum { CODE_HOTKEY_ACTION_SAVE = 'Z', CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P' };
 } // namespace Code
 } // namespace Keypress
 
-enum { CELL_BORDER_PADDING = 1, MINIMUM_CELL_WIDTH = 4 };
+enum { MINIMUM_CELL_WIDTH = 4 };
 
 } // namespace
 
