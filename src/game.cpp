@@ -209,7 +209,8 @@ void Game::drawBoard() {
         std::cout << std::setw(cellWidth) << " ";
       } else {
         std::cout << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(cellWidth) << currentTile.value << bold_off << def;
+                  << std::setw(cellWidth) << currentTile.value << bold_off
+                  << def;
       }
     }
 
@@ -506,7 +507,7 @@ void Game::move(int y, int x, int k, int l) {
       /**
        * Default border length is 4. When largestTileLength exceeds 4
        * then increase the border and cell width by 1
-      */
+       */
       int largestTileLength = std::to_string(largestTile).length();
       if (cellWidth > MINIMUM_CELL_WIDTH) {
         cellWidth = largestTileLength;
