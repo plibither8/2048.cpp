@@ -207,7 +207,8 @@ void Game::drawBoard() {
         std::cout << "    ";
       } else {
         std::cout << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
+                  << std::setw(4) << theme.themedOutput(currentTile.value)
+                  << bold_off << def;
       }
     }
 
@@ -544,7 +545,7 @@ void Game::statistics() {
   endl();
   std::cout << "  Final score:       " << bold_on << score << bold_off;
   endl();
-  std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off;
+  std::cout << "  Largest Tile:      " << bold_on << theme.themedOutput(largestTile) << bold_off;
   endl();
   std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off;
   endl();
@@ -577,7 +578,7 @@ void Game::saveScore() {
   s.score = score;
   s.win = win;
   s.moveCount = moveCount;
-  s.largestTile = largestTile;
+  s.largestTile = theme.themedOutput(largestTile);
   s.duration = duration;
   s.save();
 }
@@ -688,6 +689,8 @@ void Game::startGame() {
   }
 
   setBoardSize();
+    loadThemes(themeController);
+  theme = themeController.chooseTheme();
 
   initialiseBoardArray();
   addTile();

@@ -5,6 +5,7 @@
 #include "global.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
+#include "themes.hpp"
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -62,6 +63,8 @@ private:
   RandInt randInt;
   bool stateSaved;
   bool noSave;
+  Theme theme;
+  ThemeController themeController;
 
   enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
   enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };

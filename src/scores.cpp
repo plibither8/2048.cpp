@@ -40,7 +40,7 @@ void Scoreboard::printScore() {
     ull playerScore = scoreList[i].score;
     std::string won = scoreList[i].win ? "Yes" : "No";
     long long moveCount = scoreList[i].moveCount;
-    ull largestTile = scoreList[i].largestTile;
+    std::string largestTile = scoreList[i].largestTile;
     double duration = scoreList[i].duration;
 
     if (i == size - 1) {
@@ -143,7 +143,7 @@ void Scoreboard::readFile() {
   std::string playerName;
   ull playerScore;
   bool win;
-  ull largestTile;
+  std::string largestTile;
   long long moveCount;
   double duration;
 
