@@ -75,7 +75,8 @@ I deeply appreciate the help of the following people:
 * [Aviskar KC](https://github.com/aviskarkc10) added arrow keys to game instructions.
 * [Peter Squicciarini](https://github.com/stripedpajamas) fixed readme instructions.
 * [Mark Fischer, Jr.](https://github.com/flyingfisch) fixed a typo.
-* [Hugo Brandão](https://github.com/jhugobb) cmpletely reorganised the existing project structure and updated the build method to enfore CMake.
+* [Hugo Brandão](https://github.com/jhugobb) completely reorganised the existing project structure and updated the build method to enfore CMake.
+* [Alton Alvarez](https://github.com/mathematicalist) fixed a typo.
 * [cawvyoct](https://github.com/cawvyoct) made source code much, much easier to read, removing most magic numbers and replacing them with variable to ease maintanence and implemented `clang-format`.
 
 ## Notes
