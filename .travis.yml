@@ -17,6 +17,7 @@ install:
   - mkdir build
   - cd build
   - cmake ..
+  - make
 
 script:
-  - make
+  - 4 | ./2048
