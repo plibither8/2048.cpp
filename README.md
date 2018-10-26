@@ -77,7 +77,8 @@ I deeply appreciate the help of the following people:
 * [Mark Fischer, Jr.](https://github.com/flyingfisch) fixed a typo.
 * [Hugo Brandão](https://github.com/jhugobb) completely reorganised the existing project structure and updated the build method to enfore CMake.
 * [Alton Alvarez](https://github.com/mathematicalist) fixed a typo.
-* [cawvyoct](https://github.com/cawvyoct) made source code much, much easier to read, removing most magic numbers and replacing them with variable to ease maintanence and implemented `clang-format`.
+* [cawvyoct](https://github.com/cawvyoct) made the source code much, much easier to read: removed most magic numbers, replacing them with variables to ease maintanence. Implemented `clang-format`.
+* [Cong](https://github.com/cxong) edited the `Game` class constructor.
 
 ## Notes
 
