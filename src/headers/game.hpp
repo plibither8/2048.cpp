@@ -89,8 +89,8 @@ private:
 public:
   Game()
       : win(false), moved(true), boardFull(false), rexit(false), score(0),
-        bestScore(0), moveCount(-2), duration(0.0), largestTile(2), stateSaved(false),
-        noSave(false) {}
+        bestScore(0), moveCount(-2), duration(0.0), largestTile(2),
+        stateSaved(false), noSave(false) {}
   void startGame();
   void continueGame();
 };
