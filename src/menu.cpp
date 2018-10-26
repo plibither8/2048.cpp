@@ -11,7 +11,8 @@ void Menu::startMenu(int err) {
   endl();
   std::cout << "          2. Continue Previous Game";
   endl();
-  std::cout << "          3. View Highscores and Statistics";
+  std::cout << "          3. View Highscores and Statistics\n";
+  std::cout << "          4. Exit";
   endl(2);
 
   input(err);
@@ -43,6 +44,8 @@ void Menu::input(int err) {
   case '3':
     showScores();
     break;
+  case '4':
+    exit(EXIT_SUCCESS);
   default:
     startMenu(1);
     break;
