@@ -9,7 +9,7 @@ typedef unsigned long long ull;
 
 void getInput(char &);
 
-void endl(int n = 1);
+void newline(int n = 1);
 
 void clearScreen();
 

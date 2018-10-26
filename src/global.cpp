@@ -37,10 +37,9 @@ void getInput(char &c) {
 
 #endif
 
-void endl(int n) {
-
+void newline(int n) {
   for (int i = 0; i < n; i++) {
-    std::cout << std::endl;
+    std::cout << "\n";
   }
 };
 
