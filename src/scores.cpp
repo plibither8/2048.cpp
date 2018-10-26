@@ -17,7 +17,7 @@ void Scoreboard::writeToFile() {
   scores << std::endl
          << name << " " << score << " " << win << " " << moveCount << " "
          << largestTile << " " << duration;
-  endl();
+  newline();
   scores.close();
 }
 
@@ -28,9 +28,9 @@ void Scoreboard::printScore() {
   clearScreen();
   drawAscii();
   std::cout << green << bold_on << "  SCOREBOARD" << bold_off << def;
-  endl();
+  newline();
   std::cout << green << bold_on << "  ──────────" << bold_off << def;
-  endl();
+  newline();
 
   int size = scoreList.size();
 
@@ -47,18 +47,18 @@ void Scoreboard::printScore() {
       std::cout << "  "
                    "┌─────┬────────────────────┬──────────┬──────┬───────┬─────"
                    "─────────┬──────────────┐";
-      endl();
+      newline();
       std::cout << "  │ " << bold_on << "No." << bold_off << " │ " << bold_on
                 << "Name" << bold_off << "               │ " << bold_on
                 << "Score" << bold_off << "    │ " << bold_on << "Won?"
                 << bold_off << " │ " << bold_on << "Moves" << bold_off << " │ "
                 << bold_on << "Largest Tile" << bold_off << " │ " << bold_on
                 << "Duration    " << bold_off << " │";
-      endl();
+      newline();
       std::cout << "  "
                    "├─────┼────────────────────┼──────────┼──────┼───────┼─────"
                    "─────────┼──────────────┤";
-      endl();
+      newline();
     }
 
     std::cout << "  │ " << std::setw(2) << size - i << ". │ " << playerName;
@@ -67,19 +67,19 @@ void Scoreboard::printScore() {
               << won << " │ " << std::setw(5) << moveCount << " │ "
               << std::setw(12) << largestTile << " │ " << std::setw(12)
               << secondsFormat(duration) << " │ ";
-    endl();
+    newline();
   }
 
   if (!size) {
     std::cout << "  No saved scores.";
-    endl();
+    newline();
   } else {
     std::cout << "  "
                  "└─────┴────────────────────┴──────────┴──────┴───────┴───────"
                  "───────┴──────────────┘";
   }
 
-  endl(3);
+  newline(3);
 }
 
 void Scoreboard::printStats() {
@@ -88,36 +88,36 @@ void Scoreboard::printStats() {
   if (stats.collectStatistics()) {
 
     std::cout << green << bold_on << "  STATISTICS" << bold_off << def;
-    endl();
+    newline();
     std::cout << green << bold_on << "  ──────────" << bold_off << def;
-    endl();
+    newline();
     std::cout << "  ┌────────────────────┬─────────────┐";
-    endl();
+    newline();
     std::cout << "  │ " << bold_on << "Best Score        " << bold_off << " │ "
               << std::setw(11) << stats.bestScore << " │";
-    endl();
+    newline();
     std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ "
               << std::setw(11) << stats.gameCount << " │";
-    endl();
+    newline();
     std::cout << "  │ " << bold_on << "Number of Wins    " << bold_off << " │ "
               << std::setw(11) << stats.winCount << " │";
-    endl();
+    newline();
     std::cout << "  │ " << bold_on << "Total Moves Played" << bold_off << " │ "
               << std::setw(11) << stats.totalMoveCount << " │";
-    endl();
+    newline();
     std::cout << "  │ " << bold_on << "Total Duration    " << bold_off << " │ "
               << std::setw(11) << secondsFormat(stats.totalDuration) << " │";
-    endl();
+    newline();
     std::cout << "  └────────────────────┴─────────────┘";
-    endl();
+    newline();
 
   } else {
 
     std::cout << "  No saved statistics.";
-    endl();
+    newline();
   }
 
-  endl(3);
+  newline(3);
 
   std::cout << "  Press any key to exit: ";
   char c;
@@ -169,5 +169,5 @@ void Scoreboard::save() {
   prompt();
   writeToFile();
   std::cout << green << bold_on << "  Score saved!" << bold_off << def;
-  endl();
+  newline();
 }

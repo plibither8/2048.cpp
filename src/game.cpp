@@ -195,7 +195,7 @@ void Game::drawBoard() {
         }
       }
     }
-    endl();
+    newline();
     std::cout << " ";
 
     for (int x = 0; x < gameBoardPlaySize; x++) {
@@ -212,7 +212,7 @@ void Game::drawBoard() {
     }
 
     std::cout << " │ ";
-    endl();
+    newline();
   }
 
   std::cout << "  └";
@@ -224,12 +224,12 @@ void Game::drawBoard() {
       std::cout << "┘";
     }
   }
-  endl(3);
+  newline(3);
 }
 
 void Game::drawScoreBoard(std::ostream &out_stream) {
   constexpr auto score_text_label = "SCORE:";
-  constexpr auto bestscore_text_label = "BEST SCORE:";
+  constexpr auto bestscore_text_label = "BEST CORE:";
   constexpr auto moves_text_label = "MOVES:";
 
   // * border padding: vvv
@@ -294,21 +294,21 @@ void Game::input(KeyInputErrorStatus err) {
   char c;
 
   std::cout << "  W or K or \u2191 => Up";
-  endl();
+  newline();
   std::cout << "  A or H or \u2190 => Left";
-  endl();
+  newline();
   std::cout << "  S or J or \u2193 => Down";
-  endl();
+  newline();
   std::cout << "  D or L or \u2192 => Right";
-  endl();
+  newline();
   std::cout << "  Z or P => Save";
-  endl(2);
+  newline(2);
   std::cout << "  Press the keys to start and continue.";
-  endl();
+  newline();
 
   if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
     std::cout << red << "  Invalid input. Please try again." << def;
-    endl(2);
+    newline(2);
   }
 
   getInput(c);
@@ -317,7 +317,7 @@ void Game::input(KeyInputErrorStatus err) {
     getInput(c);
     if (c == CODE_ANSI_TRIGGER_2) {
       getInput(c);
-      endl(4);
+      newline(4);
       switch (c) {
       case CODE_ANSI_UP:
         decideMove(UP);
@@ -333,11 +333,11 @@ void Game::input(KeyInputErrorStatus err) {
         goto next;
       }
     } else {
-      endl(4);
+      newline(4);
     }
   }
 
-  endl(4);
+  newline(4);
 
   switch (toupper(c)) {
 
@@ -539,18 +539,18 @@ void Game::move(int y, int x, int k, int l) {
 void Game::statistics() {
 
   std::cout << yellow << "  STATISTICS" << def;
-  endl();
+  newline();
   std::cout << yellow << "  ──────────" << def;
-  endl();
+  newline();
   std::cout << "  Final score:       " << bold_on << score << bold_off;
-  endl();
+  newline();
   std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off;
-  endl();
+  newline();
   std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off;
-  endl();
+  newline();
   std::cout << "  Time taken:        " << bold_on << secondsFormat(duration)
             << bold_off;
-  endl();
+  newline();
 }
 
 void Game::saveStats() {
@@ -590,7 +590,7 @@ void Game::saveState() {
   for (int y = 0; y < gameBoardPlaySize; y++) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
       stateFile << board[y][x].value << ":" << board[y][x].blocked << ",";
-      endl();
+      newline();
     }
     stateFile << "\n";
   }
@@ -617,7 +617,7 @@ void Game::playGame(ContinueStatus cont) {
       std::cout << green << bold_on
                 << "The game has been saved feel free to take a break." << def
                 << bold_off;
-      endl(2);
+      newline(2);
       stateSaved = false;
     }
     input();
@@ -631,17 +631,17 @@ void Game::playGame(ContinueStatus cont) {
 
   if (win) {
     std::cout << green << bold_on << msg << def << bold_off;
-    endl(3);
+    newline(3);
   } else {
     std::cout << red << bold_on << msg << def << bold_off;
-    endl(3);
+    newline(3);
   }
 
   if (gameBoardPlaySize == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
     statistics();
     saveStats();
-    endl(2);
+    newline(2);
     saveScore();
   }
 }
@@ -660,11 +660,11 @@ void Game::setBoardSize() {
       std::cout << red << "  Invalid input. Gameboard size should range from "
                 << MIN_GAME_BOARD_PLAY_SIZE << " to "
                 << MAX_GAME_BOARD_PLAY_SIZE << "." << def;
-      endl(2);
+      newline(2);
     } else if (noSave) {
       std::cout << red << bold_on << "No save game exist, Starting a new game."
                 << def << bold_off;
-      endl(2);
+      newline(2);
       noSave = false;
     }
 
