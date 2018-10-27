@@ -80,10 +80,10 @@ void Game::initialiseContinueBoardArray() {
     gameBoardPlaySize = GetLines();
     initialiseBoardArray();
     std::string tempArr[gameBoardPlaySize][gameBoardPlaySize];
-    int i = 0, j, k;
+    int i = 0;
     while (std::getline(stateFile, tempLine, '\n') && i < gameBoardPlaySize) {
       std::stringstream line(tempLine);
-      j = 0;
+      int j = 0;
       while (std::getline(line, temp, ',') && j < gameBoardPlaySize) {
         tempArr[i][j] = temp;
         j++;
@@ -95,7 +95,7 @@ void Game::initialiseContinueBoardArray() {
       std::vector<Tile> bufferArray;
       for (int j = 0; j < gameBoardPlaySize; j++) {
         std::stringstream blocks(tempArr[i][j]);
-        k = 0;
+        int k = 0;
         Tile bufferTile;
         while (std::getline(blocks, tempBlock, ':')) {
           if (k == 0) {
@@ -111,7 +111,7 @@ void Game::initialiseContinueBoardArray() {
     std::ifstream stats("./data/previousGameStats");
     while (std::getline(stats, tempLine, '\n')) {
       std::stringstream line(tempLine);
-      k = 0;
+      int k = 0;
       while (std::getline(line, temp, ':')) {
         if (k == 0)
           score = std::stoi(temp);
