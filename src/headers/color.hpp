@@ -4,7 +4,7 @@
 #include <ostream>
 
 namespace Color {
-enum Code {
+enum class Code {
   BOLD = 1,
   RESET = 0,
   BG_BLUE = 44,
@@ -37,28 +37,28 @@ class Modifier {
 public:
   Modifier(Code pCode) : code(pCode) {}
   friend std::ostream &operator<<(std::ostream &os, const Modifier &mod) {
-    return os << "\033[" << mod.code << "m";
+    return os << "\033[" << static_cast<int>(mod.code) << "m";
   }
 };
 
 } // namespace Color
 
-static Color::Modifier bold_off(Color::RESET);
-static Color::Modifier bold_on(Color::BOLD);
-static Color::Modifier def(Color::FG_DEFAULT);
-static Color::Modifier red(Color::FG_RED);
-static Color::Modifier green(Color::FG_GREEN);
-static Color::Modifier yellow(Color::FG_YELLOW);
-static Color::Modifier blue(Color::FG_BLUE);
-static Color::Modifier magenta(Color::FG_MAGENTA);
-static Color::Modifier cyan(Color::FG_CYAN);
-static Color::Modifier lightGray(Color::FG_LIGHT_GRAY);
-static Color::Modifier darkGray(Color::FG_DARK_GRAY);
-static Color::Modifier lightRed(Color::FG_LIGHT_RED);
-static Color::Modifier lightGreen(Color::FG_LIGHT_GREEN);
-static Color::Modifier lightYellow(Color::FG_LIGHT_YELLOW);
-static Color::Modifier lightBlue(Color::FG_LIGHT_BLUE);
-static Color::Modifier lightMagenta(Color::FG_LIGHT_MAGENTA);
-static Color::Modifier lightCyan(Color::FG_LIGHT_CYAN);
+static Color::Modifier bold_off(Color::Code::RESET);
+static Color::Modifier bold_on(Color::Code::BOLD);
+static Color::Modifier def(Color::Code::FG_DEFAULT);
+static Color::Modifier red(Color::Code::FG_RED);
+static Color::Modifier green(Color::Code::FG_GREEN);
+static Color::Modifier yellow(Color::Code::FG_YELLOW);
+static Color::Modifier blue(Color::Code::FG_BLUE);
+static Color::Modifier magenta(Color::Code::FG_MAGENTA);
+static Color::Modifier cyan(Color::Code::FG_CYAN);
+static Color::Modifier lightGray(Color::Code::FG_LIGHT_GRAY);
+static Color::Modifier darkGray(Color::Code::FG_DARK_GRAY);
+static Color::Modifier lightRed(Color::Code::FG_LIGHT_RED);
+static Color::Modifier lightGreen(Color::Code::FG_LIGHT_GREEN);
+static Color::Modifier lightYellow(Color::Code::FG_LIGHT_YELLOW);
+static Color::Modifier lightBlue(Color::Code::FG_LIGHT_BLUE);
+static Color::Modifier lightMagenta(Color::Code::FG_LIGHT_MAGENTA);
+static Color::Modifier lightCyan(Color::Code::FG_LIGHT_CYAN);
 
 #endif
