@@ -47,8 +47,11 @@ private:
 
 class GameBoard {
   std::vector<std::vector<Tile>> board;
+  ull playsize{0};
 
 public:
+  GameBoard() = default;
+  GameBoard(ull playsize) : playsize{playsize} {}
   Tile getTile(int x, int y) const { return board[x][y]; }
   void setTile(int x, int y, Tile tile) { board[x][y] = tile; }
   ull getTileValue(int x, int y) const { return board[x][y].value; }
@@ -58,6 +61,8 @@ public:
     board[x][y].blocked = blocked;
   }
   void pushBackRowData(std::vector<Tile> rowData) { board.push_back(rowData); }
+  int getPlaySize() const { return playsize; }
+  void setPlaySize(ull newSize) { playsize = newSize; }
 };
 
 class Game {
@@ -72,7 +77,6 @@ private:
   ull largestTile;
   long long moveCount;
   double duration;
-  ull gameBoardPlaySize;
   GameBoard gamePlayBoard;
   RandInt randInt;
   bool stateSaved;
@@ -82,7 +86,7 @@ private:
   enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
-  void initialiseBoardArray();
+  void initialiseBoardArray(ull userDefinedBoardSize);
   void initialiseContinueBoardArray();
   bool addTile();
   void collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles);
@@ -99,7 +103,7 @@ private:
   void saveScore();
   void saveState();
   void playGame(ContinueStatus);
-  void setBoardSize();
+  ull setBoardSize();
 
 public:
   Game()
