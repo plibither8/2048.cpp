@@ -153,7 +153,7 @@ void Game::collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles) {
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
       if (!gamePlayBoard.getTileValue(x, y)) {
-        freeTiles.push_back({x, y});
+        freeTiles.push_back(std::make_tuple(x, y));
       }
     }
   }
