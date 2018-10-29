@@ -85,7 +85,7 @@ void Game::initialiseContinueBoardArray() {
       std::stringstream line(tempLine);
       int j = 0;
       while (std::getline(line, temp, ',') && j < gameBoardPlaySize) {
-        tempArr[i][j] = temp;
+        tempArr[j][i] = temp;
         j++;
       }
       i++;
@@ -94,14 +94,14 @@ void Game::initialiseContinueBoardArray() {
     for (int i = 0; i < gameBoardPlaySize; i++) {
       std::vector<Tile> bufferArray;
       for (int j = 0; j < gameBoardPlaySize; j++) {
-        std::stringstream blocks(tempArr[i][j]);
+        std::stringstream blocks(tempArr[j][i]);
         int k = 0;
         Tile bufferTile;
         while (std::getline(blocks, tempBlock, ':')) {
           if (k == 0) {
-            gamePlayBoard.setTileValue(i, j, std::stoi(tempBlock));
+            gamePlayBoard.setTileValue(j, i, std::stoi(tempBlock));
           } else if (k == 1) {
-            gamePlayBoard.setTileBlocked(i, j, std::stoi(tempBlock));
+            gamePlayBoard.setTileBlocked(j, i, std::stoi(tempBlock));
           }
           k++;
         }
@@ -130,19 +130,24 @@ void Game::initialiseContinueBoardArray() {
 bool Game::addTile() {
 
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  std::vector<std::vector<int>> freeTiles;
+
+  // Simple {x,y} datastructure = std::tuple<int, int>...
+  std::vector<std::tuple<int, int>> freeTiles;
   collectFreeTiles(freeTiles);
 
   if (!freeTiles.size()) {
     boardFull = true;
   }
 
-  std::vector<int> randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
-  int x = randomFreeTile.at(1);
-  int y = randomFreeTile.at(0);
+  // decltype(auto) = std::tuple<int, int>...
+  const auto randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
+  // Note: Recognised forced implicit conversion to [int]!
+  enum tupleCoord { COORD_X, COORD_Y };
+  const int x = std::get<COORD_X>(randomFreeTile);
+  const int y = std::get<COORD_Y>(randomFreeTile);
   const auto value_four_or_two =
       randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  gamePlayBoard.setTileValue(y, x, value_four_or_two);
+  gamePlayBoard.setTileValue(x, y, value_four_or_two);
 
   moveCount++;
   moved = true;
@@ -154,13 +159,12 @@ bool Game::addTile() {
   return canMove();
 }
 
-void Game::collectFreeTiles(std::vector<std::vector<int>> &freeTiles) {
+void Game::collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles) {
 
   for (int y = 0; y < gameBoardPlaySize; y++) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
-      if (!gamePlayBoard.getTileValue(y, x)) {
-        std::vector<int> newEmpty{y, x};
-        freeTiles.push_back(newEmpty);
+      if (!gamePlayBoard.getTileValue(x, y)) {
+        freeTiles.push_back({x, y});
       }
     }
   }
@@ -202,7 +206,7 @@ void Game::drawBoard() {
 
     for (int x = 0; x < gameBoardPlaySize; x++) {
 
-      Tile currentTile = gamePlayBoard.getTile(y, x);
+      Tile currentTile = gamePlayBoard.getTile(x, y);
 
       std::cout << " │ ";
       if (!currentTile.value) {
@@ -378,7 +382,7 @@ bool Game::canMove() {
 
   for (int y = 0; y < gameBoardPlaySize; y++) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
-      if (!gamePlayBoard.getTileValue(y, x)) {
+      if (!gamePlayBoard.getTileValue(x, y)) {
         return true;
       }
     }
@@ -386,16 +390,16 @@ bool Game::canMove() {
 
   for (int y = 0; y < gameBoardPlaySize; y++) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
-      if (testAdd(y + 1, x, gamePlayBoard.getTileValue(y, x))) {
+      if (testAdd(x, y + 1, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
-      if (testAdd(y - 1, x, gamePlayBoard.getTileValue(y, x))) {
+      if (testAdd(x, y - 1, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
-      if (testAdd(y, x + 1, gamePlayBoard.getTileValue(y, x))) {
+      if (testAdd(x + 1, y, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
-      if (testAdd(y, x - 1, gamePlayBoard.getTileValue(y, x))) {
+      if (testAdd(x - 1, y, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
     }
@@ -404,21 +408,21 @@ bool Game::canMove() {
   return false;
 }
 
-bool Game::testAdd(int y, int x, ull value) {
+bool Game::testAdd(int x, int y, ull value) {
 
   if (y < 0 || y > gameBoardPlaySize - 1 || x < 0 ||
       x > gameBoardPlaySize - 1) {
     return false;
   }
 
-  return gamePlayBoard.getTileValue(y, x) == value;
+  return gamePlayBoard.getTileValue(x, y) == value;
 }
 
 void Game::unblockTiles() {
 
   for (int y = 0; y < gameBoardPlaySize; y++) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
-      gamePlayBoard.setTileBlocked(y, x, false);
+      gamePlayBoard.setTileBlocked(x, y, false);
     }
   }
 }
@@ -432,8 +436,8 @@ void Game::decideMove(Directions d) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
       int y = 1;
       while (y < gameBoardPlaySize) {
-        if (gamePlayBoard.getTileValue(y, x)) {
-          move(y, x, -1, 0);
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, 0, -1);
         }
         y++;
       }
@@ -445,8 +449,8 @@ void Game::decideMove(Directions d) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
       int y = gameBoardPlaySize - 2;
       while (y >= 0) {
-        if (gamePlayBoard.getTileValue(y, x)) {
-          move(y, x, 1, 0);
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, 0, 1);
         }
         y--;
       }
@@ -458,8 +462,8 @@ void Game::decideMove(Directions d) {
     for (int y = 0; y < gameBoardPlaySize; y++) {
       int x = 1;
       while (x < gameBoardPlaySize) {
-        if (gamePlayBoard.getTileValue(y, x)) {
-          move(y, x, 0, -1);
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, -1, 0);
         }
         x++;
       }
@@ -471,8 +475,8 @@ void Game::decideMove(Directions d) {
     for (int y = 0; y < gameBoardPlaySize; y++) {
       int x = gameBoardPlaySize - 2;
       while (x >= 0) {
-        if (gamePlayBoard.getTileValue(y, x)) {
-          move(y, x, 0, 1);
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, 1, 0);
         }
         x--;
       }
@@ -481,11 +485,11 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::move(int y, int x, int k, int l) {
+void Game::move(int x, int y, int x2, int y2) {
 
   constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-  Tile currentTile = gamePlayBoard.getTile(y, x);
-  Tile targetTile = gamePlayBoard.getTile(y + k, x + l);
+  Tile currentTile = gamePlayBoard.getTile(x, y);
+  Tile targetTile = gamePlayBoard.getTile(x + x2, y + y2);
 
   int A = currentTile.value;
   int B = targetTile.value;
@@ -519,8 +523,8 @@ void Game::move(int y, int x, int k, int l) {
       }
     }
 
-    gamePlayBoard.setTile(y, x, currentTile);
-    gamePlayBoard.setTile(y + k, x + l, targetTile);
+    gamePlayBoard.setTile(x, y, currentTile);
+    gamePlayBoard.setTile(x + x2, y + y2, targetTile);
     moved = true;
 
   } else if (A && !B) {
@@ -528,15 +532,15 @@ void Game::move(int y, int x, int k, int l) {
     targetTile.value = currentTile.value;
     currentTile.value = 0;
 
-    gamePlayBoard.setTile(y, x, currentTile);
-    gamePlayBoard.setTile(y + k, x + l, targetTile);
+    gamePlayBoard.setTile(x, y, currentTile);
+    gamePlayBoard.setTile(x + x2, y + y2, targetTile);
     moved = true;
   }
 
-  if (k + l == 1 && (k == 1 ? y : x) < gameBoardPlaySize - 2) {
-    move(y + k, x + l, k, l);
-  } else if (k + l == -1 && (k == -1 ? y : x) > 1) {
-    move(y + k, x + l, k, l);
+  if (y2 + x2 == 1 && (y2 == 1 ? y : x) < gameBoardPlaySize - 2) {
+    move(x + x2, y + y2, x2, y2);
+  } else if (y2 + x2 == -1 && (y2 == -1 ? y : x) > 1) {
+    move(x + x2, y + y2, x2, y2);
   }
 }
 
@@ -593,8 +597,8 @@ void Game::saveState() {
   std::fstream stateFile("../data/previousGame", std::ios_base::app);
   for (int y = 0; y < gameBoardPlaySize; y++) {
     for (int x = 0; x < gameBoardPlaySize; x++) {
-      stateFile << gamePlayBoard.getTileValue(y, x) << ":"
-                << gamePlayBoard.getTileBlocked(y, x) << ",";
+      stateFile << gamePlayBoard.getTileValue(x, y) << ":"
+                << gamePlayBoard.getTileBlocked(x, y) << ",";
       newline();
     }
     stateFile << "\n";

@@ -49,13 +49,13 @@ class GameBoard {
   std::vector<std::vector<Tile>> board;
 
 public:
-  Tile getTile(int y, int x) const { return board[y][x]; }
-  void setTile(int y, int x, Tile tile) { board[y][x] = tile; }
-  ull getTileValue(int y, int x) const { return board[y][x].value; }
-  void setTileValue(int y, int x, ull value) { board[y][x].value = value; }
-  bool getTileBlocked(int y, int x) const { return board[y][x].blocked; }
-  void setTileBlocked(int y, int x, bool blocked) {
-    board[y][x].blocked = blocked;
+  Tile getTile(int x, int y) const { return board[x][y]; }
+  void setTile(int x, int y, Tile tile) { board[x][y] = tile; }
+  ull getTileValue(int x, int y) const { return board[x][y].value; }
+  void setTileValue(int x, int y, ull value) { board[x][y].value = value; }
+  bool getTileBlocked(int x, int y) const { return board[x][y].blocked; }
+  void setTileBlocked(int x, int y, bool blocked) {
+    board[x][y].blocked = blocked;
   }
   void pushBackRowData(std::vector<Tile> rowData) { board.push_back(rowData); }
 };
@@ -85,7 +85,7 @@ private:
   void initialiseBoardArray();
   void initialiseContinueBoardArray();
   bool addTile();
-  void collectFreeTiles(std::vector<std::vector<int>> &freeTiles);
+  void collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles);
   void drawBoard();
   void drawScoreBoard(std::ostream &out_stream);
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
