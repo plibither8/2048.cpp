@@ -51,7 +51,7 @@ class GameBoard {
 
 public:
   GameBoard() = default;
-  GameBoard(ull playsize)
+  explicit GameBoard(ull playsize)
       : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
   Tile getTile(int x, int y) const { return board[x + playsize * y]; }
   void setTile(int x, int y, Tile tile) { board[x + playsize * y] = tile; }
