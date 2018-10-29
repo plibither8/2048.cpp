@@ -50,17 +50,6 @@ Color::Modifier Tile::tileColor(ull value) {
   return colors[index];
 }
 
-void Game::initialiseBoardArray(ull userDefinedBoardSize) {
-  for (int i = 0; i < userDefinedBoardSize; i++) {
-    std::vector<Tile> bufferArray;
-    for (int j = 0; j < userDefinedBoardSize; j++) {
-      Tile bufferTile;
-      bufferArray.push_back(bufferTile);
-    }
-    gamePlayBoard.pushBackRowData(bufferArray);
-  }
-}
-
 int GetLines() {
   int noOfLines = 0;
   std::string tempLine;
@@ -92,14 +81,11 @@ void Game::initialiseContinueBoardArray() {
     }
 
     gamePlayBoard = GameBoard(savedBoardPlaySize);
-    initialiseBoardArray(savedBoardPlaySize);
 
     for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
-      std::vector<Tile> bufferArray;
       for (int j = 0; j < gamePlayBoard.getPlaySize(); j++) {
         std::stringstream blocks(tempArr[j][i]);
         int k = 0;
-        Tile bufferTile;
         while (std::getline(blocks, tempBlock, ':')) {
           if (k == 0) {
             gamePlayBoard.setTileValue(j, i, std::stoi(tempBlock));
@@ -703,7 +689,6 @@ void Game::startGame() {
   ull userInput_PlaySize = setBoardSize();
 
   gamePlayBoard = GameBoard(userInput_PlaySize);
-  initialiseBoardArray(userInput_PlaySize);
   addTile();
 
   playGame(ContinueStatus::STATUS_END_GAME);

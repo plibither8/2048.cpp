@@ -46,21 +46,26 @@ private:
 };
 
 class GameBoard {
-  std::vector<std::vector<Tile>> board;
+  std::vector<Tile> board;
   ull playsize{0};
 
 public:
   GameBoard() = default;
-  GameBoard(ull playsize) : playsize{playsize} {}
-  Tile getTile(int x, int y) const { return board[x][y]; }
-  void setTile(int x, int y, Tile tile) { board[x][y] = tile; }
-  ull getTileValue(int x, int y) const { return board[x][y].value; }
-  void setTileValue(int x, int y, ull value) { board[x][y].value = value; }
-  bool getTileBlocked(int x, int y) const { return board[x][y].blocked; }
-  void setTileBlocked(int x, int y, bool blocked) {
-    board[x][y].blocked = blocked;
+  GameBoard(ull playsize)
+      : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
+  Tile getTile(int x, int y) const { return board[x + playsize * y]; }
+  void setTile(int x, int y, Tile tile) { board[x + playsize * y] = tile; }
+  ull getTileValue(int x, int y) const { return board[x + playsize * y].value; }
+  void setTileValue(int x, int y, ull value) {
+    board[x + playsize * y].value = value;
   }
-  void pushBackRowData(std::vector<Tile> rowData) { board.push_back(rowData); }
+  bool getTileBlocked(int x, int y) const {
+    return board[x + playsize * y].blocked;
+  }
+  void setTileBlocked(int x, int y, bool blocked) {
+    board[x + playsize * y].blocked = blocked;
+  }
+  void clearGameBoard() { board = std::vector<Tile>(playsize * playsize); }
   int getPlaySize() const { return playsize; }
   void setPlaySize(ull newSize) { playsize = newSize; }
 };
@@ -86,7 +91,6 @@ private:
   enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
-  void initialiseBoardArray(ull userDefinedBoardSize);
   void initialiseContinueBoardArray();
   bool addTile();
   void collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles);
