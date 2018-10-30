@@ -50,17 +50,6 @@ Color::Modifier Tile::tileColor(ull value) {
   return colors[index];
 }
 
-void Game::initialiseBoardArray() {
-  for (int i = 0; i < gameBoardPlaySize; i++) {
-    std::vector<Tile> bufferArray;
-    for (int j = 0; j < gameBoardPlaySize; j++) {
-      Tile bufferTile;
-      bufferArray.push_back(bufferTile);
-    }
-    board.push_back(bufferArray);
-  }
-}
-
 int GetLines() {
   int noOfLines = 0;
   std::string tempLine;
@@ -77,31 +66,31 @@ void Game::initialiseContinueBoardArray() {
   std::ifstream stateFile("./data/previousGame");
   if ((bool)stateFile) {
     std::string temp, tempLine, tempBlock;
-    gameBoardPlaySize = GetLines();
-    initialiseBoardArray();
-    std::string tempArr[gameBoardPlaySize][gameBoardPlaySize];
+    const ull savedBoardPlaySize = GetLines();
+
+    std::string tempArr[savedBoardPlaySize][savedBoardPlaySize];
     int i = 0;
-    while (std::getline(stateFile, tempLine, '\n') && i < gameBoardPlaySize) {
+    while (std::getline(stateFile, tempLine, '\n') && i < savedBoardPlaySize) {
       std::stringstream line(tempLine);
       int j = 0;
-      while (std::getline(line, temp, ',') && j < gameBoardPlaySize) {
-        tempArr[i][j] = temp;
+      while (std::getline(line, temp, ',') && j < savedBoardPlaySize) {
+        tempArr[j][i] = temp;
         j++;
       }
       i++;
     }
 
-    for (int i = 0; i < gameBoardPlaySize; i++) {
-      std::vector<Tile> bufferArray;
-      for (int j = 0; j < gameBoardPlaySize; j++) {
-        std::stringstream blocks(tempArr[i][j]);
+    gamePlayBoard = GameBoard(savedBoardPlaySize);
+
+    for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
+      for (int j = 0; j < gamePlayBoard.getPlaySize(); j++) {
+        std::stringstream blocks(tempArr[j][i]);
         int k = 0;
-        Tile bufferTile;
         while (std::getline(blocks, tempBlock, ':')) {
           if (k == 0) {
-            board[i][j].value = std::stoi(tempBlock);
+            gamePlayBoard.setTileValue(j, i, std::stoi(tempBlock));
           } else if (k == 1) {
-            board[i][j].blocked = std::stoi(tempBlock);
+            gamePlayBoard.setTileBlocked(j, i, std::stoi(tempBlock));
           }
           k++;
         }
@@ -130,17 +119,24 @@ void Game::initialiseContinueBoardArray() {
 bool Game::addTile() {
 
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  std::vector<std::vector<int>> freeTiles;
+
+  // Simple {x,y} datastructure = std::tuple<int, int>...
+  std::vector<std::tuple<int, int>> freeTiles;
   collectFreeTiles(freeTiles);
 
   if (!freeTiles.size()) {
     boardFull = true;
   }
 
-  std::vector<int> randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
-  int x = randomFreeTile.at(1);
-  int y = randomFreeTile.at(0);
-  board[y][x].value = randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
+  // decltype(auto) = std::tuple<int, int>...
+  const auto randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
+  // Note: Recognised forced implicit conversion to [int]!
+  enum tupleCoord { COORD_X, COORD_Y };
+  const int x = std::get<COORD_X>(randomFreeTile);
+  const int y = std::get<COORD_Y>(randomFreeTile);
+  const auto value_four_or_two =
+      randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
+  gamePlayBoard.setTileValue(x, y, value_four_or_two);
 
   moveCount++;
   moved = true;
@@ -152,13 +148,12 @@ bool Game::addTile() {
   return canMove();
 }
 
-void Game::collectFreeTiles(std::vector<std::vector<int>> &freeTiles) {
+void Game::collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles) {
 
-  for (int y = 0; y < gameBoardPlaySize; y++) {
-    for (int x = 0; x < gameBoardPlaySize; x++) {
-      if (!board[y][x].value) {
-        std::vector<int> newEmpty{y, x};
-        freeTiles.push_back(newEmpty);
+  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      if (!gamePlayBoard.getTileValue(x, y)) {
+        freeTiles.push_back(std::make_tuple(x, y));
       }
     }
   }
@@ -170,7 +165,7 @@ void Game::drawBoard() {
   drawAscii();
   drawScoreBoard(std::cout);
 
-  for (int y = 0; y < gameBoardPlaySize; y++) {
+  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
 
     std::cout << "  ";
 
@@ -179,9 +174,9 @@ void Game::drawBoard() {
     } else {
       std::cout << "├";
     }
-    for (int i = 0; i < gameBoardPlaySize; i++) {
+    for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
       std::cout << "──────";
-      if (i < gameBoardPlaySize - 1) {
+      if (i < gamePlayBoard.getPlaySize() - 1) {
         if (y == 0) {
           std::cout << "┬";
         } else {
@@ -198,9 +193,9 @@ void Game::drawBoard() {
     newline();
     std::cout << " ";
 
-    for (int x = 0; x < gameBoardPlaySize; x++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
 
-      Tile currentTile = board[y][x];
+      Tile currentTile = gamePlayBoard.getTile(x, y);
 
       std::cout << " │ ";
       if (!currentTile.value) {
@@ -216,9 +211,9 @@ void Game::drawBoard() {
   }
 
   std::cout << "  └";
-  for (int i = 0; i < gameBoardPlaySize; i++) {
+  for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
     std::cout << "──────";
-    if (i < gameBoardPlaySize - 1) {
+    if (i < gamePlayBoard.getPlaySize() - 1) {
       std::cout << "┴";
     } else {
       std::cout << "┘";
@@ -264,7 +259,7 @@ void Game::drawScoreBoard(std::ostream &out_stream) {
                             border_padding_char)
              << score << inner_border_padding << vertical_border_pattern
              << "\n";
-  if (gameBoardPlaySize == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     const auto tempBestScore = (bestScore < score ? score : bestScore);
     out_stream << outer_border_padding << vertical_border_pattern
                << inner_border_padding << bold_on << bestscore_text_label
@@ -374,26 +369,26 @@ next:
 
 bool Game::canMove() {
 
-  for (int y = 0; y < gameBoardPlaySize; y++) {
-    for (int x = 0; x < gameBoardPlaySize; x++) {
-      if (!board[y][x].value) {
+  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      if (!gamePlayBoard.getTileValue(x, y)) {
         return true;
       }
     }
   }
 
-  for (int y = 0; y < gameBoardPlaySize; y++) {
-    for (int x = 0; x < gameBoardPlaySize; x++) {
-      if (testAdd(y + 1, x, board[y][x].value)) {
+  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      if (testAdd(x, y + 1, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
-      if (testAdd(y - 1, x, board[y][x].value)) {
+      if (testAdd(x, y - 1, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
-      if (testAdd(y, x + 1, board[y][x].value)) {
+      if (testAdd(x + 1, y, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
-      if (testAdd(y, x - 1, board[y][x].value)) {
+      if (testAdd(x - 1, y, gamePlayBoard.getTileValue(x, y))) {
         return true;
       }
     }
@@ -402,21 +397,21 @@ bool Game::canMove() {
   return false;
 }
 
-bool Game::testAdd(int y, int x, ull value) {
+bool Game::testAdd(int x, int y, ull value) {
 
-  if (y < 0 || y > gameBoardPlaySize - 1 || x < 0 ||
-      x > gameBoardPlaySize - 1) {
+  if (y < 0 || y > gamePlayBoard.getPlaySize() - 1 || x < 0 ||
+      x > gamePlayBoard.getPlaySize() - 1) {
     return false;
   }
 
-  return board[y][x].value == value;
+  return gamePlayBoard.getTileValue(x, y) == value;
 }
 
 void Game::unblockTiles() {
 
-  for (int y = 0; y < gameBoardPlaySize; y++) {
-    for (int x = 0; x < gameBoardPlaySize; x++) {
-      board[y][x].blocked = false;
+  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      gamePlayBoard.setTileBlocked(x, y, false);
     }
   }
 }
@@ -427,11 +422,11 @@ void Game::decideMove(Directions d) {
 
   case UP:
 
-    for (int x = 0; x < gameBoardPlaySize; x++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
       int y = 1;
-      while (y < gameBoardPlaySize) {
-        if (board[y][x].value) {
-          move(y, x, -1, 0);
+      while (y < gamePlayBoard.getPlaySize()) {
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, 0, -1);
         }
         y++;
       }
@@ -440,11 +435,11 @@ void Game::decideMove(Directions d) {
 
   case DOWN:
 
-    for (int x = 0; x < gameBoardPlaySize; x++) {
-      int y = gameBoardPlaySize - 2;
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      int y = gamePlayBoard.getPlaySize() - 2;
       while (y >= 0) {
-        if (board[y][x].value) {
-          move(y, x, 1, 0);
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, 0, 1);
         }
         y--;
       }
@@ -453,11 +448,11 @@ void Game::decideMove(Directions d) {
 
   case LEFT:
 
-    for (int y = 0; y < gameBoardPlaySize; y++) {
+    for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
       int x = 1;
-      while (x < gameBoardPlaySize) {
-        if (board[y][x].value) {
-          move(y, x, 0, -1);
+      while (x < gamePlayBoard.getPlaySize()) {
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, -1, 0);
         }
         x++;
       }
@@ -466,11 +461,11 @@ void Game::decideMove(Directions d) {
 
   case RIGHT:
 
-    for (int y = 0; y < gameBoardPlaySize; y++) {
-      int x = gameBoardPlaySize - 2;
+    for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
+      int x = gamePlayBoard.getPlaySize() - 2;
       while (x >= 0) {
-        if (board[y][x].value) {
-          move(y, x, 0, 1);
+        if (gamePlayBoard.getTileValue(x, y)) {
+          move(x, y, 1, 0);
         }
         x--;
       }
@@ -479,11 +474,11 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::move(int y, int x, int k, int l) {
+void Game::move(int x, int y, int x2, int y2) {
 
   constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-  Tile &currentTile = board[y][x];
-  Tile &targetTile = board[y + k][x + l];
+  Tile currentTile = gamePlayBoard.getTile(x, y);
+  Tile targetTile = gamePlayBoard.getTile(x + x2, y + y2);
 
   int A = currentTile.value;
   int B = targetTile.value;
@@ -517,22 +512,24 @@ void Game::move(int y, int x, int k, int l) {
       }
     }
 
+    gamePlayBoard.setTile(x, y, currentTile);
+    gamePlayBoard.setTile(x + x2, y + y2, targetTile);
     moved = true;
 
-  }
-
-  else if (A && !B) {
+  } else if (A && !B) {
 
     targetTile.value = currentTile.value;
     currentTile.value = 0;
 
+    gamePlayBoard.setTile(x, y, currentTile);
+    gamePlayBoard.setTile(x + x2, y + y2, targetTile);
     moved = true;
   }
 
-  if (k + l == 1 && (k == 1 ? y : x) < gameBoardPlaySize - 2) {
-    move(y + k, x + l, k, l);
-  } else if (k + l == -1 && (k == -1 ? y : x) > 1) {
-    move(y + k, x + l, k, l);
+  if (y2 + x2 == 1 && (y2 == 1 ? y : x) < gamePlayBoard.getPlaySize() - 2) {
+    move(x + x2, y + y2, x2, y2);
+  } else if (y2 + x2 == -1 && (y2 == -1 ? y : x) > 1) {
+    move(x + x2, y + y2, x2, y2);
   }
 }
 
@@ -587,9 +584,10 @@ void Game::saveState() {
   std::remove("../data/previousGameStats");
   std::fstream stats("../data/previousGameStats", std::ios_base::app);
   std::fstream stateFile("../data/previousGame", std::ios_base::app);
-  for (int y = 0; y < gameBoardPlaySize; y++) {
-    for (int x = 0; x < gameBoardPlaySize; x++) {
-      stateFile << board[y][x].value << ":" << board[y][x].blocked << ",";
+  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
+    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      stateFile << gamePlayBoard.getTileValue(x, y) << ":"
+                << gamePlayBoard.getTileBlocked(x, y) << ",";
       newline();
     }
     stateFile << "\n";
@@ -637,7 +635,7 @@ void Game::playGame(ContinueStatus cont) {
     newline(3);
   }
 
-  if (gameBoardPlaySize == COMPETITION_GAME_BOARD_PLAY_SIZE &&
+  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
     statistics();
     saveStats();
@@ -646,13 +644,13 @@ void Game::playGame(ContinueStatus cont) {
   }
 }
 
-void Game::setBoardSize() {
+ull Game::setBoardSize() {
 
   enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
   bool err = false;
-  gameBoardPlaySize = 0;
-  while ((gameBoardPlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
-          gameBoardPlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+  ull userInput_PlaySize{0};
+  while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
+          userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
     clearScreen();
     drawAscii();
 
@@ -673,11 +671,12 @@ void Game::setBoardSize() {
                  "saved only for the 4x4 gameboard): "
               << bold_off;
 
-    std::cin >> gameBoardPlaySize;
+    std::cin >> userInput_PlaySize;
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
     err = true;
   }
+  return userInput_PlaySize;
 }
 
 void Game::startGame() {
@@ -687,9 +686,9 @@ void Game::startGame() {
     bestScore = stats.bestScore;
   }
 
-  setBoardSize();
+  ull userInput_PlaySize = setBoardSize();
 
-  initialiseBoardArray();
+  gamePlayBoard = GameBoard(userInput_PlaySize);
   addTile();
 
   playGame(ContinueStatus::STATUS_END_GAME);

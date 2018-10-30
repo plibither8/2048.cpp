@@ -82,17 +82,7 @@ I deeply appreciate the help of the following people:
 
 ## Notes
 
-* Game board array is defined as `board[y][x]`
-* Game board will follow the following structure:
-
-```plaintext
-'x' => x-axis OR the horizontal line OR columns
-'y' => y-axis OR the vertical line OR rows
-```
-
-### Example
-
-`board[2][0]` refers to the 0th tile (or column) in 2nd row as in this case, x = 0 and y = 2. The specific tile is denoted the by '@' symbol in the following gameboard:
+`[GameBoard].getTile(2,0)` refers to the 0th tile (or column) in 2nd row as in this case, x = 0 and y = 2. The specific tile is denoted the by '@' symbol in the following gameboard:
 
 > Note: `row` and `column` indexing starts at 0.
 
