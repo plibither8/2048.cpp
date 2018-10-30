@@ -44,7 +44,7 @@ void newline(int n) {
 };
 
 void clearScreen() {
-  system("clear");
+  system("cls");
 };
 
 std::string secondsFormat(double sec) {
