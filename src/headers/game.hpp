@@ -3,6 +3,7 @@
 
 #include "color.hpp"
 #include "global.hpp"
+#include "point2d.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <chrono>
@@ -48,22 +49,32 @@ private:
 class GameBoard {
   std::vector<Tile> board;
   ull playsize{0};
+  int point2D_to_1D_index(point2D_t pt) const {
+    int x, y;
+    std::tie(x, y) = pt.get();
+    return x + playsize * y;
+  }
 
 public:
   GameBoard() = default;
   explicit GameBoard(ull playsize)
       : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
-  Tile getTile(int x, int y) const { return board[x + playsize * y]; }
-  void setTile(int x, int y, Tile tile) { board[x + playsize * y] = tile; }
-  ull getTileValue(int x, int y) const { return board[x + playsize * y].value; }
-  void setTileValue(int x, int y, ull value) {
-    board[x + playsize * y].value = value;
+
+  Tile getTile(point2D_t pt) const { return board[point2D_to_1D_index(pt)]; }
+  void setTile(point2D_t pt, Tile tile) {
+    board[point2D_to_1D_index(pt)] = tile;
   }
-  bool getTileBlocked(int x, int y) const {
-    return board[x + playsize * y].blocked;
+  ull getTileValue(point2D_t pt) const {
+    return board[point2D_to_1D_index(pt)].value;
   }
-  void setTileBlocked(int x, int y, bool blocked) {
-    board[x + playsize * y].blocked = blocked;
+  void setTileValue(point2D_t pt, ull value) {
+    board[point2D_to_1D_index(pt)].value = value;
+  }
+  bool getTileBlocked(point2D_t pt) const {
+    return board[point2D_to_1D_index(pt)].blocked;
+  }
+  void setTileBlocked(point2D_t pt, bool blocked) {
+    board[point2D_to_1D_index(pt)].blocked = blocked;
   }
   void clearGameBoard() { board = std::vector<Tile>(playsize * playsize); }
   int getPlaySize() const { return playsize; }
@@ -93,15 +104,15 @@ private:
 
   void initialiseContinueBoardArray();
   bool addTile();
-  void collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles);
+  std::vector<point2D_t> collectFreeTiles();
   void drawBoard();
   void drawScoreBoard(std::ostream &out_stream);
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
   bool canMove();
-  bool testAdd(int, int, ull);
+  bool testAdd(point2D_t pt, ull);
   void unblockTiles();
   void decideMove(Directions);
-  void move(int, int, int, int);
+  void move(point2D_t pt, point2D_t pt_offset);
   void statistics();
   void saveStats();
   void saveScore();

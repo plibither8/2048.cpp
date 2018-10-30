@@ -87,10 +87,11 @@ void Game::initialiseContinueBoardArray() {
         std::stringstream blocks(tempArr[j][i]);
         int k = 0;
         while (std::getline(blocks, tempBlock, ':')) {
+          const auto current_point = point2D_t{j, i};
           if (k == 0) {
-            gamePlayBoard.setTileValue(j, i, std::stoi(tempBlock));
+            gamePlayBoard.setTileValue(current_point, std::stoi(tempBlock));
           } else if (k == 1) {
-            gamePlayBoard.setTileBlocked(j, i, std::stoi(tempBlock));
+            gamePlayBoard.setTileBlocked(current_point, std::stoi(tempBlock));
           }
           k++;
         }
@@ -117,26 +118,17 @@ void Game::initialiseContinueBoardArray() {
 }
 
 bool Game::addTile() {
-
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-
-  // Simple {x,y} datastructure = std::tuple<int, int>...
-  std::vector<std::tuple<int, int>> freeTiles;
-  collectFreeTiles(freeTiles);
+  const auto freeTiles = collectFreeTiles();
 
   if (!freeTiles.size()) {
     boardFull = true;
   }
 
-  // decltype(auto) = std::tuple<int, int>...
   const auto randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
-  // Note: Recognised forced implicit conversion to [int]!
-  enum tupleCoord { COORD_X, COORD_Y };
-  const int x = std::get<COORD_X>(randomFreeTile);
-  const int y = std::get<COORD_Y>(randomFreeTile);
   const auto value_four_or_two =
       randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  gamePlayBoard.setTileValue(x, y, value_four_or_two);
+  gamePlayBoard.setTileValue(randomFreeTile, value_four_or_two);
 
   moveCount++;
   moved = true;
@@ -148,15 +140,17 @@ bool Game::addTile() {
   return canMove();
 }
 
-void Game::collectFreeTiles(std::vector<std::tuple<int, int>> &freeTiles) {
-
+std::vector<point2D_t> Game::collectFreeTiles() {
+  std::vector<point2D_t> freeTiles;
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      if (!gamePlayBoard.getTileValue(x, y)) {
-        freeTiles.push_back(std::make_tuple(x, y));
+      const auto current_point = point2D_t{x, y};
+      if (!gamePlayBoard.getTileValue(current_point)) {
+        freeTiles.push_back(current_point);
       }
     }
   }
+  return freeTiles;
 }
 
 void Game::drawBoard() {
@@ -195,7 +189,7 @@ void Game::drawBoard() {
 
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
 
-      Tile currentTile = gamePlayBoard.getTile(x, y);
+      Tile currentTile = gamePlayBoard.getTile(point2D_t{x, y});
 
       std::cout << " │ ";
       if (!currentTile.value) {
@@ -371,7 +365,7 @@ bool Game::canMove() {
 
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      if (!gamePlayBoard.getTileValue(x, y)) {
+      if (!gamePlayBoard.getTileValue(point2D_t{x, y})) {
         return true;
       }
     }
@@ -379,16 +373,18 @@ bool Game::canMove() {
 
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      if (testAdd(x, y + 1, gamePlayBoard.getTileValue(x, y))) {
+      const auto current_point_value =
+          gamePlayBoard.getTileValue(point2D_t{x, y});
+      if (testAdd(point2D_t{x, y + 1}, current_point_value)) {
         return true;
       }
-      if (testAdd(x, y - 1, gamePlayBoard.getTileValue(x, y))) {
+      if (testAdd(point2D_t{x, y - 1}, current_point_value)) {
         return true;
       }
-      if (testAdd(x + 1, y, gamePlayBoard.getTileValue(x, y))) {
+      if (testAdd(point2D_t{x + 1, y}, current_point_value)) {
         return true;
       }
-      if (testAdd(x - 1, y, gamePlayBoard.getTileValue(x, y))) {
+      if (testAdd(point2D_t{x - 1, y}, current_point_value)) {
         return true;
       }
     }
@@ -397,21 +393,22 @@ bool Game::canMove() {
   return false;
 }
 
-bool Game::testAdd(int x, int y, ull value) {
-
+bool Game::testAdd(point2D_t pt, ull value) {
+  int x, y;
+  std::tie(x, y) = pt.get();
   if (y < 0 || y > gamePlayBoard.getPlaySize() - 1 || x < 0 ||
       x > gamePlayBoard.getPlaySize() - 1) {
     return false;
   }
 
-  return gamePlayBoard.getTileValue(x, y) == value;
+  return gamePlayBoard.getTileValue(pt) == value;
 }
 
 void Game::unblockTiles() {
 
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      gamePlayBoard.setTileBlocked(x, y, false);
+      gamePlayBoard.setTileBlocked(point2D_t{x, y}, false);
     }
   }
 }
@@ -425,8 +422,9 @@ void Game::decideMove(Directions d) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
       int y = 1;
       while (y < gamePlayBoard.getPlaySize()) {
-        if (gamePlayBoard.getTileValue(x, y)) {
-          move(x, y, 0, -1);
+        const auto current_point = point2D_t{x, y};
+        if (gamePlayBoard.getTileValue(current_point)) {
+          move(current_point, point2D_t{0, -1});
         }
         y++;
       }
@@ -438,8 +436,9 @@ void Game::decideMove(Directions d) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
       int y = gamePlayBoard.getPlaySize() - 2;
       while (y >= 0) {
-        if (gamePlayBoard.getTileValue(x, y)) {
-          move(x, y, 0, 1);
+        const auto current_point = point2D_t{x, y};
+        if (gamePlayBoard.getTileValue(current_point)) {
+          move(current_point, point2D_t{0, 1});
         }
         y--;
       }
@@ -451,8 +450,9 @@ void Game::decideMove(Directions d) {
     for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
       int x = 1;
       while (x < gamePlayBoard.getPlaySize()) {
-        if (gamePlayBoard.getTileValue(x, y)) {
-          move(x, y, -1, 0);
+        const auto current_point = point2D_t{x, y};
+        if (gamePlayBoard.getTileValue(current_point)) {
+          move(current_point, {-1, 0});
         }
         x++;
       }
@@ -464,8 +464,9 @@ void Game::decideMove(Directions d) {
     for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
       int x = gamePlayBoard.getPlaySize() - 2;
       while (x >= 0) {
-        if (gamePlayBoard.getTileValue(x, y)) {
-          move(x, y, 1, 0);
+        const auto current_point = point2D_t{x, y};
+        if (gamePlayBoard.getTileValue(current_point)) {
+          move(current_point, point2D_t{1, 0});
         }
         x--;
       }
@@ -474,11 +475,11 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::move(int x, int y, int x2, int y2) {
+void Game::move(point2D_t pt, point2D_t pt_offset) {
 
   constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-  Tile currentTile = gamePlayBoard.getTile(x, y);
-  Tile targetTile = gamePlayBoard.getTile(x + x2, y + y2);
+  Tile currentTile = gamePlayBoard.getTile(pt);
+  Tile targetTile = gamePlayBoard.getTile(pt + pt_offset);
 
   int A = currentTile.value;
   int B = targetTile.value;
@@ -512,8 +513,8 @@ void Game::move(int x, int y, int x2, int y2) {
       }
     }
 
-    gamePlayBoard.setTile(x, y, currentTile);
-    gamePlayBoard.setTile(x + x2, y + y2, targetTile);
+    gamePlayBoard.setTile(pt, currentTile);
+    gamePlayBoard.setTile(pt + pt_offset, targetTile);
     moved = true;
 
   } else if (A && !B) {
@@ -521,15 +522,19 @@ void Game::move(int x, int y, int x2, int y2) {
     targetTile.value = currentTile.value;
     currentTile.value = 0;
 
-    gamePlayBoard.setTile(x, y, currentTile);
-    gamePlayBoard.setTile(x + x2, y + y2, targetTile);
+    gamePlayBoard.setTile(pt, currentTile);
+    gamePlayBoard.setTile(pt + pt_offset, targetTile);
     moved = true;
   }
 
+  int x, y, x2, y2;
+  std::tie(x, y) = pt.get();
+  std::tie(x2, y2) = pt_offset.get();
+
   if (y2 + x2 == 1 && (y2 == 1 ? y : x) < gamePlayBoard.getPlaySize() - 2) {
-    move(x + x2, y + y2, x2, y2);
+    move(pt + pt_offset, pt_offset);
   } else if (y2 + x2 == -1 && (y2 == -1 ? y : x) > 1) {
-    move(x + x2, y + y2, x2, y2);
+    move(pt + pt_offset, pt_offset);
   }
 }
 
@@ -586,8 +591,9 @@ void Game::saveState() {
   std::fstream stateFile("../data/previousGame", std::ios_base::app);
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      stateFile << gamePlayBoard.getTileValue(x, y) << ":"
-                << gamePlayBoard.getTileBlocked(x, y) << ",";
+      const auto current_point = point2D_t{x, y};
+      stateFile << gamePlayBoard.getTileValue(current_point) << ":"
+                << gamePlayBoard.getTileBlocked(current_point) << ",";
       newline();
     }
     stateFile << "\n";
