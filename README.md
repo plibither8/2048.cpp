@@ -79,6 +79,12 @@ I deeply appreciate the help of the following people:
 * [Alton Alvarez](https://github.com/mathematicalist) fixed a typo.
 * [cawvyoct](https://github.com/cawvyoct) made the source code much, much easier to read: removed most magic numbers, replacing them with variables to ease maintanence. Implemented `clang-format`.
 * [Cong](https://github.com/cxong) edited the `Game` class constructor.
+* [Tien Do](https://github.com/tiendq) added the 'exit' option in the main menu, updated the `CMakeLists.txt` file and made `Color` enum to a scoped enum.
+
+### Maintainers
+
+* [Mihir Chaturvedi](https://github.com/plibither8)
+* [cawvyoct](https://github.com/cawvyoct)
 
 ## Notes
 
