@@ -7,7 +7,7 @@ class point2D_t {
   // Simple {x,y} datastructure = std::tuple<int, int>...
   using point_datatype_t = typename std::tuple<int, int>;
   point_datatype_t point_vector{};
-  point2D_t(const point_datatype_t pt) : point_vector{pt} {}
+  explicit point2D_t(const point_datatype_t pt) : point_vector{pt} {}
 
 public:
   enum class PointCoord { COORD_X, COORD_Y };
