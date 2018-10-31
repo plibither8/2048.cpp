@@ -137,7 +137,7 @@ bool Game::addTile() {
     return !rexit;
   }
 
-  return canMove();
+  return gamePlayBoard.canMove();
 }
 
 void Game::drawBoard() {
@@ -346,42 +346,6 @@ void Game::input(KeyInputErrorStatus err) {
 
 next:
   gamePlayBoard.unblockTiles();
-}
-
-bool Game::canMove() {
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      const auto current_point = point2D_t{x, y};
-      const auto list_of_offsets = {point2D_t{1, 0}, point2D_t{0, 1}};
-      const auto current_point_value =
-          gamePlayBoard.getTileValue(current_point);
-
-      const auto check_point_offset_in_range = [=](const point2D_t offset) {
-        return testAdd(current_point + offset,
-                       current_point_value) // Positive adjacent check
-               || testAdd(current_point - offset,
-                          current_point_value); // Negative adjacent Check
-      };
-
-      if (!current_point_value ||
-          std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
-                      check_point_offset_in_range)) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool Game::testAdd(point2D_t pt, ull value) {
-  int x, y;
-  std::tie(x, y) = pt.get();
-  if (y < 0 || y > gamePlayBoard.getPlaySize() - 1 || x < 0 ||
-      x > gamePlayBoard.getPlaySize() - 1) {
-    return false;
-  }
-
-  return gamePlayBoard.getTileValue(pt) == value;
 }
 
 void Game::decideMove(Directions d) {

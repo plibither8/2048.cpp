@@ -56,6 +56,14 @@ class GameBoard {
     std::tie(x, y) = pt.get();
     return x + playsize * y;
   }
+  bool testAdd(point2D_t pt, ull value) const {
+    int x, y;
+    std::tie(x, y) = pt.get();
+    if (y < 0 || y > getPlaySize() - 1 || x < 0 || x > getPlaySize() - 1) {
+      return false;
+    }
+    return getTileValue(pt) == value;
+  }
 
 public:
   GameBoard() = default;
@@ -102,6 +110,32 @@ public:
     std::for_each(std::begin(board), std::end(board), gatherFreePoint);
     return freeTiles;
   }
+  bool canMove() {
+    auto index_counter{0};
+
+    const auto predicate = [this, &index_counter](const Tile t) {
+      const auto current_point = point2D_t{index_counter % getPlaySize(),
+                                           index_counter / getPlaySize()};
+      index_counter++;
+      const auto list_of_offsets = {point2D_t{1, 0}, point2D_t{0, 1}};
+      const auto current_point_value = getTileValue(current_point);
+
+      const auto check_point_offset_in_range = [=](const point2D_t offset) {
+        return testAdd(current_point + offset,
+                       current_point_value) // Positive adjacent check
+               || testAdd(current_point - offset,
+                          current_point_value); // Negative adjacent Check
+      };
+
+      if (!current_point_value ||
+          std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
+                      check_point_offset_in_range)) {
+        return true;
+      }
+      return false;
+    };
+    return std::any_of(std::begin(board), std::end(board), predicate);
+  }
 };
 
 class Game {
@@ -130,8 +164,6 @@ private:
   void drawBoard();
   void drawScoreBoard(std::ostream &out_stream);
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
-  bool canMove();
-  bool testAdd(point2D_t pt, ull);
   void decideMove(Directions);
   void move(point2D_t pt, point2D_t pt_offset);
   void statistics();
