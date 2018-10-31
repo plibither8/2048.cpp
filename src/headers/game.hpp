@@ -6,6 +6,7 @@
 #include "point2d.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <fstream>
@@ -23,9 +24,10 @@ enum Directions { UP, DOWN, RIGHT, LEFT };
 class Tile {
 
 public:
-  Tile() : value(0), blocked(false) {}
-  ull value;
-  bool blocked;
+  Tile() = default;
+  explicit Tile(ull value, bool blocked) : value{value}, blocked{blocked} {}
+  ull value{0};
+  bool blocked{false};
   Color::Modifier tileColor(ull);
 };
 
@@ -79,6 +81,27 @@ public:
   void clearGameBoard() { board = std::vector<Tile>(playsize * playsize); }
   int getPlaySize() const { return playsize; }
   void setPlaySize(ull newSize) { playsize = newSize; }
+  void unblockTiles() {
+    std::transform(std::begin(board), std::end(board), std::begin(board),
+                   [](const Tile t) {
+                     return Tile{t.value, false};
+                   });
+  }
+  std::vector<point2D_t> collectFreeTiles() const {
+    std::vector<point2D_t> freeTiles;
+    auto index_counter{0};
+    const auto gatherFreePoint = [this, &freeTiles,
+                                  &index_counter](const Tile t) {
+      const auto current_point = point2D_t{index_counter % getPlaySize(),
+                                           index_counter / getPlaySize()};
+      if (!t.value) {
+        freeTiles.push_back(current_point);
+      }
+      index_counter++;
+    };
+    std::for_each(std::begin(board), std::end(board), gatherFreePoint);
+    return freeTiles;
+  }
 };
 
 class Game {
@@ -104,13 +127,11 @@ private:
 
   void initialiseContinueBoardArray();
   bool addTile();
-  std::vector<point2D_t> collectFreeTiles();
   void drawBoard();
   void drawScoreBoard(std::ostream &out_stream);
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
   bool canMove();
   bool testAdd(point2D_t pt, ull);
-  void unblockTiles();
   void decideMove(Directions);
   void move(point2D_t pt, point2D_t pt_offset);
   void statistics();

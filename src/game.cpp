@@ -119,7 +119,7 @@ void Game::initialiseContinueBoardArray() {
 
 bool Game::addTile() {
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  const auto freeTiles = collectFreeTiles();
+  const auto freeTiles = gamePlayBoard.collectFreeTiles();
 
   if (!freeTiles.size()) {
     boardFull = true;
@@ -138,19 +138,6 @@ bool Game::addTile() {
   }
 
   return canMove();
-}
-
-std::vector<point2D_t> Game::collectFreeTiles() {
-  std::vector<point2D_t> freeTiles;
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      const auto current_point = point2D_t{x, y};
-      if (!gamePlayBoard.getTileValue(current_point)) {
-        freeTiles.push_back(current_point);
-      }
-    }
-  }
-  return freeTiles;
 }
 
 void Game::drawBoard() {
@@ -358,7 +345,7 @@ void Game::input(KeyInputErrorStatus err) {
   }
 
 next:
-  unblockTiles();
+  gamePlayBoard.unblockTiles();
 }
 
 bool Game::canMove() {
@@ -395,15 +382,6 @@ bool Game::testAdd(point2D_t pt, ull value) {
   }
 
   return gamePlayBoard.getTileValue(pt) == value;
-}
-
-void Game::unblockTiles() {
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      gamePlayBoard.setTileBlocked(point2D_t{x, y}, false);
-    }
-  }
 }
 
 void Game::decideMove(Directions d) {
