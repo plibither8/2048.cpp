@@ -57,6 +57,8 @@ First of all, thank you for contributing :smile:! A few things to note:
 
 * If you have proposed a pull request, make sure that you run `clang-format` on the source code (both, `.cpp` and `.hpp`) files if you've made changes there.
 
+* In your local repository, run `git update-index --skip-worktree ./data/*.txt` to ensure that changes to the data files are not tracked by git, and thus are not staged.
+
 ## Thanks
 
 I deeply appreciate the help of the following people:
