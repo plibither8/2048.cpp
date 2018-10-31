@@ -362,34 +362,27 @@ next:
 }
 
 bool Game::canMove() {
-
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      if (!gamePlayBoard.getTileValue(point2D_t{x, y})) {
-        return true;
-      }
-    }
-  }
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
+      const auto current_point = point2D_t{x, y};
+      const auto list_of_offsets = {point2D_t{1, 0}, point2D_t{0, 1}};
       const auto current_point_value =
-          gamePlayBoard.getTileValue(point2D_t{x, y});
-      if (testAdd(point2D_t{x, y + 1}, current_point_value)) {
-        return true;
-      }
-      if (testAdd(point2D_t{x, y - 1}, current_point_value)) {
-        return true;
-      }
-      if (testAdd(point2D_t{x + 1, y}, current_point_value)) {
-        return true;
-      }
-      if (testAdd(point2D_t{x - 1, y}, current_point_value)) {
+          gamePlayBoard.getTileValue(current_point);
+
+      const auto check_point_offset_in_range = [=](const point2D_t offset) {
+        return testAdd(current_point + offset,
+                       current_point_value) // Positive adjacent check
+               || testAdd(current_point - offset,
+                          current_point_value); // Negative adjacent Check
+      };
+
+      if (!current_point_value ||
+          std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
+                      check_point_offset_in_range)) {
         return true;
       }
     }
   }
-
   return false;
 }
 
