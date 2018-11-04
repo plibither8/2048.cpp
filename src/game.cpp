@@ -483,7 +483,6 @@ void Game::playGame(ContinueStatus cont) {
     }
     input();
     gamePlayBoard.unblockTiles();
-
   }
 
   auto finishTime = std::chrono::high_resolution_clock::now();
