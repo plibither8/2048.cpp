@@ -218,7 +218,7 @@ void Game::drawBoard() {
 
 void Game::drawScoreBoard(std::ostream &out_stream) {
   constexpr auto score_text_label = "SCORE:";
-  constexpr auto bestscore_text_label = "BEST CORE:";
+  constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
 
   // * border padding: vvv
