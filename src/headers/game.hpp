@@ -64,6 +64,21 @@ class GameBoard {
     }
     return getTileValue(pt) == value;
   }
+  std::vector<point2D_t> collectFreeTiles() const {
+    std::vector<point2D_t> freeTiles;
+    auto index_counter{0};
+    const auto gatherFreePoint = [this, &freeTiles,
+                                  &index_counter](const Tile t) {
+      const auto current_point = point2D_t{index_counter % getPlaySize(),
+                                           index_counter / getPlaySize()};
+      if (!t.value) {
+        freeTiles.push_back(current_point);
+      }
+      index_counter++;
+    };
+    std::for_each(std::begin(board), std::end(board), gatherFreePoint);
+    return freeTiles;
+  }
 
 public:
   GameBoard() = default;
@@ -95,21 +110,6 @@ public:
                      return Tile{t.value, false};
                    });
   }
-  std::vector<point2D_t> collectFreeTiles() const {
-    std::vector<point2D_t> freeTiles;
-    auto index_counter{0};
-    const auto gatherFreePoint = [this, &freeTiles,
-                                  &index_counter](const Tile t) {
-      const auto current_point = point2D_t{index_counter % getPlaySize(),
-                                           index_counter / getPlaySize()};
-      if (!t.value) {
-        freeTiles.push_back(current_point);
-      }
-      index_counter++;
-    };
-    std::for_each(std::begin(board), std::end(board), gatherFreePoint);
-    return freeTiles;
-  }
   bool canMove() {
     auto index_counter{0};
 
@@ -136,6 +136,22 @@ public:
     };
     return std::any_of(std::begin(board), std::end(board), predicate);
   }
+
+  bool addTile() {
+    constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
+    const auto freeTiles = collectFreeTiles();
+
+    if (!freeTiles.size()) {
+      return true;
+    }
+
+    const auto randomFreeTile = freeTiles.at(RandInt{}() % freeTiles.size());
+    const auto value_four_or_two =
+        RandInt{}() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
+    setTileValue(randomFreeTile, value_four_or_two);
+
+    return false;
+  }
 };
 
 class Game {
@@ -160,7 +176,6 @@ private:
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
   void initialiseContinueBoardArray();
-  bool addTile();
   void drawBoard();
   void drawScoreBoard(std::ostream &out_stream);
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
@@ -176,7 +191,7 @@ private:
 public:
   Game()
       : win(false), moved(true), boardFull(false), rexit(false), score(0),
-        bestScore(0), moveCount(-2), duration(0.0), largestTile(2),
+        bestScore(0), moveCount(-1), duration(0.0), largestTile(2),
         stateSaved(false), noSave(false) {}
   void startGame();
   void continueGame();

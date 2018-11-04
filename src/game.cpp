@@ -117,29 +117,6 @@ void Game::initialiseContinueBoardArray() {
   }
 }
 
-bool Game::addTile() {
-  constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  const auto freeTiles = gamePlayBoard.collectFreeTiles();
-
-  if (!freeTiles.size()) {
-    boardFull = true;
-  }
-
-  const auto randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
-  const auto value_four_or_two =
-      randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  gamePlayBoard.setTileValue(randomFreeTile, value_four_or_two);
-
-  moveCount++;
-  moved = true;
-
-  if (rexit) {
-    return !rexit;
-  }
-
-  return gamePlayBoard.canMove();
-}
-
 void Game::drawBoard() {
 
   clearScreen();
@@ -545,7 +522,10 @@ void Game::playGame(ContinueStatus cont) {
   while (true) {
 
     if (moved) {
-      if (!addTile()) {
+      boardFull = gamePlayBoard.addTile();
+      moveCount++;
+      moved = true;
+      if (!gamePlayBoard.canMove()) {
         drawBoard();
         break;
       }
@@ -630,7 +610,7 @@ void Game::startGame() {
   ull userInput_PlaySize = setBoardSize();
 
   gamePlayBoard = GameBoard(userInput_PlaySize);
-  addTile();
+  gamePlayBoard.addTile();
 
   playGame(ContinueStatus::STATUS_END_GAME);
 }
