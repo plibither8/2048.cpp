@@ -122,62 +122,7 @@ void Game::drawBoard() {
   clearScreen();
   drawAscii();
   drawScoreBoard(std::cout);
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-
-    std::cout << "  ";
-
-    if (y == 0) {
-      std::cout << "┌";
-    } else {
-      std::cout << "├";
-    }
-    for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
-      std::cout << "──────";
-      if (i < gamePlayBoard.getPlaySize() - 1) {
-        if (y == 0) {
-          std::cout << "┬";
-        } else {
-          std::cout << "┼";
-        }
-      } else {
-        if (y == 0) {
-          std::cout << "┐";
-        } else {
-          std::cout << "┤";
-        }
-      }
-    }
-    newline();
-    std::cout << " ";
-
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-
-      Tile currentTile = gamePlayBoard.getTile(point2D_t{x, y});
-
-      std::cout << " │ ";
-      if (!currentTile.value) {
-        std::cout << "    ";
-      } else {
-        std::cout << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
-      }
-    }
-
-    std::cout << " │ ";
-    newline();
-  }
-
-  std::cout << "  └";
-  for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
-    std::cout << "──────";
-    if (i < gamePlayBoard.getPlaySize() - 1) {
-      std::cout << "┴";
-    } else {
-      std::cout << "┘";
-    }
-  }
-  newline(3);
+  std::cout << gamePlayBoard;
 }
 
 void Game::drawScoreBoard(std::ostream &out_stream) {

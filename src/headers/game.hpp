@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cmath>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <iterator>
@@ -151,6 +152,71 @@ public:
     setTileValue(randomFreeTile, value_four_or_two);
 
     return false;
+  }
+
+  std::string drawSelf() const {
+    std::stringstream str_os;
+    using stringlines_t =
+        std::tuple<std::stringstream, std::stringstream, std::stringstream>;
+    stringlines_t vertibar;
+
+    enum { TOP_BAR, XN_BAR, BASE_BAR };
+
+    using bar_pattern_t = std::tuple<decltype(std::ref(str_os)), std::string,
+                                     std::string, std::string>;
+
+    const auto bar_pattern_list = {
+        std::make_tuple(std::ref(std::get<TOP_BAR>(vertibar)), "┌", "┬", "┐"),
+        std::make_tuple(std::ref(std::get<XN_BAR>(vertibar)), "├", "┼", "┤"),
+        std::make_tuple(std::ref(std::get<BASE_BAR>(vertibar)), "└", "┴", "┘")};
+
+    // generate types of horizontal bars...
+    // done via LUT...
+    const auto generate_x_bar_pattern = [this](bar_pattern_t t) {
+      enum { PATTERN_BUFFER, PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
+      std::get<PATTERN_BUFFER>(t).get() << "  ";
+      std::get<PATTERN_BUFFER>(t).get() << std::get<PATTERN_HEAD>(t);
+      for (int i = 0; i < getPlaySize(); i++) {
+        const auto is_not_last_column = (i < getPlaySize() - 1);
+        std::get<PATTERN_BUFFER>(t).get() << "──────";
+        std::get<PATTERN_BUFFER>(t).get()
+            << (is_not_last_column ? std::get<PATTERN_MID>(t) :
+                                     std::get<PATTERN_TAIL>(t));
+      }
+      std::get<PATTERN_BUFFER>(t).get() << "\n";
+    };
+    std::for_each(std::begin(bar_pattern_list), std::end(bar_pattern_list),
+                  generate_x_bar_pattern);
+
+    for (int y = 0; y < getPlaySize(); y++) {
+      const auto is_first_row = (y == 0);
+      str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
+                                std::get<XN_BAR>(vertibar))
+                    .str();
+      str_os << " ";
+
+      for (int x = 0; x < getPlaySize(); x++) {
+        str_os << " │ ";
+        Tile currentTile = getTile(point2D_t{x, y});
+        if (!currentTile.value) {
+          str_os << "    ";
+        } else {
+          str_os << currentTile.tileColor(currentTile.value) << bold_on
+                 << std::setw(4) << currentTile.value << bold_off << def;
+        }
+      }
+
+      str_os << " │ ";
+      str_os << "\n";
+    }
+
+    str_os << std::get<BASE_BAR>(vertibar).str();
+    str_os << "\n\n\n";
+    return str_os.str();
+  }
+
+  friend std::ostream &operator<<(std::ostream &os, GameBoard gb) {
+    return os << gb.drawSelf();
   }
 };
 
