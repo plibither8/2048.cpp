@@ -219,16 +219,16 @@ void Game::input(KeyInputErrorStatus err) {
       switch (c) {
       case CODE_ANSI_UP:
         decideMove(UP);
-        goto next;
+        return;
       case CODE_ANSI_DOWN:
         decideMove(DOWN);
-        goto next;
+        return;
       case CODE_ANSI_RIGHT:
         decideMove(RIGHT);
-        goto next;
+        return;
       case CODE_ANSI_LEFT:
         decideMove(LEFT);
-        goto next;
+        return;
       }
     } else {
       newline(4);
@@ -265,9 +265,6 @@ void Game::input(KeyInputErrorStatus err) {
     input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
     break;
   }
-
-next:
-  gamePlayBoard.unblockTiles();
 }
 
 void Game::decideMove(Directions d) {
@@ -485,6 +482,8 @@ void Game::playGame(ContinueStatus cont) {
       stateSaved = false;
     }
     input();
+    gamePlayBoard.unblockTiles();
+
   }
 
   auto finishTime = std::chrono::high_resolution_clock::now();
