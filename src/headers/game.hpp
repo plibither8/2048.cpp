@@ -104,19 +104,19 @@ private:
 
   void initialiseContinueBoardArray();
   bool addTile();
-  std::vector<point2D_t> collectFreeTiles();
+  std::vector<point2D_t> collectFreeTiles() const;
   void drawBoard();
-  void drawScoreBoard(std::ostream &out_stream);
+  void drawScoreBoard(std::ostream &out_stream) const;
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
-  bool canMove();
-  bool testAdd(point2D_t pt, ull);
+  bool canMove() const;
+  bool testAdd(point2D_t pt, ull) const;
   void unblockTiles();
   void decideMove(Directions);
   void move(point2D_t pt, point2D_t pt_offset);
-  void statistics();
-  void saveStats();
-  void saveScore();
-  void saveState();
+  void statistics() const;
+  void saveStats() const;
+  void saveScore() const;
+  void saveState() const;
   void playGame(ContinueStatus);
   ull setBoardSize();
 

@@ -140,7 +140,7 @@ bool Game::addTile() {
   return canMove();
 }
 
-std::vector<point2D_t> Game::collectFreeTiles() {
+std::vector<point2D_t> Game::collectFreeTiles() const {
   std::vector<point2D_t> freeTiles;
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
@@ -216,7 +216,7 @@ void Game::drawBoard() {
   newline(3);
 }
 
-void Game::drawScoreBoard(std::ostream &out_stream) {
+void Game::drawScoreBoard(std::ostream &out_stream) const {
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
@@ -361,7 +361,7 @@ next:
   unblockTiles();
 }
 
-bool Game::canMove() {
+bool Game::canMove() const {
 
   for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
     for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
@@ -393,7 +393,7 @@ bool Game::canMove() {
   return false;
 }
 
-bool Game::testAdd(point2D_t pt, ull value) {
+bool Game::testAdd(point2D_t pt, ull value) const {
   int x, y;
   std::tie(x, y) = pt.get();
   if (y < 0 || y > gamePlayBoard.getPlaySize() - 1 || x < 0 ||
@@ -538,7 +538,7 @@ void Game::move(point2D_t pt, point2D_t pt_offset) {
   }
 }
 
-void Game::statistics() {
+void Game::statistics() const {
 
   std::cout << yellow << "  STATISTICS" << def;
   newline();
@@ -555,7 +555,7 @@ void Game::statistics() {
   newline();
 }
 
-void Game::saveStats() {
+void Game::saveStats() const {
   Stats stats;
   stats.collectStatistics();
   stats.bestScore = stats.bestScore < score ? score : stats.bestScore;
@@ -574,7 +574,7 @@ void Game::saveStats() {
   statistics.close();
 }
 
-void Game::saveScore() {
+void Game::saveScore() const {
   Scoreboard s;
   s.score = score;
   s.win = win;
@@ -584,7 +584,7 @@ void Game::saveScore() {
   s.save();
 }
 
-void Game::saveState() {
+void Game::saveState() const {
   std::remove("../data/previousGame");
   std::remove("../data/previousGameStats");
   std::fstream stats("../data/previousGameStats", std::ios_base::app);
