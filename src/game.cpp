@@ -117,103 +117,12 @@ void Game::initialiseContinueBoardArray() {
   }
 }
 
-bool Game::addTile() {
-  constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  const auto freeTiles = collectFreeTiles();
-
-  if (!freeTiles.size()) {
-    boardFull = true;
-  }
-
-  const auto randomFreeTile = freeTiles.at(randInt() % freeTiles.size());
-  const auto value_four_or_two =
-      randInt() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  gamePlayBoard.setTileValue(randomFreeTile, value_four_or_two);
-
-  moveCount++;
-  moved = true;
-
-  if (rexit) {
-    return !rexit;
-  }
-
-  return canMove();
-}
-
-std::vector<point2D_t> Game::collectFreeTiles() {
-  std::vector<point2D_t> freeTiles;
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      const auto current_point = point2D_t{x, y};
-      if (!gamePlayBoard.getTileValue(current_point)) {
-        freeTiles.push_back(current_point);
-      }
-    }
-  }
-  return freeTiles;
-}
-
 void Game::drawBoard() {
 
   clearScreen();
   drawAscii();
   drawScoreBoard(std::cout);
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-
-    std::cout << "  ";
-
-    if (y == 0) {
-      std::cout << "┌";
-    } else {
-      std::cout << "├";
-    }
-    for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
-      std::cout << "──────";
-      if (i < gamePlayBoard.getPlaySize() - 1) {
-        if (y == 0) {
-          std::cout << "┬";
-        } else {
-          std::cout << "┼";
-        }
-      } else {
-        if (y == 0) {
-          std::cout << "┐";
-        } else {
-          std::cout << "┤";
-        }
-      }
-    }
-    newline();
-    std::cout << " ";
-
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-
-      Tile currentTile = gamePlayBoard.getTile(point2D_t{x, y});
-
-      std::cout << " │ ";
-      if (!currentTile.value) {
-        std::cout << "    ";
-      } else {
-        std::cout << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
-      }
-    }
-
-    std::cout << " │ ";
-    newline();
-  }
-
-  std::cout << "  └";
-  for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
-    std::cout << "──────";
-    if (i < gamePlayBoard.getPlaySize() - 1) {
-      std::cout << "┴";
-    } else {
-      std::cout << "┘";
-    }
-  }
-  newline(3);
+  std::cout << gamePlayBoard;
 }
 
 void Game::drawScoreBoard(std::ostream &out_stream) {
@@ -310,16 +219,16 @@ void Game::input(KeyInputErrorStatus err) {
       switch (c) {
       case CODE_ANSI_UP:
         decideMove(UP);
-        goto next;
+        return;
       case CODE_ANSI_DOWN:
         decideMove(DOWN);
-        goto next;
+        return;
       case CODE_ANSI_RIGHT:
         decideMove(RIGHT);
-        goto next;
+        return;
       case CODE_ANSI_LEFT:
         decideMove(LEFT);
-        goto next;
+        return;
       }
     } else {
       newline(4);
@@ -355,61 +264,6 @@ void Game::input(KeyInputErrorStatus err) {
     drawBoard();
     input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
     break;
-  }
-
-next:
-  unblockTiles();
-}
-
-bool Game::canMove() {
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      if (!gamePlayBoard.getTileValue(point2D_t{x, y})) {
-        return true;
-      }
-    }
-  }
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      const auto current_point_value =
-          gamePlayBoard.getTileValue(point2D_t{x, y});
-      if (testAdd(point2D_t{x, y + 1}, current_point_value)) {
-        return true;
-      }
-      if (testAdd(point2D_t{x, y - 1}, current_point_value)) {
-        return true;
-      }
-      if (testAdd(point2D_t{x + 1, y}, current_point_value)) {
-        return true;
-      }
-      if (testAdd(point2D_t{x - 1, y}, current_point_value)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-bool Game::testAdd(point2D_t pt, ull value) {
-  int x, y;
-  std::tie(x, y) = pt.get();
-  if (y < 0 || y > gamePlayBoard.getPlaySize() - 1 || x < 0 ||
-      x > gamePlayBoard.getPlaySize() - 1) {
-    return false;
-  }
-
-  return gamePlayBoard.getTileValue(pt) == value;
-}
-
-void Game::unblockTiles() {
-
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      gamePlayBoard.setTileBlocked(point2D_t{x, y}, false);
-    }
   }
 }
 
@@ -610,7 +464,10 @@ void Game::playGame(ContinueStatus cont) {
   while (true) {
 
     if (moved) {
-      if (!addTile()) {
+      boardFull = gamePlayBoard.addTile();
+      moveCount++;
+      moved = true;
+      if (!gamePlayBoard.canMove()) {
         drawBoard();
         break;
       }
@@ -625,6 +482,7 @@ void Game::playGame(ContinueStatus cont) {
       stateSaved = false;
     }
     input();
+    gamePlayBoard.unblockTiles();
   }
 
   auto finishTime = std::chrono::high_resolution_clock::now();
@@ -695,7 +553,7 @@ void Game::startGame() {
   ull userInput_PlaySize = setBoardSize();
 
   gamePlayBoard = GameBoard(userInput_PlaySize);
-  addTile();
+  gamePlayBoard.addTile();
 
   playGame(ContinueStatus::STATUS_END_GAME);
 }
