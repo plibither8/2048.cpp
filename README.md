@@ -10,7 +10,9 @@
 
 :tada: Featured on GitHub's [Twitter](https://twitter.com/github/status/1017094930991370240) and [Facebook](https://www.facebook.com/GitHub/videos/1433491453419807/) pages! :tada:
 
-![Demo of usage](assets/demo.gif)
+<p align="center">
+    <img align="center" alt="2048 in action!" src="assets/demo.gif"></img>
+</p>
 
 ## Setup
 
