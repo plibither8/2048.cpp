@@ -45,15 +45,15 @@ private:
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
   void initialiseContinueBoardArray();
-  void drawBoard();
-  void drawScoreBoard(std::ostream &out_stream);
+  void drawBoard() const;
+  void drawScoreBoard(std::ostream &out_stream) const;
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
   void decideMove(Directions);
   void move(point2D_t pt, point2D_t pt_offset);
-  void statistics();
-  void saveStats();
-  void saveScore();
-  void saveState();
+  void statistics() const;
+  void saveStats() const;
+  void saveScore() const;
+  void saveState() const;
   void playGame(ContinueStatus);
   ull setBoardSize();
 
