@@ -113,7 +113,6 @@ void Game::initialiseContinueBoardArray() {
 
   } else {
     noSave = true;
-    startGame();
   }
 }
 
@@ -352,18 +351,6 @@ void Game::move(point2D_t pt, point2D_t pt_offset) {
     if (!win) {
       if (targetTile.value == GAME_TILE_WINNING_SCORE) {
         win = true;
-        std::cout << green << bold_on
-                  << "  You win! Press any key to continue or 'x' to exit: "
-                  << bold_off << def;
-        char c;
-        std::cin >> c;
-        switch (toupper(c)) {
-        case 'X':
-          rexit = true;
-          break;
-        default:
-          break;
-        }
       }
     }
 
@@ -467,13 +454,14 @@ void Game::playGame(ContinueStatus cont) {
       boardFull = gamePlayBoard.addTile();
       moveCount++;
       moved = true;
-      if (!gamePlayBoard.canMove()) {
-        drawBoard();
-        break;
-      }
     }
 
     drawBoard();
+
+    if (win || !gamePlayBoard.canMove()) {
+      break;
+    }
+
     if (stateSaved) {
       std::cout << green << bold_on
                 << "The game has been saved feel free to take a break." << def
@@ -489,7 +477,8 @@ void Game::playGame(ContinueStatus cont) {
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
 
-  std::string msg = win ? "  You win!" : "  Game over! You lose.";
+  const auto msg =
+      win ? "  You win! Congratulations! " : "  Game over! You lose.";
 
   if (win) {
     std::cout << green << bold_on << msg << def << bold_off;
@@ -506,6 +495,10 @@ void Game::playGame(ContinueStatus cont) {
     newline(2);
     saveScore();
   }
+
+  std::cout << green << bold_on << "  Press any key to exit." << bold_off << def
+            << std::endl;
+  getchar();
 }
 
 ull Game::setBoardSize() {
@@ -565,10 +558,11 @@ void Game::continueGame() {
     bestScore = stats.bestScore;
   }
 
-  clearScreen();
-  drawAscii();
-
   initialiseContinueBoardArray();
 
-  playGame(ContinueStatus::STATUS_CONTINUE);
+  if (noSave) {
+    startGame();
+  } else {
+    playGame(ContinueStatus::STATUS_CONTINUE);
+  }
 }
