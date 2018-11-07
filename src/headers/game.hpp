@@ -26,13 +26,9 @@ enum Directions { UP, DOWN, RIGHT, LEFT };
 class Game {
 
 private:
-  bool moved;
-  bool win;
   bool boardFull;
   bool rexit;
-  ull score;
   ull bestScore;
-  ull largestTile;
   long long moveCount;
   double duration;
   GameBoard gamePlayBoard;
@@ -65,9 +61,8 @@ private:
 
 public:
   Game()
-      : win(false), moved(true), boardFull(false), rexit(false), score(0),
-        bestScore(0), moveCount(-1), duration(0.0), largestTile(2),
-        stateSaved(false), noSave(false) {}
+      : boardFull(false), rexit(false), bestScore(0), moveCount(-1),
+        duration(0.0), stateSaved(false), noSave(false) {}
   void startGame();
   void continueGame();
 };
