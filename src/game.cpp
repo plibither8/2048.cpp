@@ -361,9 +361,8 @@ void Game::playGame(ContinueStatus cont) {
   auto startTime = std::chrono::high_resolution_clock::now();
 
   while (true) {
-
     if (gamePlayBoard.moved) {
-      boardFull = gamePlayBoard.addTile();
+      gamePlayBoard.addTile();
       moveCount++;
       gamePlayBoard.moved = false;
     }
