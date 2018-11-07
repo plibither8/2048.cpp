@@ -49,6 +49,12 @@ private:
   void drawScoreBoard(std::ostream &out_stream) const;
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
   void decideMove(Directions);
+
+  bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
+  bool shiftTiles(point2D_t pt, point2D_t pt_offset);
+  bool collasped_or_shifted_tiles(point2D_t pt, point2D_t pt_offset);
+  bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset);
+
   void move(point2D_t pt, point2D_t pt_offset);
   void statistics() const;
   void saveStats() const;

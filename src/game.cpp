@@ -328,54 +328,84 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::move(point2D_t pt, point2D_t pt_offset) {
-
+bool Game::collaspeTiles(point2D_t pt, point2D_t pt_offset) {
   constexpr auto GAME_TILE_WINNING_SCORE = 2048;
+
   Tile currentTile = gamePlayBoard.getTile(pt);
   Tile targetTile = gamePlayBoard.getTile(pt + pt_offset);
 
-  int A = currentTile.value;
-  int B = targetTile.value;
-  int C = currentTile.blocked;
-  int D = targetTile.blocked;
+  currentTile.value = 0;
+  targetTile.value *= 2;
+  score += targetTile.value;
+  targetTile.blocked = true;
 
-  if (B && A == B && !C && !D) {
-
-    currentTile.value = 0;
-    targetTile.value *= 2;
-    score += targetTile.value;
-    targetTile.blocked = true;
-
-    largestTile =
-        largestTile < targetTile.value ? targetTile.value : largestTile;
-    if (!win) {
-      if (targetTile.value == GAME_TILE_WINNING_SCORE) {
-        win = true;
-      }
+  largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
+  if (!win) {
+    if (targetTile.value == GAME_TILE_WINNING_SCORE) {
+      win = true;
     }
-
-    gamePlayBoard.setTile(pt, currentTile);
-    gamePlayBoard.setTile(pt + pt_offset, targetTile);
-    moved = true;
-
-  } else if (A && !B) {
-
-    targetTile.value = currentTile.value;
-    currentTile.value = 0;
-
-    gamePlayBoard.setTile(pt, currentTile);
-    gamePlayBoard.setTile(pt + pt_offset, targetTile);
-    moved = true;
   }
 
+  gamePlayBoard.setTile(pt, currentTile);
+  gamePlayBoard.setTile(pt + pt_offset, targetTile);
+  return true;
+}
+
+bool Game::shiftTiles(point2D_t pt, point2D_t pt_offset) {
+  Tile currentTile = gamePlayBoard.getTile(pt);
+  Tile targetTile = gamePlayBoard.getTile(pt + pt_offset);
+
+  targetTile.value = currentTile.value;
+  currentTile.value = 0;
+
+  gamePlayBoard.setTile(pt, currentTile);
+  gamePlayBoard.setTile(pt + pt_offset, targetTile);
+  return true;
+}
+
+bool Game::collasped_or_shifted_tiles(point2D_t pt, point2D_t pt_offset) {
+  const auto currentTile = gamePlayBoard.getTile(pt);
+  const auto targetTile = gamePlayBoard.getTile(pt + pt_offset);
+  const auto does_value_exist_in_target_point = targetTile.value;
+  const auto is_value_same_as_target_value =
+      (currentTile.value == targetTile.value);
+  const auto no_tiles_are_blocked =
+      (!currentTile.blocked && !targetTile.blocked);
+  const auto is_there_a_current_value_but_no_target_value =
+      (currentTile.value && !targetTile.value);
+
+  if (does_value_exist_in_target_point && is_value_same_as_target_value &&
+      no_tiles_are_blocked) {
+    return collaspeTiles(pt, pt_offset);
+  } else if (is_there_a_current_value_but_no_target_value) {
+    return shiftTiles(pt, pt_offset);
+  }
+  return false;
+}
+
+bool Game::check_recursive_offset_in_game_bounds(point2D_t pt,
+                                                 point2D_t pt_offset) {
   int x, y, x2, y2;
   std::tie(x, y) = pt.get();
   std::tie(x2, y2) = pt_offset.get();
+  const auto positive_direction = (y2 + x2 == 1);
+  const auto negative_direction = (y2 + x2 == -1);
+  const auto is_positive_y_direction_flagged = (y2 == 1);
+  const auto is_negative_y_direction_flagged = (y2 == -1);
+  const auto is_inside_outer_bounds =
+      (positive_direction && (is_positive_y_direction_flagged ? y : x) <
+                                 gamePlayBoard.getPlaySize() - 2);
+  const auto is_inside_inner_bounds =
+      (negative_direction && (is_negative_y_direction_flagged ? y : x) > 1);
+  return (is_inside_outer_bounds || is_inside_inner_bounds);
+}
 
-  if (y2 + x2 == 1 && (y2 == 1 ? y : x) < gamePlayBoard.getPlaySize() - 2) {
-    move(pt + pt_offset, pt_offset);
-  } else if (y2 + x2 == -1 && (y2 == -1 ? y : x) > 1) {
-    move(pt + pt_offset, pt_offset);
+void Game::move(point2D_t pt, point2D_t pt_offset) {
+  if (collasped_or_shifted_tiles(pt, pt_offset)) {
+    moved = true;
+  }
+  if (check_recursive_offset_in_game_bounds(pt, pt_offset)) {
+      move(pt + pt_offset, pt_offset);
   }
 }
 
@@ -453,7 +483,8 @@ void Game::playGame(ContinueStatus cont) {
     if (moved) {
       boardFull = gamePlayBoard.addTile();
       moveCount++;
-      moved = true;
+//      moved = true;
+      moved = false;
     }
 
     drawBoard();
