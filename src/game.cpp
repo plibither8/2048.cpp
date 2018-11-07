@@ -367,8 +367,8 @@ void Game::playGame(ContinueStatus cont) {
 
     if (stateSaved) {
       std::cout << green << bold_on
-                << "The game has been saved feel free to take a break." << def
-                << bold_off;
+                << "  The game has been saved. Feel free to take a break."
+                << def << bold_off;
       newline(2);
       stateSaved = false;
     }
@@ -399,9 +399,6 @@ void Game::playGame(ContinueStatus cont) {
     saveScore();
   }
 
-  std::cout << green << bold_on << "  Press any key to exit." << bold_off << def
-            << std::endl;
-  getchar();
 }
 
 ull Game::setBoardSize() {
@@ -420,8 +417,9 @@ ull Game::setBoardSize() {
                 << MAX_GAME_BOARD_PLAY_SIZE << "." << def;
       newline(2);
     } else if (noSave) {
-      std::cout << red << bold_on << "No save game exist, Starting a new game."
-                << def << bold_off;
+      std::cout << red << bold_on
+                << "  No saved game found. Starting a new game." << def
+                << bold_off;
       newline(2);
       noSave = false;
     }
