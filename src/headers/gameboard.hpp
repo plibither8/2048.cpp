@@ -31,6 +31,10 @@ private:
 class GameBoard {
   std::vector<Tile> board;
   ull playsize{0};
+
+  Tile getTile(point2D_t pt) const;
+  void setTile(point2D_t pt, Tile tile);
+
   int point2D_to_1D_index(point2D_t pt) const;
   bool testAdd(point2D_t pt, ull value) const;
   std::vector<point2D_t> collectFreeTiles() const;
@@ -53,8 +57,6 @@ public:
   explicit GameBoard(ull playsize)
       : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
 
-  Tile getTile(point2D_t pt) const;
-  void setTile(point2D_t pt, Tile tile);
   ull getTileValue(point2D_t pt) const;
   void setTileValue(point2D_t pt, ull value);
   bool getTileBlocked(point2D_t pt) const;
