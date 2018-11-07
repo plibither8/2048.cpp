@@ -47,6 +47,9 @@ class GameBoard {
 
   bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset);
 
+  void discoverLargestTileValue(Tile targetTile);
+  void discoverWinningTileValue(Tile targetTile);
+
 public:
   bool win{};
   bool moved{true};

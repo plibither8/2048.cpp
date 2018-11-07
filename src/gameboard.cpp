@@ -179,8 +179,6 @@ std::string GameBoard::drawSelf() const {
 }
 
 bool GameBoard::collaspeTiles(point2D_t pt, point2D_t pt_offset) {
-  constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-
   Tile currentTile = getTile(pt);
   Tile targetTile = getTile(pt + pt_offset);
 
@@ -189,12 +187,8 @@ bool GameBoard::collaspeTiles(point2D_t pt, point2D_t pt_offset) {
   score += targetTile.value;
   targetTile.blocked = true;
 
-  largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
-  if (!win) {
-    if (targetTile.value == GAME_TILE_WINNING_SCORE) {
-      win = true;
-    }
-  }
+  discoverLargestTileValue(targetTile);
+  discoverWinningTileValue(targetTile);
 
   setTile(pt, currentTile);
   setTile(pt + pt_offset, targetTile);
@@ -248,6 +242,19 @@ bool GameBoard::check_recursive_offset_in_game_bounds(point2D_t pt,
   const auto is_inside_inner_bounds =
       (negative_direction && (is_negative_y_direction_flagged ? y : x) > 1);
   return (is_inside_outer_bounds || is_inside_inner_bounds);
+}
+
+void GameBoard::discoverLargestTileValue(Tile targetTile) {
+  largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
+}
+
+void GameBoard::discoverWinningTileValue(Tile targetTile) {
+  if (!win) {
+    constexpr auto GAME_TILE_WINNING_SCORE = 2048;
+    if (targetTile.value == GAME_TILE_WINNING_SCORE) {
+      win = true;
+    }
+  }
 }
 
 void GameBoard::move(point2D_t pt, point2D_t pt_offset) {
