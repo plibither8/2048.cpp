@@ -50,6 +50,8 @@ class GameBoard {
   void discoverLargestTileValue(Tile targetTile);
   void discoverWinningTileValue(Tile targetTile);
 
+  void move(point2D_t pt, point2D_t pt_offset);
+
 public:
   bool win{};
   bool moved{true};
@@ -72,16 +74,14 @@ public:
 
   bool addTile();
 
-  std::string drawSelf() const;
-
-  friend std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
-
-  void move(point2D_t pt, point2D_t pt_offset);
-
   void tumbleTilesUp();
   void tumbleTilesDown();
   void tumbleTilesLeft();
   void tumbleTilesRight();
+
+  std::string printState() const;
+  std::string drawSelf() const;
+  friend std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 };
 
 #endif

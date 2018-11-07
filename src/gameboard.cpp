@@ -318,6 +318,19 @@ void GameBoard::tumbleTilesRight() {
   }
 }
 
+std::string GameBoard::printState() const {
+  std::stringstream out_stream;
+  for (int y = 0; y < getPlaySize(); y++) {
+    for (int x = 0; x < getPlaySize(); x++) {
+      const auto current_point = point2D_t{x, y};
+      out_stream << getTileValue(current_point) << ":"
+                 << getTileBlocked(current_point) << ",";
+    }
+    out_stream << "\n";
+  }
+  return out_stream.str();
+}
+
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
   return os << gb.drawSelf();
 }

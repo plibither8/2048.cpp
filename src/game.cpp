@@ -342,15 +342,7 @@ void Game::saveState() const {
   std::remove("../data/previousGameStats");
   std::fstream stats("../data/previousGameStats", std::ios_base::app);
   std::fstream stateFile("../data/previousGame", std::ios_base::app);
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      const auto current_point = point2D_t{x, y};
-      stateFile << gamePlayBoard.getTileValue(current_point) << ":"
-                << gamePlayBoard.getTileBlocked(current_point) << ",";
-      newline();
-    }
-    stateFile << "\n";
-  }
+  stateFile << gamePlayBoard.printState();
   stateFile.close();
   stats << gamePlayBoard.score << ":" << moveCount;
   stats.close();
