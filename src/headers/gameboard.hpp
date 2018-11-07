@@ -74,6 +74,11 @@ public:
   friend std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 
   void move(point2D_t pt, point2D_t pt_offset);
+
+  void tumbleTilesUp();
+  void tumbleTilesDown();
+  void tumbleTilesLeft();
+  void tumbleTilesRight();
 };
 
 #endif

@@ -259,6 +259,58 @@ void GameBoard::move(point2D_t pt, point2D_t pt_offset) {
   }
 }
 
+void GameBoard::tumbleTilesUp() {
+  for (int x = 0; x < getPlaySize(); x++) {
+    int y = 1;
+    while (y < getPlaySize()) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValue(current_point)) {
+        move(current_point, point2D_t{0, -1});
+      }
+      y++;
+    }
+  }
+}
+
+void GameBoard::tumbleTilesDown() {
+  for (int x = 0; x < getPlaySize(); x++) {
+    int y = getPlaySize() - 2;
+    while (y >= 0) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValue(current_point)) {
+        move(current_point, point2D_t{0, 1});
+      }
+      y--;
+    }
+  }
+}
+
+void GameBoard::tumbleTilesLeft() {
+  for (int y = 0; y < getPlaySize(); y++) {
+    int x = 1;
+    while (x < getPlaySize()) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValue(current_point)) {
+        move(current_point, {-1, 0});
+      }
+      x++;
+    }
+  }
+}
+
+void GameBoard::tumbleTilesRight() {
+  for (int y = 0; y < getPlaySize(); y++) {
+    int x = getPlaySize() - 2;
+    while (x >= 0) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValue(current_point)) {
+        move(current_point, point2D_t{1, 0});
+      }
+      x--;
+    }
+  }
+}
+
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
   return os << gb.drawSelf();
 }

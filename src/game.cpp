@@ -269,61 +269,20 @@ void Game::input(KeyInputErrorStatus err) {
 void Game::decideMove(Directions d) {
 
   switch (d) {
-
   case UP:
-
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      int y = 1;
-      while (y < gamePlayBoard.getPlaySize()) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          gamePlayBoard.move(current_point, point2D_t{0, -1});
-        }
-        y++;
-      }
-    }
+    gamePlayBoard.tumbleTilesUp();
     break;
 
   case DOWN:
-
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      int y = gamePlayBoard.getPlaySize() - 2;
-      while (y >= 0) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          gamePlayBoard.move(current_point, point2D_t{0, 1});
-        }
-        y--;
-      }
-    }
+    gamePlayBoard.tumbleTilesDown();
     break;
 
   case LEFT:
-
-    for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-      int x = 1;
-      while (x < gamePlayBoard.getPlaySize()) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          gamePlayBoard.move(current_point, {-1, 0});
-        }
-        x++;
-      }
-    }
+    gamePlayBoard.tumbleTilesLeft();
     break;
 
   case RIGHT:
-
-    for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-      int x = gamePlayBoard.getPlaySize() - 2;
-      while (x >= 0) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          gamePlayBoard.move(current_point, point2D_t{1, 0});
-        }
-        x--;
-      }
-    }
+    gamePlayBoard.tumbleTilesRight();
     break;
   }
 }
