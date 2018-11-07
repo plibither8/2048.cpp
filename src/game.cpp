@@ -104,7 +104,7 @@ void Game::initialiseContinueBoardArray() {
       int k = 0;
       while (std::getline(line, temp, ':')) {
         if (k == 0)
-          score = std::stoi(temp);
+          gamePlayBoard.score = std::stoi(temp);
         else if (k == 1)
           moveCount = std::stoi(temp) - 1;
         k++;
@@ -113,7 +113,6 @@ void Game::initialiseContinueBoardArray() {
 
   } else {
     noSave = true;
-    startGame();
   }
 }
 
@@ -158,12 +157,13 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
              << inner_border_padding << bold_on << score_text_label << bold_off
              << std::string(inner_padding_length -
                                 std::string{score_text_label}.length() -
-                                std::to_string(score).length(),
+                                std::to_string(gamePlayBoard.score).length(),
                             border_padding_char)
-             << score << inner_border_padding << vertical_border_pattern
-             << "\n";
+             << gamePlayBoard.score << inner_border_padding
+             << vertical_border_pattern << "\n";
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
-    const auto tempBestScore = (bestScore < score ? score : bestScore);
+    const auto tempBestScore =
+        (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
     out_stream << outer_border_padding << vertical_border_pattern
                << inner_border_padding << bold_on << bestscore_text_label
                << bold_off
@@ -188,7 +188,6 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
 void Game::input(KeyInputErrorStatus err) {
 
   using namespace Keypress::Code;
-  moved = false;
   char c;
 
   std::cout << "  W or K or \u2191 => Up";
@@ -270,125 +269,21 @@ void Game::input(KeyInputErrorStatus err) {
 void Game::decideMove(Directions d) {
 
   switch (d) {
-
   case UP:
-
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      int y = 1;
-      while (y < gamePlayBoard.getPlaySize()) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          move(current_point, point2D_t{0, -1});
-        }
-        y++;
-      }
-    }
+    gamePlayBoard.tumbleTilesUp();
     break;
 
   case DOWN:
-
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      int y = gamePlayBoard.getPlaySize() - 2;
-      while (y >= 0) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          move(current_point, point2D_t{0, 1});
-        }
-        y--;
-      }
-    }
+    gamePlayBoard.tumbleTilesDown();
     break;
 
   case LEFT:
-
-    for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-      int x = 1;
-      while (x < gamePlayBoard.getPlaySize()) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          move(current_point, {-1, 0});
-        }
-        x++;
-      }
-    }
+    gamePlayBoard.tumbleTilesLeft();
     break;
 
   case RIGHT:
-
-    for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-      int x = gamePlayBoard.getPlaySize() - 2;
-      while (x >= 0) {
-        const auto current_point = point2D_t{x, y};
-        if (gamePlayBoard.getTileValue(current_point)) {
-          move(current_point, point2D_t{1, 0});
-        }
-        x--;
-      }
-    }
+    gamePlayBoard.tumbleTilesRight();
     break;
-  }
-}
-
-void Game::move(point2D_t pt, point2D_t pt_offset) {
-
-  constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-  Tile currentTile = gamePlayBoard.getTile(pt);
-  Tile targetTile = gamePlayBoard.getTile(pt + pt_offset);
-
-  int A = currentTile.value;
-  int B = targetTile.value;
-  int C = currentTile.blocked;
-  int D = targetTile.blocked;
-
-  if (B && A == B && !C && !D) {
-
-    currentTile.value = 0;
-    targetTile.value *= 2;
-    score += targetTile.value;
-    targetTile.blocked = true;
-
-    largestTile =
-        largestTile < targetTile.value ? targetTile.value : largestTile;
-    if (!win) {
-      if (targetTile.value == GAME_TILE_WINNING_SCORE) {
-        win = true;
-        std::cout << green << bold_on
-                  << "  You win! Press any key to continue or 'x' to exit: "
-                  << bold_off << def;
-        char c;
-        std::cin >> c;
-        switch (toupper(c)) {
-        case 'X':
-          rexit = true;
-          break;
-        default:
-          break;
-        }
-      }
-    }
-
-    gamePlayBoard.setTile(pt, currentTile);
-    gamePlayBoard.setTile(pt + pt_offset, targetTile);
-    moved = true;
-
-  } else if (A && !B) {
-
-    targetTile.value = currentTile.value;
-    currentTile.value = 0;
-
-    gamePlayBoard.setTile(pt, currentTile);
-    gamePlayBoard.setTile(pt + pt_offset, targetTile);
-    moved = true;
-  }
-
-  int x, y, x2, y2;
-  std::tie(x, y) = pt.get();
-  std::tie(x2, y2) = pt_offset.get();
-
-  if (y2 + x2 == 1 && (y2 == 1 ? y : x) < gamePlayBoard.getPlaySize() - 2) {
-    move(pt + pt_offset, pt_offset);
-  } else if (y2 + x2 == -1 && (y2 == -1 ? y : x) > 1) {
-    move(pt + pt_offset, pt_offset);
   }
 }
 
@@ -398,9 +293,11 @@ void Game::statistics() const {
   newline();
   std::cout << yellow << "  ──────────" << def;
   newline();
-  std::cout << "  Final score:       " << bold_on << score << bold_off;
+  std::cout << "  Final score:       " << bold_on << gamePlayBoard.score
+            << bold_off;
   newline();
-  std::cout << "  Largest Tile:      " << bold_on << largestTile << bold_off;
+  std::cout << "  Largest Tile:      " << bold_on << gamePlayBoard.largestTile
+            << bold_off;
   newline();
   std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off;
   newline();
@@ -412,9 +309,11 @@ void Game::statistics() const {
 void Game::saveStats() const {
   Stats stats;
   stats.collectStatistics();
-  stats.bestScore = stats.bestScore < score ? score : stats.bestScore;
+  stats.bestScore = stats.bestScore < gamePlayBoard.score ?
+                        gamePlayBoard.score :
+                        stats.bestScore;
   stats.gameCount++;
-  stats.winCount = win ? stats.winCount + 1 : stats.winCount;
+  stats.winCount = gamePlayBoard.win ? stats.winCount + 1 : stats.winCount;
   stats.totalMoveCount += moveCount;
   stats.totalDuration += duration;
 
@@ -430,10 +329,10 @@ void Game::saveStats() const {
 
 void Game::saveScore() const {
   Scoreboard s;
-  s.score = score;
-  s.win = win;
+  s.score = gamePlayBoard.score;
+  s.win = gamePlayBoard.win;
   s.moveCount = moveCount;
-  s.largestTile = largestTile;
+  s.largestTile = gamePlayBoard.largestTile;
   s.duration = duration;
   s.save();
 }
@@ -443,17 +342,9 @@ void Game::saveState() const {
   std::remove("../data/previousGameStats");
   std::fstream stats("../data/previousGameStats", std::ios_base::app);
   std::fstream stateFile("../data/previousGame", std::ios_base::app);
-  for (int y = 0; y < gamePlayBoard.getPlaySize(); y++) {
-    for (int x = 0; x < gamePlayBoard.getPlaySize(); x++) {
-      const auto current_point = point2D_t{x, y};
-      stateFile << gamePlayBoard.getTileValue(current_point) << ":"
-                << gamePlayBoard.getTileBlocked(current_point) << ",";
-      newline();
-    }
-    stateFile << "\n";
-  }
+  stateFile << gamePlayBoard.printState();
   stateFile.close();
-  stats << score << ":" << moveCount;
+  stats << gamePlayBoard.score << ":" << moveCount;
   stats.close();
 }
 
@@ -462,18 +353,18 @@ void Game::playGame(ContinueStatus cont) {
   auto startTime = std::chrono::high_resolution_clock::now();
 
   while (true) {
-
-    if (moved) {
-      boardFull = gamePlayBoard.addTile();
+    if (gamePlayBoard.moved) {
+      gamePlayBoard.addTile();
       moveCount++;
-      moved = true;
-      if (!gamePlayBoard.canMove()) {
-        drawBoard();
-        break;
-      }
+      gamePlayBoard.moved = false;
     }
 
     drawBoard();
+
+    if (gamePlayBoard.win || !gamePlayBoard.canMove()) {
+      break;
+    }
+
     if (stateSaved) {
       std::cout << green << bold_on
                 << "The game has been saved feel free to take a break." << def
@@ -489,9 +380,10 @@ void Game::playGame(ContinueStatus cont) {
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
 
-  std::string msg = win ? "  You win!" : "  Game over! You lose.";
+  const auto msg = gamePlayBoard.win ? "  You win! Congratulations! " :
+                                       "  Game over! You lose.";
 
-  if (win) {
+  if (gamePlayBoard.win) {
     std::cout << green << bold_on << msg << def << bold_off;
     newline(3);
   } else {
@@ -506,6 +398,10 @@ void Game::playGame(ContinueStatus cont) {
     newline(2);
     saveScore();
   }
+
+  std::cout << green << bold_on << "  Press any key to exit." << bold_off << def
+            << std::endl;
+  getchar();
 }
 
 ull Game::setBoardSize() {
@@ -565,10 +461,11 @@ void Game::continueGame() {
     bestScore = stats.bestScore;
   }
 
-  clearScreen();
-  drawAscii();
-
   initialiseContinueBoardArray();
 
-  playGame(ContinueStatus::STATUS_CONTINUE);
+  if (noSave) {
+    startGame();
+  } else {
+    playGame(ContinueStatus::STATUS_CONTINUE);
+  }
 }

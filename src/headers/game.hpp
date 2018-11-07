@@ -26,13 +26,7 @@ enum Directions { UP, DOWN, RIGHT, LEFT };
 class Game {
 
 private:
-  bool moved;
-  bool win;
-  bool boardFull;
-  bool rexit;
-  ull score;
   ull bestScore;
-  ull largestTile;
   long long moveCount;
   double duration;
   GameBoard gamePlayBoard;
@@ -49,6 +43,12 @@ private:
   void drawScoreBoard(std::ostream &out_stream) const;
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
   void decideMove(Directions);
+
+  bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
+  bool shiftTiles(point2D_t pt, point2D_t pt_offset);
+  bool collasped_or_shifted_tiles(point2D_t pt, point2D_t pt_offset);
+  bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset);
+
   void move(point2D_t pt, point2D_t pt_offset);
   void statistics() const;
   void saveStats() const;
@@ -59,9 +59,8 @@ private:
 
 public:
   Game()
-      : win(false), moved(true), boardFull(false), rexit(false), score(0),
-        bestScore(0), moveCount(-1), duration(0.0), largestTile(2),
-        stateSaved(false), noSave(false) {}
+      : bestScore(0), moveCount(-1), duration(0.0), stateSaved(false),
+        noSave(false) {}
   void startGame();
   void continueGame();
 };
