@@ -399,9 +399,6 @@ void Game::playGame(ContinueStatus cont) {
     saveScore();
   }
 
-  std::cout << green << bold_on << "  Press any key to exit." << bold_off << def
-            << std::endl;
-  getchar();
 }
 
 ull Game::setBoardSize() {
