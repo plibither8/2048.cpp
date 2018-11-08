@@ -186,35 +186,39 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
 }
 
 void Game::input(KeyInputErrorStatus err) {
+  constexpr auto input_commands_text = u8R"(
+  W or K or ↑ => Up
+  A or H or ← => Left
+  S or J or ↓ => Down
+  D or L or → => Right
+  Z or P => Save
 
-  using namespace Keypress::Code;
-  char c;
+  Press the keys to start and continue.
 
-  std::cout << "  W or K or \u2191 => Up";
-  newline();
-  std::cout << "  A or H or \u2190 => Left";
-  newline();
-  std::cout << "  S or J or \u2193 => Down";
-  newline();
-  std::cout << "  D or L or \u2192 => Right";
-  newline();
-  std::cout << "  Z or P => Save";
-  newline(2);
-  std::cout << "  Press the keys to start and continue.";
-  newline();
+)";
+
+  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
+  constexpr auto sp = "  ";
+  std::ostringstream str_os;
+  std::ostringstream invalid_prompt_richtext;
+  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
+
+  str_os << input_commands_text;
 
   if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
-    std::cout << red << "  Invalid input. Please try again." << def;
-    newline(2);
+    str_os << invalid_prompt_richtext.str();
   }
+  std::cout << str_os.str();
 
+  using namespace Keypress::Code;
+
+  char c;
   getInput(c);
 
   if (c == CODE_ANSI_TRIGGER_1) {
     getInput(c);
     if (c == CODE_ANSI_TRIGGER_2) {
       getInput(c);
-      newline(4);
       switch (c) {
       case CODE_ANSI_UP:
         decideMove(UP);
@@ -229,12 +233,8 @@ void Game::input(KeyInputErrorStatus err) {
         decideMove(LEFT);
         return;
       }
-    } else {
-      newline(4);
     }
   }
-
-  newline(4);
 
   switch (toupper(c)) {
 
@@ -398,7 +398,6 @@ void Game::playGame(ContinueStatus cont) {
     newline(2);
     saveScore();
   }
-
 }
 
 ull Game::setBoardSize() {
