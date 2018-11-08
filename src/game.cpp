@@ -288,22 +288,33 @@ void Game::decideMove(Directions d) {
 }
 
 void Game::statistics() const {
+  constexpr auto stats_title_text = "STATISTICS";
+  constexpr auto divider_text = "──────────";
+  constexpr auto stats_attributes_text = {
+      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+  constexpr auto sp = "  ";
 
-  std::cout << yellow << "  STATISTICS" << def;
-  newline();
-  std::cout << yellow << "  ──────────" << def;
-  newline();
-  std::cout << "  Final score:       " << bold_on << gamePlayBoard.score
-            << bold_off;
-  newline();
-  std::cout << "  Largest Tile:      " << bold_on << gamePlayBoard.largestTile
-            << bold_off;
-  newline();
-  std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off;
-  newline();
-  std::cout << "  Time taken:        " << bold_on << secondsFormat(duration)
-            << bold_off;
-  newline();
+  auto data_stats = std::array<std::string, stats_attributes_text.size()>{};
+  data_stats = {std::to_string(gamePlayBoard.score),
+                std::to_string(gamePlayBoard.largestTile),
+                std::to_string(moveCount), secondsFormat(duration)};
+
+  std::ostringstream stats_richtext;
+  stats_richtext << yellow << sp << stats_title_text << def << "\n";
+  stats_richtext << yellow << sp << divider_text << def << "\n";
+
+  auto counter{0};
+  const auto populate_stats_info = [data_stats, &counter,
+                                    &stats_richtext](const std::string) {
+    stats_richtext << sp << std::left << std::setw(19)
+                   << std::begin(stats_attributes_text)[counter] << bold_on
+                   << std::begin(data_stats)[counter] << bold_off << "\n";
+    counter++;
+  };
+  std::for_each(std::begin(stats_attributes_text),
+                std::end(stats_attributes_text), populate_stats_info);
+
+  std::cout << stats_richtext.str();
 }
 
 void Game::saveStats() const {
