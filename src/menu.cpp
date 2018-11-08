@@ -1,21 +1,28 @@
 #include "menu.hpp"
 
 void Menu::startMenu(int err) {
+  constexpr auto greetings_text = "Welcome to ";
+  constexpr auto gamename_text = "2048!";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
+  std::ostringstream title_richtext;
+  title_richtext << bold_on << sp << greetings_text << blue << gamename_text
+                 << def << bold_off << "\n";
+
+  constexpr auto menu_entry_text = R"(
+          1. Play a New Game
+          2. Continue Previous Game
+          3. View Highscores and Statistics
+          4. Exit
+
+)";
 
   clearScreen();
-
   drawAscii();
-  std::cout << bold_on << "  Welcome to " << blue << "2048!" << def << bold_off;
-  newline(2);
-  std::cout << "          1. Play a New Game";
-  newline();
-  std::cout << "          2. Continue Previous Game";
-  newline();
-  std::cout << "          3. View Highscores and Statistics";
-  newline();
-  std::cout << "          4. Exit";
-  newline(2);
-
+  str_os << title_richtext.str();
+  str_os << menu_entry_text;
+  std::cout << str_os.str();
   input(err);
 }
 
