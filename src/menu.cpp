@@ -27,13 +27,22 @@ void Menu::startMenu(int err) {
 }
 
 void Menu::input(int err) {
+  constexpr auto err_input_text = "Invalid input. Please try again.";
+  constexpr auto prompt_choice_text = "Enter Choice: ";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
+  std::ostringstream err_input_richtext;
+  err_input_richtext << red << sp << err_input_text << def << "\n\n";
+  std::ostringstream prompt_choice_richtext;
+  prompt_choice_richtext << sp << prompt_choice_text;
 
   if (err) {
-    std::cout << red << "  Invalid input. Please try again." << def;
-    newline(2);
+    str_os << err_input_richtext.str();
   }
 
-  std::cout << "  Enter Choice: ";
+  str_os << prompt_choice_richtext.str();
+  std::cout << str_os.str();
   char c;
   std::cin >> c;
 
