@@ -5,9 +5,14 @@ bool compare(const Score &a, const Score &b) {
 };
 
 void Scoreboard::prompt() {
+  constexpr auto score_prompt_text =
+      "Please enter your name to save this score: ";
+  constexpr auto sp = "  ";
 
-  std::cout << bold_on
-            << "  Please enter your name to save this score: " << bold_off;
+  std::ostringstream score_prompt_richtext;
+  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
+
+  std::cout << score_prompt_richtext.str();
   std::cin >> name;
 }
 
