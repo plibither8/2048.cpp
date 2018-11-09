@@ -170,9 +170,13 @@ void Scoreboard::readFile() {
 }
 
 void Scoreboard::save() {
+  constexpr auto score_saved_text = "Score saved!";
+  constexpr auto sp = "  ";
+  std::ostringstream score_saved_richtext;
+  score_saved_richtext << green << bold_on << sp << score_saved_text << bold_off
+                       << def << "\n";
 
   prompt();
   writeToFile();
-  std::cout << green << bold_on << "  Score saved!" << bold_off << def;
-  newline();
+  std::cout << score_saved_richtext.str();
 }
