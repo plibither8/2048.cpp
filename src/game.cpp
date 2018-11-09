@@ -360,10 +360,27 @@ void Game::saveState() const {
 }
 
 void Game::playGame(ContinueStatus cont) {
+  constexpr auto state_saved_text =
+      "The game has been saved. Feel free to take a break.";
+  constexpr auto win_game_text = "You win! Congratulations!";
+  constexpr auto lose_game_text = "Game over! You lose.";
+  constexpr auto sp = "  ";
+
+  std::ostringstream state_saved_richtext;
+  state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                       << bold_off << "\n\n";
+  std::ostringstream win_richtext;
+  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
+               << "\n\n\n";
+
+  std::ostringstream lose_richtext;
+  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
+                << "\n\n\n";
 
   auto startTime = std::chrono::high_resolution_clock::now();
 
   while (true) {
+    std::ostringstream str_os;
     if (gamePlayBoard.moved) {
       gamePlayBoard.addTile();
       moveCount++;
@@ -377,12 +394,10 @@ void Game::playGame(ContinueStatus cont) {
     }
 
     if (stateSaved) {
-      std::cout << green << bold_on
-                << "  The game has been saved. Feel free to take a break."
-                << def << bold_off;
-      newline(2);
+      str_os << state_saved_richtext.str();
       stateSaved = false;
     }
+    std::cout << str_os.str();
     input();
     gamePlayBoard.unblockTiles();
   }
@@ -391,16 +406,13 @@ void Game::playGame(ContinueStatus cont) {
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
 
-  const auto msg = gamePlayBoard.win ? "  You win! Congratulations! " :
-                                       "  Game over! You lose.";
-
+  std::ostringstream str_os;
   if (gamePlayBoard.win) {
-    std::cout << green << bold_on << msg << def << bold_off;
-    newline(3);
+    str_os << win_richtext.str();
   } else {
-    std::cout << red << bold_on << msg << def << bold_off;
-    newline(3);
+    str_os << lose_richtext.str();
   }
+  std::cout << str_os.str();
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
