@@ -412,32 +412,47 @@ void Game::playGame(ContinueStatus cont) {
 }
 
 ull Game::setBoardSize() {
+  constexpr auto invalid_prompt_text = {
+      "Invalid input. Gameboard size should range from ", " to ", "."};
+  constexpr auto no_save_found_text =
+      "No saved game found. Starting a new game.";
+  constexpr auto board_size_prompt_text =
+      "Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
+  constexpr auto sp = "  ";
 
   enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
+
+  std::ostringstream str_os;
+  std::ostringstream error_prompt_richtext;
+  error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
+                        << MIN_GAME_BOARD_PLAY_SIZE
+                        << std::begin(invalid_prompt_text)[1]
+                        << MAX_GAME_BOARD_PLAY_SIZE
+                        << std::begin(invalid_prompt_text)[2] << def << "\n\n";
+  std::ostringstream no_save_richtext;
+  no_save_richtext << red << bold_on << sp << no_save_found_text << def
+                   << bold_off << "\n\n";
+  std::ostringstream board_size_prompt_richtext;
+  board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
+                             << bold_off;
+
   bool err = false;
   ull userInput_PlaySize{0};
+
   while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
           userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
     clearScreen();
     drawAscii();
 
     if (err) {
-      std::cout << red << "  Invalid input. Gameboard size should range from "
-                << MIN_GAME_BOARD_PLAY_SIZE << " to "
-                << MAX_GAME_BOARD_PLAY_SIZE << "." << def;
-      newline(2);
+      str_os << error_prompt_richtext.str();
     } else if (noSave) {
-      std::cout << red << bold_on
-                << "  No saved game found. Starting a new game." << def
-                << bold_off;
-      newline(2);
+      str_os << no_save_richtext.str();
       noSave = false;
     }
 
-    std::cout << bold_on
-              << "  Enter gameboard size (NOTE: Scores and statistics will be "
-                 "saved only for the 4x4 gameboard): "
-              << bold_off;
+    str_os << board_size_prompt_richtext.str();
+    std::cout << str_os.str();
 
     std::cin >> userInput_PlaySize;
     std::cin.clear();
