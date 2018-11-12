@@ -88,43 +88,54 @@ void Scoreboard::printScore() {
 }
 
 void Scoreboard::printStats() {
+  constexpr auto stats_title_text = "STATISTICS";
+  constexpr auto divider_text = "──────────";
+  constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
+  constexpr auto footer_border_text = "└────────────────────┴─────────────┘";
+  constexpr auto stats_attributes_text = {
+      "Best Score", "Game Count", "Number of Wins", "Total Moves Played",
+      "Total Duration"};
+  constexpr auto no_save_text = "No saved statistics.";
+  constexpr auto any_key_exit_text = "Press any key to exit: ";
+  constexpr auto sp = "  ";
 
   Stats stats;
+  std::ostringstream stats_richtext;
   if (stats.collectStatistics()) {
+    auto data_stats = std::array<std::string, stats_attributes_text.size()>{};
+    data_stats = {
+        std::to_string(stats.bestScore), std::to_string(stats.gameCount),
+        std::to_string(stats.winCount), std::to_string(stats.totalMoveCount),
+        secondsFormat(stats.totalDuration)};
 
-    std::cout << green << bold_on << "  STATISTICS" << bold_off << def;
-    newline();
-    std::cout << green << bold_on << "  ──────────" << bold_off << def;
-    newline();
-    std::cout << "  ┌────────────────────┬─────────────┐";
-    newline();
-    std::cout << "  │ " << bold_on << "Best Score        " << bold_off << " │ "
-              << std::setw(11) << stats.bestScore << " │";
-    newline();
-    std::cout << "  │ " << bold_on << "Game Count        " << bold_off << " │ "
-              << std::setw(11) << stats.gameCount << " │";
-    newline();
-    std::cout << "  │ " << bold_on << "Number of Wins    " << bold_off << " │ "
-              << std::setw(11) << stats.winCount << " │";
-    newline();
-    std::cout << "  │ " << bold_on << "Total Moves Played" << bold_off << " │ "
-              << std::setw(11) << stats.totalMoveCount << " │";
-    newline();
-    std::cout << "  │ " << bold_on << "Total Duration    " << bold_off << " │ "
-              << std::setw(11) << secondsFormat(stats.totalDuration) << " │";
-    newline();
-    std::cout << "  └────────────────────┴─────────────┘";
-    newline();
+    auto counter{0};
+    const auto populate_stats_info = [data_stats, &counter,
+                                      &stats_richtext](const std::string) {
+      stats_richtext << sp << "│ " << bold_on << std::left << std::setw(18)
+                     << std::begin(stats_attributes_text)[counter] << bold_off
+                     << " │ " << std::right << std::setw(11)
+                     << data_stats[counter] << " │"
+                     << "\n";
+      counter++;
+    };
+
+    stats_richtext << green << bold_on << sp << stats_title_text << bold_off
+                   << def << "\n";
+    stats_richtext << green << bold_on << sp << divider_text << bold_off << def
+                   << "\n";
+    stats_richtext << sp << header_border_text << "\n";
+    std::for_each(std::begin(stats_attributes_text),
+                  std::end(stats_attributes_text), populate_stats_info);
+    stats_richtext << sp << footer_border_text << "\n";
 
   } else {
-
-    std::cout << "  No saved statistics.";
-    newline();
+    stats_richtext << sp << no_save_text << "\n";
   }
 
-  newline(3);
+  stats_richtext << "\n\n\n";
+  stats_richtext << sp << any_key_exit_text;
 
-  std::cout << "  Press any key to exit: ";
+  std::cout << stats_richtext.str();
   char c;
   std::cin >> c;
   exit(EXIT_SUCCESS);
