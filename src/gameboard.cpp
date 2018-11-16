@@ -118,44 +118,38 @@ bool GameBoard::addTile() {
 }
 
 std::string GameBoard::drawSelf() const {
-  std::stringstream str_os;
-  using stringlines_t =
-      std::tuple<std::stringstream, std::stringstream, std::stringstream>;
-  stringlines_t vertibar;
+  enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
+  auto vertibar = std::array<std::string, MAX_TYPES_OF_BARS>{};
+  using bar_pattern_t = std::tuple<std::string, std::string, std::string>;
 
-  enum { TOP_BAR, XN_BAR, BASE_BAR };
-
-  using bar_pattern_t = std::tuple<decltype(std::ref(str_os)), std::string,
-                                   std::string, std::string>;
-
-  const auto bar_pattern_list = {
-      std::make_tuple(std::ref(std::get<TOP_BAR>(vertibar)), "┌", "┬", "┐"),
-      std::make_tuple(std::ref(std::get<XN_BAR>(vertibar)), "├", "┼", "┤"),
-      std::make_tuple(std::ref(std::get<BASE_BAR>(vertibar)), "└", "┴", "┘")};
+  const auto bar_pattern_list = {std::make_tuple("┌", "┬", "┐"),
+                                 std::make_tuple("├", "┼", "┤"),
+                                 std::make_tuple("└", "┴", "┘")};
 
   // generate types of horizontal bars...
-  // done via LUT...
-  const auto generate_x_bar_pattern = [this](bar_pattern_t t) {
-    enum { PATTERN_BUFFER, PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
-    std::get<PATTERN_BUFFER>(t).get() << "  ";
-    std::get<PATTERN_BUFFER>(t).get() << std::get<PATTERN_HEAD>(t);
+  const auto generate_x_bar_pattern = [this](const bar_pattern_t t) {
+    enum { PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
+    constexpr auto sp = "  ";
+    constexpr auto separator = "──────";
+    std::ostringstream temp_richtext;
+    temp_richtext << sp << std::get<PATTERN_HEAD>(t);
     for (int i = 0; i < getPlaySize(); i++) {
       const auto is_not_last_column = (i < getPlaySize() - 1);
-      std::get<PATTERN_BUFFER>(t).get() << "──────";
-      std::get<PATTERN_BUFFER>(t).get()
-          << (is_not_last_column ? std::get<PATTERN_MID>(t) :
-                                   std::get<PATTERN_TAIL>(t));
+      temp_richtext << separator
+                    << (is_not_last_column ? std::get<PATTERN_MID>(t) :
+                                             std::get<PATTERN_TAIL>(t));
     }
-    std::get<PATTERN_BUFFER>(t).get() << "\n";
+    temp_richtext << "\n";
+    return temp_richtext.str();
   };
-  std::for_each(std::begin(bar_pattern_list), std::end(bar_pattern_list),
-                generate_x_bar_pattern);
+  std::transform(std::begin(bar_pattern_list), std::end(bar_pattern_list),
+                 std::begin(vertibar), generate_x_bar_pattern);
 
+  std::ostringstream str_os;
   for (int y = 0; y < getPlaySize(); y++) {
     const auto is_first_row = (y == 0);
     str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
-                              std::get<XN_BAR>(vertibar))
-                  .str();
+                              std::get<XN_BAR>(vertibar));
     str_os << " ";
 
     for (int x = 0; x < getPlaySize(); x++) {
@@ -173,7 +167,7 @@ std::string GameBoard::drawSelf() const {
     str_os << "\n";
   }
 
-  str_os << std::get<BASE_BAR>(vertibar).str();
+  str_os << std::get<BASE_BAR>(vertibar);
   str_os << "\n";
   return str_os.str();
 }
