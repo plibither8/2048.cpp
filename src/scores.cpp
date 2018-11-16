@@ -185,7 +185,10 @@ void Scoreboard::readFile() {
     scoreList.push_back(bufferScore);
   };
 
-  std::sort(scoreList.begin(), scoreList.end(), compare);
+  const auto predicate = [](const Score a, const Score b) {
+    return a.score > b.score;
+  };
+  std::sort(scoreList.begin(), scoreList.end(), predicate);
 }
 
 void Scoreboard::save() {
