@@ -174,7 +174,7 @@ std::string GameBoard::drawSelf() const {
   }
 
   str_os << std::get<BASE_BAR>(vertibar).str();
-  str_os << "\n\n\n";
+  str_os << "\n";
   return str_os.str();
 }
 

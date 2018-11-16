@@ -186,35 +186,39 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
 }
 
 void Game::input(KeyInputErrorStatus err) {
+  constexpr auto input_commands_text = u8R"(
+  W or K or ↑ => Up
+  A or H or ← => Left
+  S or J or ↓ => Down
+  D or L or → => Right
+  Z or P => Save
 
-  using namespace Keypress::Code;
-  char c;
+  Press the keys to start and continue.
 
-  std::cout << "  W or K or \u2191 => Up";
-  newline();
-  std::cout << "  A or H or \u2190 => Left";
-  newline();
-  std::cout << "  S or J or \u2193 => Down";
-  newline();
-  std::cout << "  D or L or \u2192 => Right";
-  newline();
-  std::cout << "  Z or P => Save";
-  newline(2);
-  std::cout << "  Press the keys to start and continue.";
-  newline();
+)";
+
+  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
+  constexpr auto sp = "  ";
+  std::ostringstream str_os;
+  std::ostringstream invalid_prompt_richtext;
+  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
+
+  str_os << input_commands_text;
 
   if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
-    std::cout << red << "  Invalid input. Please try again." << def;
-    newline(2);
+    str_os << invalid_prompt_richtext.str();
   }
+  std::cout << str_os.str();
 
+  using namespace Keypress::Code;
+
+  char c;
   getInput(c);
 
   if (c == CODE_ANSI_TRIGGER_1) {
     getInput(c);
     if (c == CODE_ANSI_TRIGGER_2) {
       getInput(c);
-      newline(4);
       switch (c) {
       case CODE_ANSI_UP:
         decideMove(UP);
@@ -229,12 +233,8 @@ void Game::input(KeyInputErrorStatus err) {
         decideMove(LEFT);
         return;
       }
-    } else {
-      newline(4);
     }
   }
-
-  newline(4);
 
   switch (toupper(c)) {
 
@@ -288,22 +288,33 @@ void Game::decideMove(Directions d) {
 }
 
 void Game::statistics() const {
+  constexpr auto stats_title_text = "STATISTICS";
+  constexpr auto divider_text = "──────────";
+  constexpr auto stats_attributes_text = {
+      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+  constexpr auto sp = "  ";
 
-  std::cout << yellow << "  STATISTICS" << def;
-  newline();
-  std::cout << yellow << "  ──────────" << def;
-  newline();
-  std::cout << "  Final score:       " << bold_on << gamePlayBoard.score
-            << bold_off;
-  newline();
-  std::cout << "  Largest Tile:      " << bold_on << gamePlayBoard.largestTile
-            << bold_off;
-  newline();
-  std::cout << "  Number of moves:   " << bold_on << moveCount << bold_off;
-  newline();
-  std::cout << "  Time taken:        " << bold_on << secondsFormat(duration)
-            << bold_off;
-  newline();
+  auto data_stats = std::array<std::string, stats_attributes_text.size()>{};
+  data_stats = {std::to_string(gamePlayBoard.score),
+                std::to_string(gamePlayBoard.largestTile),
+                std::to_string(moveCount), secondsFormat(duration)};
+
+  std::ostringstream stats_richtext;
+  stats_richtext << yellow << sp << stats_title_text << def << "\n";
+  stats_richtext << yellow << sp << divider_text << def << "\n";
+
+  auto counter{0};
+  const auto populate_stats_info = [data_stats, &counter,
+                                    &stats_richtext](const std::string) {
+    stats_richtext << sp << std::left << std::setw(19)
+                   << std::begin(stats_attributes_text)[counter] << bold_on
+                   << std::begin(data_stats)[counter] << bold_off << "\n";
+    counter++;
+  };
+  std::for_each(std::begin(stats_attributes_text),
+                std::end(stats_attributes_text), populate_stats_info);
+
+  std::cout << stats_richtext.str();
 }
 
 void Game::saveStats() const {
@@ -349,10 +360,27 @@ void Game::saveState() const {
 }
 
 void Game::playGame(ContinueStatus cont) {
+  constexpr auto state_saved_text =
+      "The game has been saved. Feel free to take a break.";
+  constexpr auto win_game_text = "You win! Congratulations!";
+  constexpr auto lose_game_text = "Game over! You lose.";
+  constexpr auto sp = "  ";
+
+  std::ostringstream state_saved_richtext;
+  state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                       << bold_off << "\n\n";
+  std::ostringstream win_richtext;
+  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
+               << "\n\n\n";
+
+  std::ostringstream lose_richtext;
+  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
+                << "\n\n\n";
 
   auto startTime = std::chrono::high_resolution_clock::now();
 
   while (true) {
+    std::ostringstream str_os;
     if (gamePlayBoard.moved) {
       gamePlayBoard.addTile();
       moveCount++;
@@ -366,12 +394,10 @@ void Game::playGame(ContinueStatus cont) {
     }
 
     if (stateSaved) {
-      std::cout << green << bold_on
-                << "  The game has been saved. Feel free to take a break."
-                << def << bold_off;
-      newline(2);
+      str_os << state_saved_richtext.str();
       stateSaved = false;
     }
+    std::cout << str_os.str();
     input();
     gamePlayBoard.unblockTiles();
   }
@@ -380,16 +406,13 @@ void Game::playGame(ContinueStatus cont) {
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
 
-  const auto msg = gamePlayBoard.win ? "  You win! Congratulations! " :
-                                       "  Game over! You lose.";
-
+  std::ostringstream str_os;
   if (gamePlayBoard.win) {
-    std::cout << green << bold_on << msg << def << bold_off;
-    newline(3);
+    str_os << win_richtext.str();
   } else {
-    std::cout << red << bold_on << msg << def << bold_off;
-    newline(3);
+    str_os << lose_richtext.str();
   }
+  std::cout << str_os.str();
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
@@ -398,36 +421,50 @@ void Game::playGame(ContinueStatus cont) {
     newline(2);
     saveScore();
   }
-
 }
 
 ull Game::setBoardSize() {
+  constexpr auto invalid_prompt_text = {
+      "Invalid input. Gameboard size should range from ", " to ", "."};
+  constexpr auto no_save_found_text =
+      "No saved game found. Starting a new game.";
+  constexpr auto board_size_prompt_text =
+      "Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
+  constexpr auto sp = "  ";
 
   enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
+
+  std::ostringstream str_os;
+  std::ostringstream error_prompt_richtext;
+  error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
+                        << MIN_GAME_BOARD_PLAY_SIZE
+                        << std::begin(invalid_prompt_text)[1]
+                        << MAX_GAME_BOARD_PLAY_SIZE
+                        << std::begin(invalid_prompt_text)[2] << def << "\n\n";
+  std::ostringstream no_save_richtext;
+  no_save_richtext << red << bold_on << sp << no_save_found_text << def
+                   << bold_off << "\n\n";
+  std::ostringstream board_size_prompt_richtext;
+  board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
+                             << bold_off;
+
   bool err = false;
   ull userInput_PlaySize{0};
+
   while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
           userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
     clearScreen();
     drawAscii();
 
     if (err) {
-      std::cout << red << "  Invalid input. Gameboard size should range from "
-                << MIN_GAME_BOARD_PLAY_SIZE << " to "
-                << MAX_GAME_BOARD_PLAY_SIZE << "." << def;
-      newline(2);
+      str_os << error_prompt_richtext.str();
     } else if (noSave) {
-      std::cout << red << bold_on
-                << "  No saved game found. Starting a new game." << def
-                << bold_off;
-      newline(2);
+      str_os << no_save_richtext.str();
       noSave = false;
     }
 
-    std::cout << bold_on
-              << "  Enter gameboard size (NOTE: Scores and statistics will be "
-                 "saved only for the 4x4 gameboard): "
-              << bold_off;
+    str_os << board_size_prompt_richtext.str();
+    std::cout << str_os.str();
 
     std::cin >> userInput_PlaySize;
     std::cin.clear();
