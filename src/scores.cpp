@@ -27,64 +27,72 @@ void Scoreboard::writeToFile() {
 }
 
 void Scoreboard::printScore() {
+  constexpr auto no_save_text = "No saved scores.";
+  constexpr auto score_attributes_text = {
+      "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
+  constexpr auto header_border_text =
+      "┌─────┬────────────────────┬──────────┬──────┬───────┬──────────────┬──────────────┐";
+  constexpr auto mid_border_text =
+      "├─────┼────────────────────┼──────────┼──────┼───────┼──────────────┼──────────────┤";
+  constexpr auto bottom_border_text =
+      "└─────┴────────────────────┴──────────┴──────┴───────┴──────────────┴──────────────┘";
+  constexpr auto score_title_text = "SCOREBOARD";
+  constexpr auto divider_text = "──────────";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
 
   readFile();
 
   clearScreen();
   drawAscii();
-  std::cout << green << bold_on << "  SCOREBOARD" << bold_off << def;
-  newline();
-  std::cout << green << bold_on << "  ──────────" << bold_off << def;
-  newline();
+  str_os << green << bold_on << sp << score_title_text << bold_off << def
+         << "\n";
+  str_os << green << bold_on << sp << divider_text << bold_off << def << "\n";
 
-  int size = scoreList.size();
+  const auto number_of_scores = scoreList.size();
+  if (number_of_scores) {
+    str_os << sp << header_border_text << "\n";
+    str_os << std::left;
+    str_os << sp << "│ " << bold_on << std::begin(score_attributes_text)[0]
+           << bold_off << " │ " << bold_on << std::setw(18)
+           << std::begin(score_attributes_text)[1] << bold_off << " │ "
+           << bold_on << std::setw(8) << std::begin(score_attributes_text)[2]
+           << bold_off << " │ " << bold_on
+           << std::begin(score_attributes_text)[3] << bold_off << " │ "
+           << bold_on << std::begin(score_attributes_text)[4] << bold_off
+           << " │ " << bold_on << std::begin(score_attributes_text)[5]
+           << bold_off << " │ " << bold_on << std::setw(12)
+           << std::begin(score_attributes_text)[6] << bold_off << " │"
+           << "\n";
+    str_os << std::right;
+    str_os << sp << mid_border_text << "\n";
 
-  for (int i = size - 1; i >= 0; i--) {
+    auto counter{1};
+    const auto print_score_stat = [&counter, &str_os](const Score i) {
+      constexpr auto number_of_fields = 7;
+      auto data_stats = std::array<std::string, number_of_fields>{};
+      data_stats = {std::to_string(counter),     i.name,
+                    std::to_string(i.score),     i.win ? "Yes" : "No",
+                    std::to_string(i.moveCount), std::to_string(i.largestTile),
+                    secondsFormat(i.duration)};
+      str_os << sp << "│ " << std::setw(2) << data_stats[0] << ". │ "
+             << std::left << std::setw(18) << data_stats[1] << std::right
+             << " │ " << std::setw(8) << data_stats[2] << " │ " << std::setw(4)
+             << data_stats[3] << " │ " << std::setw(5) << data_stats[4] << " │ "
+             << std::setw(12) << data_stats[5] << " │ " << std::setw(12)
+             << data_stats[6] << " │"
+             << "\n";
+      counter++;
+    };
 
-    std::string playerName = scoreList[i].name;
-    ull playerScore = scoreList[i].score;
-    std::string won = scoreList[i].win ? "Yes" : "No";
-    long long moveCount = scoreList[i].moveCount;
-    ull largestTile = scoreList[i].largestTile;
-    double duration = scoreList[i].duration;
-
-    if (i == size - 1) {
-      std::cout << "  "
-                   "┌─────┬────────────────────┬──────────┬──────┬───────┬─────"
-                   "─────────┬──────────────┐";
-      newline();
-      std::cout << "  │ " << bold_on << "No." << bold_off << " │ " << bold_on
-                << "Name" << bold_off << "               │ " << bold_on
-                << "Score" << bold_off << "    │ " << bold_on << "Won?"
-                << bold_off << " │ " << bold_on << "Moves" << bold_off << " │ "
-                << bold_on << "Largest Tile" << bold_off << " │ " << bold_on
-                << "Duration    " << bold_off << " │";
-      newline();
-      std::cout << "  "
-                   "├─────┼────────────────────┼──────────┼──────┼───────┼─────"
-                   "─────────┼──────────────┤";
-      newline();
-    }
-
-    std::cout << "  │ " << std::setw(2) << size - i << ". │ " << playerName;
-    padding(playerName);
-    std::cout << " │ " << std::setw(8) << playerScore << " │ " << std::setw(4)
-              << won << " │ " << std::setw(5) << moveCount << " │ "
-              << std::setw(12) << largestTile << " │ " << std::setw(12)
-              << secondsFormat(duration) << " │ ";
-    newline();
-  }
-
-  if (!size) {
-    std::cout << "  No saved scores.";
-    newline();
+    std::for_each(std::begin(scoreList), std::end(scoreList), print_score_stat);
+    str_os << sp << bottom_border_text << "\n";
   } else {
-    std::cout << "  "
-                 "└─────┴────────────────────┴──────────┴──────┴───────┴───────"
-                 "───────┴──────────────┘";
+    str_os << sp << no_save_text << "\n";
   }
-
-  newline(3);
+  str_os << "\n\n";
+  std::cout << str_os.str();
 }
 
 void Scoreboard::printStats() {
