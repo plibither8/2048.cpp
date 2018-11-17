@@ -1,5 +1,48 @@
 #include <gameboard.hpp>
 
+namespace {
+std::string drawTileString(Tile currentTile) {
+  std::ostringstream tile_richtext;
+  if (!currentTile.value) {
+    tile_richtext << "    ";
+  } else {
+    tile_richtext << currentTile.tileColor(currentTile.value) << bold_on
+                  << std::setw(4) << currentTile.value << bold_off << def;
+  }
+  return tile_richtext.str();
+}
+
+template<int num_of_bars>
+std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
+  auto temp_bars = std::array<std::string, num_of_bars>{};
+  using bar_pattern_t = std::tuple<std::string, std::string, std::string>;
+
+  const auto bar_pattern_list = {std::make_tuple("┌", "┬", "┐"),
+                                 std::make_tuple("├", "┼", "┤"),
+                                 std::make_tuple("└", "┴", "┘")};
+
+  // generate types of horizontal bars...
+  const auto generate_x_bar_pattern = [playsize](const bar_pattern_t t) {
+    enum { PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
+    constexpr auto sp = "  ";
+    constexpr auto separator = "──────";
+    std::ostringstream temp_richtext;
+    temp_richtext << sp << std::get<PATTERN_HEAD>(t);
+    for (int i = 0; i < playsize; i++) {
+      const auto is_not_last_column = (i < playsize - 1);
+      temp_richtext << separator
+                    << (is_not_last_column ? std::get<PATTERN_MID>(t) :
+                                             std::get<PATTERN_TAIL>(t));
+    }
+    temp_richtext << "\n";
+    return temp_richtext.str();
+  };
+  std::transform(std::begin(bar_pattern_list), std::end(bar_pattern_list),
+                 std::begin(temp_bars), generate_x_bar_pattern);
+  return temp_bars;
+}
+} // namespace
+
 int GameBoard::point2D_to_1D_index(point2D_t pt) const {
   int x, y;
   std::tie(x, y) = pt.get();
@@ -119,54 +162,22 @@ bool GameBoard::addTile() {
 
 std::string GameBoard::drawSelf() const {
   enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
-  auto vertibar = std::array<std::string, MAX_TYPES_OF_BARS>{};
-  using bar_pattern_t = std::tuple<std::string, std::string, std::string>;
-
-  const auto bar_pattern_list = {std::make_tuple("┌", "┬", "┐"),
-                                 std::make_tuple("├", "┼", "┤"),
-                                 std::make_tuple("└", "┴", "┘")};
-
-  // generate types of horizontal bars...
-  const auto generate_x_bar_pattern = [this](const bar_pattern_t t) {
-    enum { PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
-    constexpr auto sp = "  ";
-    constexpr auto separator = "──────";
-    std::ostringstream temp_richtext;
-    temp_richtext << sp << std::get<PATTERN_HEAD>(t);
-    for (int i = 0; i < getPlaySize(); i++) {
-      const auto is_not_last_column = (i < getPlaySize() - 1);
-      temp_richtext << separator
-                    << (is_not_last_column ? std::get<PATTERN_MID>(t) :
-                                             std::get<PATTERN_TAIL>(t));
-    }
-    temp_richtext << "\n";
-    return temp_richtext.str();
-  };
-  std::transform(std::begin(bar_pattern_list), std::end(bar_pattern_list),
-                 std::begin(vertibar), generate_x_bar_pattern);
-
+  const auto vertibar = make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySize());
   std::ostringstream str_os;
   for (int y = 0; y < getPlaySize(); y++) {
     const auto is_first_row = (y == 0);
     str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
                               std::get<XN_BAR>(vertibar));
-    str_os << " ";
-
     for (int x = 0; x < getPlaySize(); x++) {
-      str_os << " │ ";
-      Tile currentTile = getTile(point2D_t{x, y});
-      if (!currentTile.value) {
-        str_os << "    ";
-      } else {
-        str_os << currentTile.tileColor(currentTile.value) << bold_on
-               << std::setw(4) << currentTile.value << bold_off << def;
-      }
+      const auto is_first_col = (x == 0);
+      const auto sp = (is_first_col ? "  " : " ");
+      str_os << sp;
+      str_os << "│ ";
+      str_os << drawTileString(getTile(point2D_t{x, y}));
     }
-
-    str_os << " │ ";
+    str_os << " │";
     str_os << "\n";
   }
-
   str_os << std::get<BASE_BAR>(vertibar);
   str_os << "\n";
   return str_os.str();
