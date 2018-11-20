@@ -34,6 +34,7 @@ class GameBoard {
 
   Tile getTile(point2D_t pt) const;
   void setTile(point2D_t pt, Tile tile);
+  bool getTileBlocked(point2D_t pt) const;
 
   int point2D_to_1D_index(point2D_t pt) const;
   std::vector<point2D_t> collectFreeTiles() const;
@@ -61,7 +62,6 @@ public:
 
   ull getTileValue(point2D_t pt) const;
   void setTileValue(point2D_t pt, ull value);
-  bool getTileBlocked(point2D_t pt) const;
   void setTileBlocked(point2D_t pt, bool blocked);
   int getPlaySize() const;
   void unblockTiles();
