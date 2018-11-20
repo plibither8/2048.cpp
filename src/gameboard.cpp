@@ -121,10 +121,6 @@ int GameBoard::getPlaySize() const {
   return playsize;
 }
 
-void GameBoard::setPlaySize(ull newSize) {
-  playsize = newSize;
-}
-
 void GameBoard::unblockTiles() {
   std::transform(std::begin(board), std::end(board), std::begin(board),
                  [](const Tile t) {
