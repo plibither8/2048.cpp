@@ -34,6 +34,7 @@ class GameBoard {
 
   Tile getTile(point2D_t pt) const;
   void setTile(point2D_t pt, Tile tile);
+  ull getTileValue(point2D_t pt) const;
   bool getTileBlocked(point2D_t pt) const;
 
   int point2D_to_1D_index(point2D_t pt) const;
@@ -60,7 +61,6 @@ public:
   explicit GameBoard(ull playsize)
       : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
 
-  ull getTileValue(point2D_t pt) const;
   void setTileValue(point2D_t pt, ull value);
   void setTileBlocked(point2D_t pt, bool blocked);
   int getPlaySize() const;
