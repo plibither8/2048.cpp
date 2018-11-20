@@ -48,6 +48,23 @@ bool is_point_in_board_play_area(point2D_t pt, int playsize) {
   return !(y < 0 || y > playsize - 1 || x < 0 || x > playsize - 1);
 }
 
+bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset,
+                                           int playsize) {
+  int x, y, x2, y2;
+  std::tie(x, y) = pt.get();
+  std::tie(x2, y2) = pt_offset.get();
+  const auto positive_direction = (y2 + x2 == 1);
+  const auto negative_direction = (y2 + x2 == -1);
+  const auto is_positive_y_direction_flagged = (y2 == 1);
+  const auto is_negative_y_direction_flagged = (y2 == -1);
+  const auto is_inside_outer_bounds =
+      (positive_direction &&
+       (is_positive_y_direction_flagged ? y : x) < playsize - 2);
+  const auto is_inside_inner_bounds =
+      (negative_direction && (is_negative_y_direction_flagged ? y : x) > 1);
+  return (is_inside_outer_bounds || is_inside_inner_bounds);
+}
+
 } // namespace
 
 int GameBoard::point2D_to_1D_index(point2D_t pt) const {
@@ -232,23 +249,6 @@ bool GameBoard::collasped_or_shifted_tiles(point2D_t pt, point2D_t pt_offset) {
   return false;
 }
 
-bool GameBoard::check_recursive_offset_in_game_bounds(point2D_t pt,
-                                                      point2D_t pt_offset) {
-  int x, y, x2, y2;
-  std::tie(x, y) = pt.get();
-  std::tie(x2, y2) = pt_offset.get();
-  const auto positive_direction = (y2 + x2 == 1);
-  const auto negative_direction = (y2 + x2 == -1);
-  const auto is_positive_y_direction_flagged = (y2 == 1);
-  const auto is_negative_y_direction_flagged = (y2 == -1);
-  const auto is_inside_outer_bounds =
-      (positive_direction &&
-       (is_positive_y_direction_flagged ? y : x) < getPlaySize() - 2);
-  const auto is_inside_inner_bounds =
-      (negative_direction && (is_negative_y_direction_flagged ? y : x) > 1);
-  return (is_inside_outer_bounds || is_inside_inner_bounds);
-}
-
 void GameBoard::discoverLargestTileValue(Tile targetTile) {
   largestTile = largestTile < targetTile.value ? targetTile.value : largestTile;
 }
@@ -266,7 +266,7 @@ void GameBoard::move(point2D_t pt, point2D_t pt_offset) {
   if (collasped_or_shifted_tiles(pt, pt_offset)) {
     moved = true;
   }
-  if (check_recursive_offset_in_game_bounds(pt, pt_offset)) {
+  if (check_recursive_offset_in_game_bounds(pt, pt_offset, getPlaySize())) {
     move(pt + pt_offset, pt_offset);
   }
 }
