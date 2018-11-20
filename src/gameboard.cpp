@@ -41,21 +41,19 @@ std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
                  std::begin(temp_bars), generate_x_bar_pattern);
   return temp_bars;
 }
+
+bool is_point_in_board_play_area(point2D_t pt, int playsize) {
+  int x, y;
+  std::tie(x, y) = pt.get();
+  return !(y < 0 || y > playsize - 1 || x < 0 || x > playsize - 1);
+}
+
 } // namespace
 
 int GameBoard::point2D_to_1D_index(point2D_t pt) const {
   int x, y;
   std::tie(x, y) = pt.get();
   return x + playsize * y;
-}
-
-bool GameBoard::testAdd(point2D_t pt, ull value) const {
-  int x, y;
-  std::tie(x, y) = pt.get();
-  if (y < 0 || y > getPlaySize() - 1 || x < 0 || x > getPlaySize() - 1) {
-    return false;
-  }
-  return getTileValue(pt) == value;
 }
 
 std::vector<point2D_t> GameBoard::collectFreeTiles() const {
@@ -120,28 +118,30 @@ void GameBoard::unblockTiles() {
 bool GameBoard::canMove() {
   auto index_counter{0};
 
-  const auto predicate = [this, &index_counter](const Tile t) {
+  const auto can_move_to_offset = [this, &index_counter](const Tile t) {
     const auto current_point =
         point2D_t{index_counter % getPlaySize(), index_counter / getPlaySize()};
     index_counter++;
     const auto list_of_offsets = {point2D_t{1, 0}, point2D_t{0, 1}};
-    const auto current_point_value = getTileValue(current_point);
+    const auto current_point_value = t.value;
 
-    const auto check_point_offset_in_range = [=](const point2D_t offset) {
-      return testAdd(current_point + offset,
-                     current_point_value) // Positive adjacent check
-             || testAdd(current_point - offset,
-                        current_point_value); // Negative adjacent Check
+    const auto offset_in_range_with_same_value = [=](const point2D_t offset) {
+      const auto offset_check = {
+          current_point + offset, // Positive adjacent check
+          current_point - offset}; // Negative adjacent Check
+      for (const auto current_offset : offset_check) {
+        if (is_point_in_board_play_area(current_offset, getPlaySize())) {
+          return getTileValue(current_offset) == current_point_value;
+        }
+      }
+      return false;
     };
 
-    if (!current_point_value ||
-        std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
-                    check_point_offset_in_range)) {
-      return true;
-    }
-    return false;
+    return ((current_point_value == 0u) ||
+            std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
+                        offset_in_range_with_same_value));
   };
-  return std::any_of(std::begin(board), std::end(board), predicate);
+  return std::any_of(std::begin(board), std::end(board), can_move_to_offset);
 }
 
 bool GameBoard::addTile() {

@@ -36,7 +36,6 @@ class GameBoard {
   void setTile(point2D_t pt, Tile tile);
 
   int point2D_to_1D_index(point2D_t pt) const;
-  bool testAdd(point2D_t pt, ull value) const;
   std::vector<point2D_t> collectFreeTiles() const;
 
   bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
