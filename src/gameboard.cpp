@@ -113,10 +113,6 @@ void GameBoard::setTileBlocked(point2D_t pt, bool blocked) {
   board[point2D_to_1D_index(pt)].blocked = blocked;
 }
 
-void GameBoard::clearGameBoard() {
-  board = std::vector<Tile>(playsize * playsize);
-}
-
 int GameBoard::getPlaySize() const {
   return playsize;
 }

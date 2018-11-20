@@ -63,7 +63,6 @@ public:
   void setTileValue(point2D_t pt, ull value);
   bool getTileBlocked(point2D_t pt) const;
   void setTileBlocked(point2D_t pt, bool blocked);
-  void clearGameBoard();
   int getPlaySize() const;
   void unblockTiles();
   bool canMove();
