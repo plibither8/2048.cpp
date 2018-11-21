@@ -4,15 +4,15 @@ namespace {
 namespace Keypress {
 namespace Code {
 
-enum { CODE_ESC = 27, CODE_LSQUAREBRACKET = '[' };
+enum class EscKey{ CODE_ESC = 27, CODE_LSQUAREBRACKET = '[' };
 
 // Hotkey bindings:
 // Style: ANSI (Arrow Keys)
-enum {
-  CODE_ANSI_TRIGGER_1 = CODE_ESC,
-  CODE_ANSI_TRIGGER_2 = CODE_LSQUAREBRACKET
+enum class KeyBindEsc{
+  CODE_ANSI_TRIGGER_1 = (int)EscKey::CODE_ESC,
+  CODE_ANSI_TRIGGER_2 = (int)EscKey::CODE_LSQUAREBRACKET
 };
-enum {
+enum class KeyBindABDC{
   CODE_ANSI_UP = 'A',
   CODE_ANSI_DOWN = 'B',
   CODE_ANSI_LEFT = 'D',
@@ -20,7 +20,7 @@ enum {
 };
 
 // Style: WASD
-enum {
+enum class KeyBindWASD{
   CODE_WASD_UP = 'W',
   CODE_WASD_DOWN = 'S',
   CODE_WASD_LEFT = 'A',
@@ -28,14 +28,17 @@ enum {
 };
 
 // Style: Vim
-enum {
+enum class KeyBindVim{
   CODE_VIM_UP = 'K',
   CODE_VIM_DOWN = 'J',
   CODE_VIM_LEFT = 'H',
   CODE_VIM_RIGHT = 'L'
 };
 
-enum { CODE_HOTKEY_ACTION_SAVE = 'Z', CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P' };
+enum class KeyBindSave{
+	CODE_HOTKEY_ACTION_SAVE = 'Z',
+	CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P'
+};
 
 } // namespace Code
 } // namespace Keypress
@@ -207,26 +210,23 @@ void Game::input(KeyInputErrorStatus err) {
     std::cout << red << "  Invalid input. Please try again." << def;
     newline(2);
   }
-
-  getInput(c);
-
-  if (c == CODE_ANSI_TRIGGER_1) {
+  if (c == (int)KeyBindEsc::CODE_ANSI_TRIGGER_1) {
     getInput(c);
-    if (c == CODE_ANSI_TRIGGER_2) {
+    if (c == (int)KeyBindEsc::CODE_ANSI_TRIGGER_2) {
       getInput(c);
       newline(4);
       switch (c) {
-      case CODE_ANSI_UP:
-        decideMove(UP);
+      case (int)KeyBindABDC::CODE_ANSI_UP:
+        decideMove(Directions::UP);
         return;
-      case CODE_ANSI_DOWN:
-        decideMove(DOWN);
+      case (int)KeyBindABDC::CODE_ANSI_DOWN:
+        decideMove(Directions::DOWN);
         return;
-      case CODE_ANSI_RIGHT:
-        decideMove(RIGHT);
+      case (int)KeyBindABDC::CODE_ANSI_RIGHT:
+        decideMove(Directions::RIGHT);
         return;
-      case CODE_ANSI_LEFT:
-        decideMove(LEFT);
+      case (int)KeyBindABDC::CODE_ANSI_LEFT:
+        decideMove(Directions::LEFT);
         return;
       }
     } else {
@@ -238,24 +238,24 @@ void Game::input(KeyInputErrorStatus err) {
 
   switch (toupper(c)) {
 
-  case CODE_WASD_UP:
-  case CODE_VIM_UP:
-    decideMove(UP);
+  case (int)KeyBindWASD::CODE_WASD_UP:
+  case (int)KeyBindVim::CODE_VIM_UP:
+    decideMove(Directions::UP);
     break;
-  case CODE_WASD_LEFT:
-  case CODE_VIM_LEFT:
-    decideMove(LEFT);
+  case (int)KeyBindWASD::CODE_WASD_LEFT:
+  case (int)KeyBindVim::CODE_VIM_LEFT:
+    decideMove(Directions::LEFT);
     break;
-  case CODE_WASD_DOWN:
-  case CODE_VIM_DOWN:
-    decideMove(DOWN);
+  case (int)KeyBindWASD::CODE_WASD_DOWN:
+  case (int)KeyBindVim::CODE_VIM_DOWN:
+    decideMove(Directions::DOWN);
     break;
-  case CODE_WASD_RIGHT:
-  case CODE_VIM_RIGHT:
-    decideMove(RIGHT);
+  case (int)KeyBindWASD::CODE_WASD_RIGHT:
+  case (int)KeyBindVim::CODE_VIM_RIGHT:
+    decideMove(Directions::RIGHT);
     break;
-  case CODE_HOTKEY_ACTION_SAVE:
-  case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
+  case (int)KeyBindSave::CODE_HOTKEY_ACTION_SAVE:
+  case (int)KeyBindSave::CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
     saveState();
     stateSaved = true;
     break;
@@ -269,19 +269,19 @@ void Game::input(KeyInputErrorStatus err) {
 void Game::decideMove(Directions d) {
 
   switch (d) {
-  case UP:
+  case Directions::UP:
     gamePlayBoard.tumbleTilesUp();
     break;
 
-  case DOWN:
+  case Directions::DOWN:
     gamePlayBoard.tumbleTilesDown();
     break;
 
-  case LEFT:
+  case Directions::LEFT:
     gamePlayBoard.tumbleTilesLeft();
     break;
 
-  case RIGHT:
+  case Directions::RIGHT:
     gamePlayBoard.tumbleTilesRight();
     break;
   }

@@ -21,7 +21,13 @@
 #include <string>
 #include <vector>
 
-enum Directions { UP, DOWN, RIGHT, LEFT };
+enum Directions
+{ 
+	UP,
+    DOWN,
+    RIGHT,
+    LEFT
+};
 
 class Game {
 
