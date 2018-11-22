@@ -56,6 +56,7 @@ public:
   bool moved{true};
   ull score{};
   ull largestTile{2};
+  long long moveCount{-1};
 
   GameBoard() = default;
   explicit GameBoard(ull playsize)
