@@ -117,6 +117,10 @@ int GameBoard::getPlaySize() const {
   return playsize;
 }
 
+bool GameBoard::hasWon() const {
+  return win;
+}
+
 void GameBoard::unblockTiles() {
   std::transform(std::begin(board), std::end(board), std::begin(board),
                  [](const Tile t) {
@@ -251,7 +255,7 @@ void GameBoard::discoverLargestTileValue(Tile targetTile) {
 }
 
 void GameBoard::discoverWinningTileValue(Tile targetTile) {
-  if (!win) {
+  if (!hasWon()) {
     constexpr auto GAME_TILE_WINNING_SCORE = 2048;
     if (targetTile.value == GAME_TILE_WINNING_SCORE) {
       win = true;

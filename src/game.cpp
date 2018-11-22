@@ -326,7 +326,7 @@ void Game::saveStats() const {
                         gamePlayBoard.score :
                         stats.bestScore;
   stats.gameCount++;
-  stats.winCount = gamePlayBoard.win ? stats.winCount + 1 : stats.winCount;
+  stats.winCount = gamePlayBoard.hasWon() ? stats.winCount + 1 : stats.winCount;
   stats.totalMoveCount += gamePlayBoard.moveCount;
   stats.totalDuration += duration;
 
@@ -343,7 +343,7 @@ void Game::saveStats() const {
 void Game::saveScore() const {
   Scoreboard s;
   s.score = gamePlayBoard.score;
-  s.win = gamePlayBoard.win;
+  s.win = gamePlayBoard.hasWon();
   s.moveCount = gamePlayBoard.moveCount;
   s.largestTile = gamePlayBoard.largestTile;
   s.duration = duration;
@@ -390,7 +390,7 @@ void Game::playGame(ContinueStatus cont) {
 
     drawBoard();
 
-    if (gamePlayBoard.win || !gamePlayBoard.canMove()) {
+    if (gamePlayBoard.hasWon() || !gamePlayBoard.canMove()) {
       break;
     }
 
@@ -408,7 +408,7 @@ void Game::playGame(ContinueStatus cont) {
   duration = elapsed.count();
 
   std::ostringstream str_os;
-  if (gamePlayBoard.win) {
+  if (gamePlayBoard.hasWon()) {
     str_os << win_richtext.str();
   } else {
     str_os << lose_richtext.str();

@@ -31,6 +31,7 @@ private:
 class GameBoard {
   std::vector<Tile> board;
   ull playsize{0};
+  bool win{};
 
   Tile getTile(point2D_t pt) const;
   void setTile(point2D_t pt, Tile tile);
@@ -52,7 +53,6 @@ class GameBoard {
   void move(point2D_t pt, point2D_t pt_offset);
 
 public:
-  bool win{};
   bool moved{true};
   ull score{};
   ull largestTile{2};
@@ -65,6 +65,7 @@ public:
   void setTileValue(point2D_t pt, ull value);
   void setTileBlocked(point2D_t pt, bool blocked);
   int getPlaySize() const;
+  bool hasWon() const;
   void unblockTiles();
   bool canMove();
   void registerMoveByOne();
