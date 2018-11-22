@@ -66,6 +66,7 @@ public:
   void setTileBlocked(point2D_t pt, bool blocked);
   int getPlaySize() const;
   bool hasWon() const;
+  long long MoveCount() const;
   void unblockTiles();
   bool canMove();
   void registerMoveByOne();

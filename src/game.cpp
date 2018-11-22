@@ -179,9 +179,9 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
              << std::string(
                     inner_padding_length -
                         std::string{moves_text_label}.length() -
-                        std::to_string(gamePlayBoard.moveCount).length(),
+                        std::to_string(gamePlayBoard.MoveCount()).length(),
                     border_padding_char)
-             << gamePlayBoard.moveCount << inner_border_padding
+             << gamePlayBoard.MoveCount() << inner_border_padding
              << vertical_border_pattern << "\n";
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
@@ -298,7 +298,7 @@ void Game::statistics() const {
   auto data_stats = std::array<std::string, stats_attributes_text.size()>{};
   data_stats = {std::to_string(gamePlayBoard.score),
                 std::to_string(gamePlayBoard.largestTile),
-                std::to_string(gamePlayBoard.moveCount),
+                std::to_string(gamePlayBoard.MoveCount()),
                 secondsFormat(duration)};
 
   std::ostringstream stats_richtext;
@@ -327,7 +327,7 @@ void Game::saveStats() const {
                         stats.bestScore;
   stats.gameCount++;
   stats.winCount = gamePlayBoard.hasWon() ? stats.winCount + 1 : stats.winCount;
-  stats.totalMoveCount += gamePlayBoard.moveCount;
+  stats.totalMoveCount += gamePlayBoard.MoveCount();
   stats.totalDuration += duration;
 
   std::fstream statistics("../data/statistics.txt");
@@ -344,7 +344,7 @@ void Game::saveScore() const {
   Scoreboard s;
   s.score = gamePlayBoard.score;
   s.win = gamePlayBoard.hasWon();
-  s.moveCount = gamePlayBoard.moveCount;
+  s.moveCount = gamePlayBoard.MoveCount();
   s.largestTile = gamePlayBoard.largestTile;
   s.duration = duration;
   s.save();
@@ -357,7 +357,7 @@ void Game::saveState() const {
   std::fstream stateFile("../data/previousGame", std::ios_base::app);
   stateFile << gamePlayBoard.printState();
   stateFile.close();
-  stats << gamePlayBoard.score << ":" << gamePlayBoard.moveCount;
+  stats << gamePlayBoard.score << ":" << gamePlayBoard.MoveCount();
   stats.close();
 }
 

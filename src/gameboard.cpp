@@ -121,6 +121,10 @@ bool GameBoard::hasWon() const {
   return win;
 }
 
+long long GameBoard::MoveCount() const {
+  return moveCount;
+}
+
 void GameBoard::unblockTiles() {
   std::transform(std::begin(board), std::end(board), std::begin(board),
                  [](const Tile t) {
