@@ -153,6 +153,11 @@ bool GameBoard::canMove() {
   return std::any_of(std::begin(board), std::end(board), can_move_to_offset);
 }
 
+void GameBoard::registerMoveByOne() {
+  moveCount++;
+  moved = false;
+}
+
 bool GameBoard::addTile() {
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
   const auto freeTiles = collectFreeTiles();

@@ -385,8 +385,7 @@ void Game::playGame(ContinueStatus cont) {
     std::ostringstream str_os;
     if (gamePlayBoard.moved) {
       gamePlayBoard.addTile();
-      gamePlayBoard.moveCount++;
-      gamePlayBoard.moved = false;
+      gamePlayBoard.registerMoveByOne();
     }
 
     drawBoard();

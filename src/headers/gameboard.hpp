@@ -67,6 +67,7 @@ public:
   int getPlaySize() const;
   void unblockTiles();
   bool canMove();
+  void registerMoveByOne();
 
   bool addTile();
 
