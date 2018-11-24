@@ -31,12 +31,14 @@ private:
 class GameBoard {
   std::vector<Tile> board;
   ull playsize{0};
+  bool win{};
 
   Tile getTile(point2D_t pt) const;
   void setTile(point2D_t pt, Tile tile);
+  ull getTileValue(point2D_t pt) const;
+  bool getTileBlocked(point2D_t pt) const;
 
   int point2D_to_1D_index(point2D_t pt) const;
-  bool testAdd(point2D_t pt, ull value) const;
   std::vector<point2D_t> collectFreeTiles() const;
 
   bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
@@ -45,32 +47,29 @@ class GameBoard {
 
   bool collasped_or_shifted_tiles(point2D_t pt, point2D_t pt_offset);
 
-  bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset);
-
   void discoverLargestTileValue(Tile targetTile);
   void discoverWinningTileValue(Tile targetTile);
 
   void move(point2D_t pt, point2D_t pt_offset);
 
 public:
-  bool win{};
   bool moved{true};
   ull score{};
   ull largestTile{2};
+  long long moveCount{-1};
 
   GameBoard() = default;
   explicit GameBoard(ull playsize)
       : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
 
-  ull getTileValue(point2D_t pt) const;
   void setTileValue(point2D_t pt, ull value);
-  bool getTileBlocked(point2D_t pt) const;
   void setTileBlocked(point2D_t pt, bool blocked);
-  void clearGameBoard();
   int getPlaySize() const;
-  void setPlaySize(ull newSize);
+  bool hasWon() const;
+  long long MoveCount() const;
   void unblockTiles();
   bool canMove();
+  void registerMoveByOne();
 
   bool addTile();
 

@@ -27,7 +27,6 @@ class Game {
 
 private:
   ull bestScore;
-  long long moveCount;
   double duration;
   GameBoard gamePlayBoard;
   RandInt randInt;
@@ -58,9 +57,7 @@ private:
   ull setBoardSize();
 
 public:
-  Game()
-      : bestScore(0), moveCount(-1), duration(0.0), stateSaved(false),
-        noSave(false) {}
+  Game() : bestScore(0), duration(0.0), stateSaved(false), noSave(false) {}
   void startGame();
   void continueGame();
 };
