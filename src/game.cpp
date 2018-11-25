@@ -53,7 +53,7 @@ Color::Modifier Tile::tileColor(ull value) {
 int GetLines() {
   int noOfLines = 0;
   std::string tempLine;
-  std::ifstream stateFile("./data/previousGame");
+  std::ifstream stateFile("../data/previousGame");
   while (std::getline(stateFile, tempLine, '\n')) {
     noOfLines++;
   }
@@ -61,44 +61,78 @@ int GetLines() {
   return noOfLines;
 }
 
-void Game::initialiseContinueBoardArray() {
-
-  std::ifstream stateFile("./data/previousGame");
-  if ((bool)stateFile) {
-    std::string temp, tempLine, tempBlock;
-    const ull savedBoardPlaySize = GetLines();
-
-    std::string tempArr[savedBoardPlaySize][savedBoardPlaySize];
-    int i = 0;
-    while (std::getline(stateFile, tempLine, '\n') && i < savedBoardPlaySize) {
-      std::stringstream line(tempLine);
-      int j = 0;
-      while (std::getline(line, temp, ',') && j < savedBoardPlaySize) {
-        tempArr[j][i] = temp;
-        j++;
-      }
-      i++;
+std::vector<std::string> get_file_tile_data(std::istream &buf) {
+  std::vector<std::string> tempbuffer;
+  enum { MAX_WIDTH = 10, MAX_HEIGHT = 10 };
+  auto i{0};
+  for (std::string tempLine; std::getline(buf, tempLine) && i < MAX_WIDTH;
+       i++) {
+    std::istringstream temp_filestream(tempLine);
+    auto j{0};
+    for (std::string a_word;
+         std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
+      tempbuffer.push_back(a_word);
     }
+  }
+  return tempbuffer;
+}
 
-    gamePlayBoard = GameBoard(savedBoardPlaySize);
-
-    for (int i = 0; i < gamePlayBoard.getPlaySize(); i++) {
-      for (int j = 0; j < gamePlayBoard.getPlaySize(); j++) {
-        std::stringstream blocks(tempArr[j][i]);
-        int k = 0;
-        while (std::getline(blocks, tempBlock, ':')) {
-          const auto current_point = point2D_t{j, i};
-          if (k == 0) {
-            gamePlayBoard.setTileValue(current_point, std::stoi(tempBlock));
-          } else if (k == 1) {
-            gamePlayBoard.setTileBlocked(current_point, std::stoi(tempBlock));
+std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
+  std::vector<Tile> result_buf;
+  auto tile_processed_counter{0};
+  const auto prime_tile_data =
+      [&tile_processed_counter](const std::string tile_data) {
+        enum FieldIndex { IDX_TILE_VALUE, IDX_TILE_BLOCKED, MAX_NO_TILE_IDXS };
+        std::array<int, MAX_NO_TILE_IDXS> tile_internal;
+        std::istringstream blocks(tile_data);
+        auto idx_id{0};
+        for (std::string temptiledata; std::getline(
+                 blocks, temptiledata, ':') /*&& idx_id < MAX_NO_TILE_IDXS*/;
+             idx_id++) {
+          switch (idx_id) {
+          case IDX_TILE_VALUE:
+            std::get<IDX_TILE_VALUE>(tile_internal) = std::stoi(temptiledata);
+            break;
+          case IDX_TILE_BLOCKED:
+            std::get<IDX_TILE_BLOCKED>(tile_internal) = std::stoi(temptiledata);
+            break;
+          default:
+            std::cout << "ERROR: [tile_processed_counter: "
+                      << tile_processed_counter
+                      << "]: Read past MAX_NO_TILE_IDXS! (idx no:"
+                      << MAX_NO_TILE_IDXS << ")\n";
           }
-          k++;
         }
-      }
-    }
-    stateFile.close();
-    std::ifstream stats("./data/previousGameStats");
+        tile_processed_counter++;
+        return Tile(std::get<IDX_TILE_VALUE>(tile_internal),
+                    std::get<IDX_TILE_BLOCKED>(tile_internal));
+      };
+  std::transform(std::begin(buf), std::end(buf), std::back_inserter(result_buf),
+                 prime_tile_data);
+  return result_buf;
+}
+
+bool Game::load_GameBoard_data_from_file(std::string filename) {
+  std::ifstream stateFile(filename);
+  if (stateFile) {
+    const ull savedBoardPlaySize = GetLines();
+    const auto file_tile_data = get_file_tile_data(stateFile);
+    const auto processed_tile_data =
+        process_file_tile_string_data(file_tile_data);
+    gamePlayBoard = GameBoard(savedBoardPlaySize, processed_tile_data);
+    return true;
+  }
+  return false;
+}
+
+void Game::initialiseContinueBoardArray() {
+  std::string temp, tempLine;
+  auto loaded_ok{false};
+
+  loaded_ok = load_GameBoard_data_from_file("../data/previousGame");
+
+  if (loaded_ok) {
+    std::ifstream stats("../data/previousGameStats");
     while (std::getline(stats, tempLine, '\n')) {
       std::stringstream line(tempLine);
       int k = 0;
@@ -110,7 +144,6 @@ void Game::initialiseContinueBoardArray() {
         k++;
       }
     }
-
   } else {
     noSave = true;
   }
