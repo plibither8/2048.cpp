@@ -50,14 +50,10 @@ Color::Modifier Tile::tileColor(ull value) {
   return colors[index];
 }
 
-int GetLines() {
-  int noOfLines = 0;
-  std::string tempLine;
-  std::ifstream stateFile("../data/previousGame");
-  while (std::getline(stateFile, tempLine, '\n')) {
-    noOfLines++;
-  }
-  stateFile.close();
+int GetLines(std::string filename) {
+  std::ifstream stateFile(filename);
+  using iter = std::istreambuf_iterator<char>;
+  const auto noOfLines = std::count(iter{stateFile}, iter{}, '\n');
   return noOfLines;
 }
 
@@ -115,7 +111,7 @@ std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
 bool Game::load_GameBoard_data_from_file(std::string filename) {
   std::ifstream stateFile(filename);
   if (stateFile) {
-    const ull savedBoardPlaySize = GetLines();
+    const ull savedBoardPlaySize = GetLines(filename);
     const auto file_tile_data = get_file_tile_data(stateFile);
     const auto processed_tile_data =
         process_file_tile_string_data(file_tile_data);
