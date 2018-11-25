@@ -125,26 +125,47 @@ bool Game::load_GameBoard_data_from_file(std::string filename) {
   return false;
 }
 
-void Game::initialiseContinueBoardArray() {
-  std::string temp, tempLine;
-  auto loaded_ok{false};
-
-  loaded_ok = load_GameBoard_data_from_file("../data/previousGame");
-
-  if (loaded_ok) {
-    std::ifstream stats("../data/previousGameStats");
-    while (std::getline(stats, tempLine, '\n')) {
-      std::stringstream line(tempLine);
-      int k = 0;
-      while (std::getline(line, temp, ':')) {
-        if (k == 0)
+bool Game::get_and_process_game_stats_string_data(std::istream &stats_file) {
+  if (stats_file) {
+    for (std::string tempLine; std::getline(stats_file, tempLine);) {
+      enum GameStatsFieldIndex {
+        IDX_GAME_SCORE_VALUE,
+        IDX_GAME_MOVECOUNT,
+        MAX_NO_GAME_STATS_IDXS
+      };
+      std::istringstream line(tempLine);
+      auto idx_id{0};
+      for (std::string temp; std::getline(line, temp, ':'); idx_id++) {
+        switch (idx_id) {
+        case IDX_GAME_SCORE_VALUE:
           gamePlayBoard.score = std::stoi(temp);
-        else if (k == 1)
+          break;
+        case IDX_GAME_MOVECOUNT:
           gamePlayBoard.moveCount = std::stoi(temp) - 1;
-        k++;
+          break;
+        default:
+          // Error: No fields to process!
+          break;
+        }
       }
     }
-  } else {
+    return true;
+  }
+  return false;
+}
+
+bool Game::load_game_stats_from_file(std::string filename) {
+  std::ifstream stats(filename);
+  return get_and_process_game_stats_string_data(stats);
+}
+
+void Game::initialiseContinueBoardArray() {
+  auto loaded_ok{false}, loaded_ok2{false};
+
+  loaded_ok = load_GameBoard_data_from_file("../data/previousGame");
+  loaded_ok2 = load_game_stats_from_file("../data/previousGameStats");
+
+  if (!loaded_ok || !loaded_ok2) {
     noSave = true;
   }
 }

@@ -38,6 +38,8 @@ private:
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
   bool load_GameBoard_data_from_file(std::string filename);
+  bool get_and_process_game_stats_string_data(std::istream &stats_file);
+  bool load_game_stats_from_file(std::string filename);
   void initialiseContinueBoardArray();
   void drawBoard() const;
   void drawScoreBoard(std::ostream &out_stream) const;
