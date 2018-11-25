@@ -159,15 +159,11 @@ bool Game::load_game_stats_from_file(std::string filename) {
   return get_and_process_game_stats_string_data(stats);
 }
 
-void Game::initialiseContinueBoardArray() {
-  auto loaded_ok{false}, loaded_ok2{false};
-
-  loaded_ok = load_GameBoard_data_from_file("../data/previousGame");
-  loaded_ok2 = load_game_stats_from_file("../data/previousGameStats");
-
-  if (!loaded_ok || !loaded_ok2) {
-    noSave = true;
-  }
+bool Game::initialiseContinueBoardArray() {
+  constexpr auto gameboard_data_filename = "../data/previousGame";
+  constexpr auto game_stats_data_filename = "../data/previousGameStats";
+  return (load_GameBoard_data_from_file(gameboard_data_filename) &&
+          load_game_stats_from_file(game_stats_data_filename));
 }
 
 void Game::drawBoard() const {
@@ -553,11 +549,10 @@ void Game::continueGame() {
     bestScore = stats.bestScore;
   }
 
-  initialiseContinueBoardArray();
-
-  if (noSave) {
-    startGame();
-  } else {
+  if (initialiseContinueBoardArray()) {
     playGame(ContinueStatus::STATUS_CONTINUE);
+  } else {
+    noSave = true;
+    startGame();
   }
 }
