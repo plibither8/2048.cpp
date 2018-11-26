@@ -28,8 +28,9 @@ void Scoreboard::writeToFile() {
 
 void Scoreboard::printScore() {
   constexpr auto no_save_text = "No saved scores.";
-  constexpr auto score_attributes_text = {
+  const auto score_attributes_text = {
       "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
+  //  constexpr auto num_of_score_attributes_text = 7;
   constexpr auto header_border_text =
       "┌─────┬────────────────────┬──────────┬──────┬───────┬──────────────┬──────────────┐";
   constexpr auto mid_border_text =
@@ -100,9 +101,9 @@ void Scoreboard::printStats() {
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
   constexpr auto footer_border_text = "└────────────────────┴─────────────┘";
-  constexpr auto stats_attributes_text = {
-      "Best Score", "Game Count", "Number of Wins", "Total Moves Played",
-      "Total Duration"};
+  const auto stats_attributes_text = {"Best Score", "Game Count",
+                                      "Number of Wins", "Total Moves Played",
+                                      "Total Duration"};
   constexpr auto no_save_text = "No saved statistics.";
   constexpr auto any_key_exit_text = "Press any key to exit: ";
   constexpr auto sp = "  ";
@@ -110,14 +111,16 @@ void Scoreboard::printStats() {
   Stats stats;
   std::ostringstream stats_richtext;
   if (stats.collectStatistics()) {
-    auto data_stats = std::array<std::string, stats_attributes_text.size()>{};
+    constexpr auto num_of_stats_attributes_text = 5;
+    auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
     data_stats = {
         std::to_string(stats.bestScore), std::to_string(stats.gameCount),
         std::to_string(stats.winCount), std::to_string(stats.totalMoveCount),
         secondsFormat(stats.totalDuration)};
 
     auto counter{0};
-    const auto populate_stats_info = [data_stats, &counter,
+    const auto populate_stats_info = [data_stats, stats_attributes_text,
+                                      &counter,
                                       &stats_richtext](const std::string) {
       stats_richtext << sp << "│ " << bold_on << std::left << std::setw(18)
                      << std::begin(stats_attributes_text)[counter] << bold_off
