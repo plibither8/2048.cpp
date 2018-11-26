@@ -39,16 +39,6 @@ enum { CODE_HOTKEY_ACTION_SAVE = 'Z', CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P' };
 
 } // namespace Code
 } // namespace Keypress
-} // namespace
-
-Color::Modifier Tile::tileColor(ull value) {
-  std::vector<Color::Modifier> colors{red, yellow, magenta, blue, cyan, yellow,
-                                      red, yellow, magenta, blue, green};
-  int log = log2(value);
-  int index = log < 12 ? log - 1 : 10;
-
-  return colors[index];
-}
 
 int GetLines(std::string filename) {
   std::ifstream stateFile(filename);
@@ -108,17 +98,29 @@ std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
   return result_buf;
 }
 
-bool Game::load_GameBoard_data_from_file(std::string filename) {
+std::tuple<bool, GameBoard>
+load_GameBoard_data_from_file(std::string filename) {
   std::ifstream stateFile(filename);
   if (stateFile) {
     const ull savedBoardPlaySize = GetLines(filename);
     const auto file_tile_data = get_file_tile_data(stateFile);
     const auto processed_tile_data =
         process_file_tile_string_data(file_tile_data);
-    gamePlayBoard = GameBoard(savedBoardPlaySize, processed_tile_data);
-    return true;
+    return std::make_tuple(true,
+                           GameBoard(savedBoardPlaySize, processed_tile_data));
   }
-  return false;
+  return std::make_tuple(false, GameBoard{});
+}
+
+} // namespace
+
+Color::Modifier Tile::tileColor(ull value) {
+  std::vector<Color::Modifier> colors{red, yellow, magenta, blue, cyan, yellow,
+                                      red, yellow, magenta, blue, green};
+  int log = log2(value);
+  int index = log < 12 ? log - 1 : 10;
+
+  return colors[index];
 }
 
 bool Game::get_and_process_game_stats_string_data(std::istream &stats_file) {
@@ -158,7 +160,11 @@ bool Game::load_game_stats_from_file(std::string filename) {
 bool Game::initialiseContinueBoardArray() {
   constexpr auto gameboard_data_filename = "../data/previousGame";
   constexpr auto game_stats_data_filename = "../data/previousGameStats";
-  return (load_GameBoard_data_from_file(gameboard_data_filename) &&
+  auto loaded_gameboard{false};
+  std::tie(loaded_gameboard, gamePlayBoard) =
+      load_GameBoard_data_from_file(gameboard_data_filename);
+
+  return (loaded_gameboard &&
           load_game_stats_from_file(game_stats_data_filename));
 }
 
