@@ -291,11 +291,12 @@ void Game::decideMove(Directions d) {
 void Game::statistics() const {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
-  constexpr auto stats_attributes_text = {
+  const auto stats_attributes_text = {
       "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+  constexpr auto num_of_stats_attributes_text = 4;
   constexpr auto sp = "  ";
 
-  auto data_stats = std::array<std::string, stats_attributes_text.size()>{};
+  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
   data_stats = {std::to_string(gamePlayBoard.score),
                 std::to_string(gamePlayBoard.largestTile),
                 std::to_string(gamePlayBoard.MoveCount()),
@@ -306,7 +307,7 @@ void Game::statistics() const {
   stats_richtext << yellow << sp << divider_text << def << "\n";
 
   auto counter{0};
-  const auto populate_stats_info = [data_stats, &counter,
+  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
                                     &stats_richtext](const std::string) {
     stats_richtext << sp << std::left << std::setw(19)
                    << std::begin(stats_attributes_text)[counter] << bold_on
@@ -425,8 +426,9 @@ void Game::playGame(ContinueStatus cont) {
 }
 
 ull Game::setBoardSize() {
-  constexpr auto invalid_prompt_text = {
+  const auto invalid_prompt_text = {
       "Invalid input. Gameboard size should range from ", " to ", "."};
+  //  constexpr auto num_of_invalid_prompt_text = 3;
   constexpr auto no_save_found_text =
       "No saved game found. Starting a new game.";
   constexpr auto board_size_prompt_text =
