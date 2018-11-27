@@ -37,7 +37,9 @@ private:
   enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
-  void initialiseContinueBoardArray();
+  bool get_and_process_game_stats_string_data(std::istream &stats_file);
+  bool load_game_stats_from_file(std::string filename);
+  bool initialiseContinueBoardArray();
   void drawBoard() const;
   void drawScoreBoard(std::ostream &out_stream) const;
   void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);

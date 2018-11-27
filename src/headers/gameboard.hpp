@@ -61,6 +61,8 @@ public:
   GameBoard() = default;
   explicit GameBoard(ull playsize)
       : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
+  explicit GameBoard(ull playsize, const std::vector<Tile> &prempt_board)
+      : playsize{playsize}, board{prempt_board} {}
 
   void setTileValue(point2D_t pt, ull value);
   void setTileBlocked(point2D_t pt, bool blocked);
