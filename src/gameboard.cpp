@@ -1,4 +1,8 @@
-#include <gameboard.hpp>
+#include "gameboard.hpp"
+#include <algorithm>
+#include <array>
+#include <iomanip>
+#include <sstream>
 
 namespace {
 std::string drawTileString(Tile currentTile) {
