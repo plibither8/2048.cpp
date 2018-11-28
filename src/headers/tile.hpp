@@ -1,11 +1,10 @@
 #ifndef TILE_H
 #define TILE_H
 
-#include <color.hpp>
-#include <global.hpp>
+#include "color.hpp"
+#include "global.hpp"
 
 class Tile {
-
 public:
   Tile() = default;
   explicit Tile(ull value, bool blocked) : value{value}, blocked{blocked} {}

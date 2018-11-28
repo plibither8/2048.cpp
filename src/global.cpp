@@ -1,4 +1,5 @@
 #include "global.hpp"
+#include <iostream>
 #include <sstream>
 
 #ifdef _WIN32
