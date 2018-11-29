@@ -24,6 +24,7 @@ private:
   bool load_game_stats_from_file(std::string filename);
   bool initialiseContinueBoardArray();
   bool soloGameLoop();
+  void drawEndScreen();
   void drawBoard() const;
   void drawGameState();
   void drawScoreBoard(std::ostream &out_stream) const;

@@ -425,6 +425,28 @@ void Game::saveState() const {
   stats.close();
 }
 
+void Game::drawEndScreen() {
+  constexpr auto win_game_text = "You win! Congratulations!";
+  constexpr auto lose_game_text = "Game over! You lose.";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
+  std::ostringstream win_richtext;
+  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
+               << "\n\n\n";
+
+  std::ostringstream lose_richtext;
+  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
+                << "\n\n\n";
+
+  if (gamePlayBoard.hasWon()) {
+    str_os << win_richtext.str();
+  } else {
+    str_os << lose_richtext.str();
+  }
+  std::cout << str_os.str();
+}
+
 void Game::drawGameState() {
   constexpr auto state_saved_text =
       "The game has been saved. Feel free to take a break.";
@@ -487,19 +509,6 @@ void Game::endlessGameLoop() {
 }
 
 void Game::playGame(ContinueStatus cont) {
-  constexpr auto win_game_text = "You win! Congratulations!";
-  constexpr auto lose_game_text = "Game over! You lose.";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream win_richtext;
-  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
-               << "\n\n\n";
-
-  std::ostringstream lose_richtext;
-  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
-                << "\n\n\n";
-
   auto startTime = std::chrono::high_resolution_clock::now();
   endlessGameLoop();
   auto finishTime = std::chrono::high_resolution_clock::now();
@@ -507,13 +516,7 @@ void Game::playGame(ContinueStatus cont) {
   duration = elapsed.count();
 
   drawBoard();
-
-  if (gamePlayBoard.hasWon()) {
-    str_os << win_richtext.str();
-  } else {
-    str_os << lose_richtext.str();
-  }
-  std::cout << str_os.str();
+  drawEndScreen();
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
