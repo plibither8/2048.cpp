@@ -247,7 +247,7 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
-void Game::input(KeyInputErrorStatus err) {
+void Game::drawInputControls() {
   constexpr auto input_commands_text = u8R"(
   W or K or ↑ => Up
   A or H or ← => Left
@@ -267,13 +267,16 @@ void Game::input(KeyInputErrorStatus err) {
 
   str_os << input_commands_text;
 
-  if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
+  if (input_err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
     str_os << invalid_prompt_richtext.str();
+    input_err = KeyInputErrorStatus::STATUS_INPUT_VALID;
   }
   std::cout << str_os.str();
+}
+
+void Game::input() {
 
   using namespace Keypress::Code;
-
   char c;
   getInput(c);
 
@@ -322,8 +325,7 @@ void Game::input(KeyInputErrorStatus err) {
     stateSaved = true;
     break;
   default:
-    drawBoard();
-    input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
+    input_err = KeyInputErrorStatus::STATUS_INPUT_ERROR;
     break;
   }
 }
@@ -423,16 +425,70 @@ void Game::saveState() const {
   stats.close();
 }
 
-void Game::playGame(ContinueStatus cont) {
+void Game::drawGameState() {
   constexpr auto state_saved_text =
       "The game has been saved. Feel free to take a break.";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
+  std::ostringstream state_saved_richtext;
+  state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                       << bold_off << "\n\n";
+  if (stateSaved) {
+    str_os << state_saved_richtext.str();
+    stateSaved = false;
+  }
+  std::cout << str_os.str();
+}
+
+void Game::drawGraphics() {
+  drawBoard();
+  drawGameState();
+  drawInputControls();
+}
+
+std::tuple<bool, bool> Game::process_gamelogic() {
+  gamePlayBoard.unblockTiles();
+  if (gamePlayBoard.moved) {
+    gamePlayBoard.addTile();
+    gamePlayBoard.registerMoveByOne();
+  }
+
+  if (gamePlayBoard.hasWon()) {
+    return std::make_tuple(true, false);
+  }
+  if (!gamePlayBoard.canMove()) {
+    return std::make_tuple(false, true);
+  }
+  return std::make_tuple(false, false);
+}
+
+void Game::gameloop() {
+  enum GameStatusFlag { FLAG_WIN, FLAG_END_GAME, MAX_NO_GAME_STATUS_FLAGS };
+  auto gamestatus = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>{};
+
+  bool endless_mode = true;
+  while (endless_mode) {
+    const auto logic_results = process_gamelogic();
+    std::tie(gamestatus[FLAG_WIN], gamestatus[FLAG_END_GAME]) = logic_results;
+    if (gamestatus[FLAG_WIN]) {
+      // break if question asked
+    }
+    if (gamestatus[FLAG_END_GAME]) {
+      // End endless_mode;
+      break;
+    }
+    drawGraphics();
+    input();
+  }
+}
+
+void Game::playGame(ContinueStatus cont) {
   constexpr auto win_game_text = "You win! Congratulations!";
   constexpr auto lose_game_text = "Game over! You lose.";
   constexpr auto sp = "  ";
 
-  std::ostringstream state_saved_richtext;
-  state_saved_richtext << green << bold_on << sp << state_saved_text << def
-                       << bold_off << "\n\n";
+  std::ostringstream str_os;
   std::ostringstream win_richtext;
   win_richtext << green << bold_on << sp << win_game_text << def << bold_off
                << "\n\n\n";
@@ -442,34 +498,13 @@ void Game::playGame(ContinueStatus cont) {
                 << "\n\n\n";
 
   auto startTime = std::chrono::high_resolution_clock::now();
-
-  while (true) {
-    std::ostringstream str_os;
-    if (gamePlayBoard.moved) {
-      gamePlayBoard.addTile();
-      gamePlayBoard.registerMoveByOne();
-    }
-
-    drawBoard();
-
-    if (gamePlayBoard.hasWon() || !gamePlayBoard.canMove()) {
-      break;
-    }
-
-    if (stateSaved) {
-      str_os << state_saved_richtext.str();
-      stateSaved = false;
-    }
-    std::cout << str_os.str();
-    input();
-    gamePlayBoard.unblockTiles();
-  }
-
+  gameloop();
   auto finishTime = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
 
-  std::ostringstream str_os;
+  drawBoard();
+
   if (gamePlayBoard.hasWon()) {
     str_os << win_richtext.str();
   } else {

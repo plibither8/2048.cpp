@@ -8,23 +8,25 @@ enum Directions { UP, DOWN, RIGHT, LEFT };
 
 class Game {
 private:
+  enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
+  enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
+  enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
+
   ull bestScore;
   double duration;
   GameBoard gamePlayBoard;
   RandInt randInt;
   bool stateSaved;
   bool noSave;
-
-  enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
-  enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
-  enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
+  KeyInputErrorStatus input_err{STATUS_INPUT_VALID};
 
   bool get_and_process_game_stats_string_data(std::istream &stats_file);
   bool load_game_stats_from_file(std::string filename);
   bool initialiseContinueBoardArray();
   void drawBoard() const;
+  void drawGameState();
   void drawScoreBoard(std::ostream &out_stream) const;
-  void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
+  void input();
   void decideMove(Directions);
 
   bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
@@ -39,6 +41,11 @@ private:
   void saveState() const;
   void playGame(ContinueStatus);
   ull setBoardSize();
+
+  void drawGraphics();
+  void gameloop();
+  std::tuple<bool, bool> process_gamelogic();
+  void drawInputControls();
 
 public:
   Game() : bestScore(0), duration(0.0), stateSaved(false), noSave(false) {}
