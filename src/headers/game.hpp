@@ -23,6 +23,7 @@ private:
   bool get_and_process_game_stats_string_data(std::istream &stats_file);
   bool load_game_stats_from_file(std::string filename);
   bool initialiseContinueBoardArray();
+  bool soloGameLoop();
   void drawBoard() const;
   void drawGameState();
   void drawScoreBoard(std::ostream &out_stream) const;
@@ -43,7 +44,7 @@ private:
   ull setBoardSize();
 
   void drawGraphics();
-  void gameloop();
+  void endlessGameLoop();
   std::tuple<bool, bool> process_gamelogic();
   void drawInputControls();
 

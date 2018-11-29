@@ -463,24 +463,27 @@ std::tuple<bool, bool> Game::process_gamelogic() {
   return std::make_tuple(false, false);
 }
 
-void Game::gameloop() {
+bool Game::soloGameLoop() {
   enum GameStatusFlag { FLAG_WIN, FLAG_END_GAME, MAX_NO_GAME_STATUS_FLAGS };
   auto gamestatus = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>{};
-
-  bool endless_mode = true;
-  while (endless_mode) {
-    const auto logic_results = process_gamelogic();
-    std::tie(gamestatus[FLAG_WIN], gamestatus[FLAG_END_GAME]) = logic_results;
-    if (gamestatus[FLAG_WIN]) {
-      // break if question asked
-    }
-    if (gamestatus[FLAG_END_GAME]) {
-      // End endless_mode;
-      break;
-    }
-    drawGraphics();
-    input();
+  const auto logic_results = process_gamelogic();
+  std::tie(gamestatus[FLAG_WIN], gamestatus[FLAG_END_GAME]) = logic_results;
+  if (gamestatus[FLAG_WIN]) {
+    // break if question asked
+    return false;
   }
+  if (gamestatus[FLAG_END_GAME]) {
+    // End endless_mode;
+    return false;
+  }
+  drawGraphics();
+  input();
+  return true;
+}
+
+void Game::endlessGameLoop() {
+  while (soloGameLoop())
+    ;
 }
 
 void Game::playGame(ContinueStatus cont) {
@@ -498,7 +501,7 @@ void Game::playGame(ContinueStatus cont) {
                 << "\n\n\n";
 
   auto startTime = std::chrono::high_resolution_clock::now();
-  gameloop();
+  endlessGameLoop();
   auto finishTime = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
