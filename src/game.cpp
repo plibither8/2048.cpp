@@ -321,7 +321,6 @@ void Game::input() {
     break;
   case CODE_HOTKEY_ACTION_SAVE:
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
-    saveState();
     stateSaved = true;
     break;
   default:
@@ -497,6 +496,9 @@ bool Game::soloGameLoop() {
   if (gamestatus[FLAG_END_GAME]) {
     // End endless_mode;
     return false;
+  }
+  if (stateSaved) {
+    saveState();
   }
   drawGraphics();
   input();
