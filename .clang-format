@@ -1,6 +1,6 @@
 ﻿---
 AccessModifierOffset: '-2'
-AlignAfterOpenBracket: 'Align'
+AlignAfterOpenBracket(BAS_Align): 'true'
 AlignConsecutiveAssignments: 'false'
 AlignConsecutiveDeclarations: 'false'
 AlignEscapedNewlines: 'Left'
@@ -9,7 +9,7 @@ AlignTrailingComments: 'false'
 AllowAllParametersOfDeclarationOnNextLine: 'false'
 AllowShortBlocksOnASingleLine: 'true'
 AllowShortCaseLabelsOnASingleLine: 'false'
-AllowShortFunctionsOnASingleLine: 'InlineOnly'
+AllowShortFunctionsOnASingleLine(SFS_InlineOnly): 'true
 AllowShortIfStatementsOnASingleLine: 'false'
 AllowShortLoopsOnASingleLine: 'false'
 AlwaysBreakAfterReturnType: 'None'
