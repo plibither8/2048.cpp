@@ -275,57 +275,59 @@ void Game::drawInputControls() {
 }
 
 void Game::input() {
-
   using namespace Keypress::Code;
-  char c;
-  getInput(c);
-
-  if (c == CODE_ANSI_TRIGGER_1) {
+  if (!gamestatus[FLAG_END_GAME]) {
+    // Game still in play. Take input commands for next turn.
+    char c;
     getInput(c);
-    if (c == CODE_ANSI_TRIGGER_2) {
+
+    if (c == CODE_ANSI_TRIGGER_1) {
       getInput(c);
-      switch (c) {
-      case CODE_ANSI_UP:
-        decideMove(UP);
-        return;
-      case CODE_ANSI_DOWN:
-        decideMove(DOWN);
-        return;
-      case CODE_ANSI_RIGHT:
-        decideMove(RIGHT);
-        return;
-      case CODE_ANSI_LEFT:
-        decideMove(LEFT);
-        return;
+      if (c == CODE_ANSI_TRIGGER_2) {
+        getInput(c);
+        switch (c) {
+        case CODE_ANSI_UP:
+          decideMove(UP);
+          return;
+        case CODE_ANSI_DOWN:
+          decideMove(DOWN);
+          return;
+        case CODE_ANSI_RIGHT:
+          decideMove(RIGHT);
+          return;
+        case CODE_ANSI_LEFT:
+          decideMove(LEFT);
+          return;
+        }
       }
     }
-  }
 
-  switch (toupper(c)) {
+    switch (toupper(c)) {
 
-  case CODE_WASD_UP:
-  case CODE_VIM_UP:
-    decideMove(UP);
-    break;
-  case CODE_WASD_LEFT:
-  case CODE_VIM_LEFT:
-    decideMove(LEFT);
-    break;
-  case CODE_WASD_DOWN:
-  case CODE_VIM_DOWN:
-    decideMove(DOWN);
-    break;
-  case CODE_WASD_RIGHT:
-  case CODE_VIM_RIGHT:
-    decideMove(RIGHT);
-    break;
-  case CODE_HOTKEY_ACTION_SAVE:
-  case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
-    gamestatus[FLAG_SAVED_GAME] = true;
-    break;
-  default:
-    input_err = KeyInputErrorStatus::STATUS_INPUT_ERROR;
-    break;
+    case CODE_WASD_UP:
+    case CODE_VIM_UP:
+      decideMove(UP);
+      break;
+    case CODE_WASD_LEFT:
+    case CODE_VIM_LEFT:
+      decideMove(LEFT);
+      break;
+    case CODE_WASD_DOWN:
+    case CODE_VIM_DOWN:
+      decideMove(DOWN);
+      break;
+    case CODE_WASD_RIGHT:
+    case CODE_VIM_RIGHT:
+      decideMove(RIGHT);
+      break;
+    case CODE_HOTKEY_ACTION_SAVE:
+    case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
+      gamestatus[FLAG_SAVED_GAME] = true;
+      break;
+    default:
+      input_err = KeyInputErrorStatus::STATUS_INPUT_ERROR;
+      break;
+    }
   }
 }
 
@@ -501,12 +503,8 @@ bool Game::process_gameStatus() {
 
 bool Game::soloGameLoop() {
   process_gamelogic();
-
   drawGraphics();
-  if (!gamestatus[FLAG_END_GAME]) {
-    // Fast track: Game has ended, no input can be done.
-    input();
-  }
+  input();
   const auto loop_again = process_gameStatus();
   return loop_again;
 }
