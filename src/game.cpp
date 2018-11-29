@@ -321,7 +321,7 @@ void Game::input() {
     break;
   case CODE_HOTKEY_ACTION_SAVE:
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
-    stateSaved = true;
+    gamestatus[FLAG_SAVED_GAME] = true;
     break;
   default:
     input_err = KeyInputErrorStatus::STATUS_INPUT_ERROR;
@@ -455,9 +455,10 @@ void Game::drawGameState() {
   std::ostringstream state_saved_richtext;
   state_saved_richtext << green << bold_on << sp << state_saved_text << def
                        << bold_off << "\n\n";
-  if (stateSaved) {
+
+  if (gamestatus[FLAG_SAVED_GAME]) {
     str_os << state_saved_richtext.str();
-    stateSaved = false;
+    gamestatus[FLAG_SAVED_GAME] = false;
   }
   std::cout << str_os.str();
 }
@@ -468,7 +469,7 @@ void Game::drawGraphics() {
   drawInputControls();
 }
 
-std::tuple<bool, bool> Game::process_gamelogic() {
+void Game::process_gamelogic() {
   gamePlayBoard.unblockTiles();
   if (gamePlayBoard.moved) {
     gamePlayBoard.addTile();
@@ -476,18 +477,16 @@ std::tuple<bool, bool> Game::process_gamelogic() {
   }
 
   if (gamePlayBoard.hasWon()) {
-    return std::make_tuple(true, false);
+    gamestatus[FLAG_WIN] = true;
   }
   if (!gamePlayBoard.canMove()) {
-    return std::make_tuple(false, true);
+    gamestatus[FLAG_END_GAME] = true;
   }
-  return std::make_tuple(false, false);
 }
 
 bool Game::soloGameLoop() {
-  auto gamestatus = gamestatus_t{};
-  const auto logic_results = process_gamelogic();
-  std::tie(gamestatus[FLAG_WIN], gamestatus[FLAG_END_GAME]) = logic_results;
+  process_gamelogic();
+
   if (gamestatus[FLAG_WIN]) {
     // break if question asked
     return false;
@@ -496,9 +495,10 @@ bool Game::soloGameLoop() {
     // End endless_mode;
     return false;
   }
-  if (stateSaved) {
+  if (gamestatus[FLAG_SAVED_GAME]) {
     saveState();
   }
+
   drawGraphics();
   input();
   return true;

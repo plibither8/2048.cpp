@@ -13,15 +13,16 @@ private:
   enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
-  enum GameStatusFlag { FLAG_WIN, FLAG_END_GAME, MAX_NO_GAME_STATUS_FLAGS };
+  enum GameStatusFlag { FLAG_WIN, FLAG_END_GAME, FLAG_SAVED_GAME, MAX_NO_GAME_STATUS_FLAGS };
 
   using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
+
+  gamestatus_t gamestatus{};
 
   ull bestScore;
   double duration;
   GameBoard gamePlayBoard;
   RandInt randInt;
-  bool stateSaved;
   bool noSave;
   KeyInputErrorStatus input_err{STATUS_INPUT_VALID};
 
@@ -51,11 +52,11 @@ private:
 
   void drawGraphics();
   void endlessGameLoop();
-  std::tuple<bool, bool> process_gamelogic();
+  void process_gamelogic();
   void drawInputControls();
 
 public:
-  Game() : bestScore(0), duration(0.0), stateSaved(false), noSave(false) {}
+  Game() : bestScore(0), duration(0.0), noSave(false) {}
   void startGame();
   void continueGame();
 };
