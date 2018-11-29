@@ -53,6 +53,7 @@ private:
   void drawGraphics();
   void endlessGameLoop();
   void process_gamelogic();
+  bool process_gameStatus();
   void drawInputControls();
 
 public:

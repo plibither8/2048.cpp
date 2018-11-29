@@ -484,9 +484,7 @@ void Game::process_gamelogic() {
   }
 }
 
-bool Game::soloGameLoop() {
-  process_gamelogic();
-
+bool Game::process_gameStatus() {
   if (gamestatus[FLAG_WIN]) {
     // break if question asked
     return false;
@@ -498,10 +496,19 @@ bool Game::soloGameLoop() {
   if (gamestatus[FLAG_SAVED_GAME]) {
     saveState();
   }
+  return true;
+}
+
+bool Game::soloGameLoop() {
+  process_gamelogic();
 
   drawGraphics();
-  input();
-  return true;
+  if (!gamestatus[FLAG_END_GAME]) {
+    // Fast track: Game has ended, no input can be done.
+    input();
+  }
+  const auto loop_again = process_gameStatus();
+  return loop_again;
 }
 
 void Game::endlessGameLoop() {
