@@ -485,8 +485,7 @@ std::tuple<bool, bool> Game::process_gamelogic() {
 }
 
 bool Game::soloGameLoop() {
-  enum GameStatusFlag { FLAG_WIN, FLAG_END_GAME, MAX_NO_GAME_STATUS_FLAGS };
-  auto gamestatus = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>{};
+  auto gamestatus = gamestatus_t{};
   const auto logic_results = process_gamelogic();
   std::tie(gamestatus[FLAG_WIN], gamestatus[FLAG_END_GAME]) = logic_results;
   if (gamestatus[FLAG_WIN]) {
