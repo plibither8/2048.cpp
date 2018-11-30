@@ -10,10 +10,15 @@ enum Directions { UP, DOWN, RIGHT, LEFT };
 class Game {
 private:
   enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
-  enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
   enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
-  enum GameStatusFlag { FLAG_WIN, FLAG_END_GAME, FLAG_SAVED_GAME, MAX_NO_GAME_STATUS_FLAGS };
+  enum GameStatusFlag {
+    FLAG_WIN,
+    FLAG_END_GAME,
+    FLAG_SAVED_GAME,
+    FLAG_INPUT_ERROR,
+    MAX_NO_GAME_STATUS_FLAGS
+  };
 
   using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
 
@@ -24,7 +29,6 @@ private:
   GameBoard gamePlayBoard;
   RandInt randInt;
   bool noSave;
-  KeyInputErrorStatus input_err{STATUS_INPUT_VALID};
 
   bool get_and_process_game_stats_string_data(std::istream &stats_file);
   bool load_game_stats_from_file(std::string filename);

@@ -267,9 +267,9 @@ void Game::drawInputControls() {
 
   str_os << input_commands_text;
 
-  if (input_err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
+  if (gamestatus[FLAG_INPUT_ERROR]) {
     str_os << invalid_prompt_richtext.str();
-    input_err = KeyInputErrorStatus::STATUS_INPUT_VALID;
+    gamestatus[FLAG_INPUT_ERROR] = false;
   }
   std::cout << str_os.str();
 }
@@ -325,7 +325,7 @@ void Game::input() {
       gamestatus[FLAG_SAVED_GAME] = true;
       break;
     default:
-      input_err = KeyInputErrorStatus::STATUS_INPUT_ERROR;
+      gamestatus[FLAG_INPUT_ERROR] = true;
       break;
     }
   }
