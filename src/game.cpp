@@ -287,16 +287,16 @@ void Game::input() {
         getInput(c);
         switch (c) {
         case CODE_ANSI_UP:
-          decideMove(UP);
+          intendedmove[FLAG_MOVE_UP] = true;
           return;
         case CODE_ANSI_DOWN:
-          decideMove(DOWN);
+          intendedmove[FLAG_MOVE_DOWN] = true;
           return;
         case CODE_ANSI_RIGHT:
-          decideMove(RIGHT);
+          intendedmove[FLAG_MOVE_RIGHT] = true;
           return;
         case CODE_ANSI_LEFT:
-          decideMove(LEFT);
+          intendedmove[FLAG_MOVE_LEFT] = true;
           return;
         }
       }
@@ -306,19 +306,19 @@ void Game::input() {
 
     case CODE_WASD_UP:
     case CODE_VIM_UP:
-      decideMove(UP);
+      intendedmove[FLAG_MOVE_UP] = true;
       break;
     case CODE_WASD_LEFT:
     case CODE_VIM_LEFT:
-      decideMove(LEFT);
+      intendedmove[FLAG_MOVE_LEFT] = true;
       break;
     case CODE_WASD_DOWN:
     case CODE_VIM_DOWN:
-      decideMove(DOWN);
+      intendedmove[FLAG_MOVE_DOWN] = true;
       break;
     case CODE_WASD_RIGHT:
     case CODE_VIM_RIGHT:
-      decideMove(RIGHT);
+      intendedmove[FLAG_MOVE_RIGHT] = true;
       break;
     case CODE_HOTKEY_ACTION_SAVE:
     case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
@@ -486,6 +486,24 @@ void Game::process_gamelogic() {
   }
 }
 
+bool Game::process_intendedMove() {
+  if (intendedmove[FLAG_MOVE_LEFT]) {
+    decideMove(LEFT);
+  }
+  if (intendedmove[FLAG_MOVE_RIGHT]) {
+    decideMove(RIGHT);
+  }
+  if (intendedmove[FLAG_MOVE_UP]) {
+    decideMove(UP);
+  }
+  if (intendedmove[FLAG_MOVE_DOWN]) {
+    decideMove(DOWN);
+  }
+  // Reset all move flags...
+  intendedmove = intendedmove_t{};
+  return true;
+}
+
 bool Game::process_gameStatus() {
   if (gamestatus[FLAG_WIN]) {
     // break if question asked
@@ -505,6 +523,7 @@ bool Game::soloGameLoop() {
   process_gamelogic();
   drawGraphics();
   input();
+  process_intendedMove();
   const auto loop_again = process_gameStatus();
   return loop_again;
 }

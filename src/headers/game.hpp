@@ -24,6 +24,17 @@ private:
 
   gamestatus_t gamestatus{};
 
+  enum IntendedMoveFlag {
+    FLAG_MOVE_LEFT,
+    FLAG_MOVE_RIGHT,
+    FLAG_MOVE_UP,
+    FLAG_MOVE_DOWN,
+    MAX_NO_INTENDED_MOVE_FLAGS
+  };
+
+  using intendedmove_t = std::array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
+  intendedmove_t intendedmove{};
+
   ull bestScore;
   double duration;
   GameBoard gamePlayBoard;
@@ -57,6 +68,7 @@ private:
   void drawGraphics();
   void endlessGameLoop();
   void process_gamelogic();
+  bool process_intendedMove();
   bool process_gameStatus();
   void drawInputControls();
 
