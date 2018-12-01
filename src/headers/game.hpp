@@ -49,6 +49,10 @@ private:
   void drawBoard() const;
   void drawGameState();
   void drawScoreBoard(std::ostream &out_stream) const;
+  bool check_input_ansi(char c);
+  bool check_input_wasd(char c);
+  bool check_input_vim(char c);
+  bool check_input_other(char c);
   void input();
   void decideMove(Directions);
 

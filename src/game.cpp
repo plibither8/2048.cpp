@@ -274,59 +274,90 @@ void Game::drawInputControls() {
   std::cout << str_os.str();
 }
 
-void Game::input() {
+bool Game::check_input_ansi(char c) {
   using namespace Keypress::Code;
-  if (!gamestatus[FLAG_END_GAME]) {
+  if (c == CODE_ANSI_TRIGGER_1) {
+    getInput(c);
+    if (c == CODE_ANSI_TRIGGER_2) {
+      getInput(c);
+      switch (c) {
+      case CODE_ANSI_UP:
+        intendedmove[FLAG_MOVE_UP] = true;
+        return false;
+      case CODE_ANSI_DOWN:
+        intendedmove[FLAG_MOVE_DOWN] = true;
+        return false;
+      case CODE_ANSI_RIGHT:
+        intendedmove[FLAG_MOVE_RIGHT] = true;
+        return false;
+      case CODE_ANSI_LEFT:
+        intendedmove[FLAG_MOVE_LEFT] = true;
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool Game::check_input_vim(char c) {
+  using namespace Keypress::Code;
+  switch (toupper(c)) {
+  case CODE_VIM_UP:
+    intendedmove[FLAG_MOVE_UP] = true;
+    return false;
+  case CODE_VIM_LEFT:
+    intendedmove[FLAG_MOVE_LEFT] = true;
+    return false;
+  case CODE_VIM_DOWN:
+    intendedmove[FLAG_MOVE_DOWN] = true;
+    return false;
+  case CODE_VIM_RIGHT:
+    intendedmove[FLAG_MOVE_RIGHT] = true;
+    return false;
+  }
+  return true;
+}
+
+bool Game::check_input_wasd(char c) {
+  using namespace Keypress::Code;
+  switch (toupper(c)) {
+  case CODE_WASD_UP:
+    intendedmove[FLAG_MOVE_UP] = true;
+    return false;
+  case CODE_WASD_LEFT:
+    intendedmove[FLAG_MOVE_LEFT] = true;
+    return false;
+  case CODE_WASD_DOWN:
+    intendedmove[FLAG_MOVE_DOWN] = true;
+    return false;
+  case CODE_WASD_RIGHT:
+    intendedmove[FLAG_MOVE_RIGHT] = true;
+    return false;
+  }
+  return true;
+}
+
+bool Game::check_input_other(char c) {
+  using namespace Keypress::Code;
+  switch (toupper(c)) {
+  case CODE_HOTKEY_ACTION_SAVE:
+  case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
+    gamestatus[FLAG_SAVED_GAME] = true;
+    return false;
+  }
+  return true;
+}
+
+void Game::input() {
+  if (!gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN]) {
     // Game still in play. Take input commands for next turn.
     char c;
     getInput(c);
-
-    if (c == CODE_ANSI_TRIGGER_1) {
-      getInput(c);
-      if (c == CODE_ANSI_TRIGGER_2) {
-        getInput(c);
-        switch (c) {
-        case CODE_ANSI_UP:
-          intendedmove[FLAG_MOVE_UP] = true;
-          return;
-        case CODE_ANSI_DOWN:
-          intendedmove[FLAG_MOVE_DOWN] = true;
-          return;
-        case CODE_ANSI_RIGHT:
-          intendedmove[FLAG_MOVE_RIGHT] = true;
-          return;
-        case CODE_ANSI_LEFT:
-          intendedmove[FLAG_MOVE_LEFT] = true;
-          return;
-        }
-      }
-    }
-
-    switch (toupper(c)) {
-
-    case CODE_WASD_UP:
-    case CODE_VIM_UP:
-      intendedmove[FLAG_MOVE_UP] = true;
-      break;
-    case CODE_WASD_LEFT:
-    case CODE_VIM_LEFT:
-      intendedmove[FLAG_MOVE_LEFT] = true;
-      break;
-    case CODE_WASD_DOWN:
-    case CODE_VIM_DOWN:
-      intendedmove[FLAG_MOVE_DOWN] = true;
-      break;
-    case CODE_WASD_RIGHT:
-    case CODE_VIM_RIGHT:
-      intendedmove[FLAG_MOVE_RIGHT] = true;
-      break;
-    case CODE_HOTKEY_ACTION_SAVE:
-    case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
-      gamestatus[FLAG_SAVED_GAME] = true;
-      break;
-    default:
+    const auto is_invalid_keypress_code =
+        check_input_ansi(c) && check_input_wasd(c) && check_input_vim(c) &&
+        check_input_other(c);
+    if (is_invalid_keypress_code) {
       gamestatus[FLAG_INPUT_ERROR] = true;
-      break;
     }
   }
 }
