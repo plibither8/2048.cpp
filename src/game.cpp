@@ -247,6 +247,20 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
+void Game::drawInputError() {
+  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
+  constexpr auto sp = "  ";
+  std::ostringstream str_os;
+  std::ostringstream invalid_prompt_richtext;
+  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
+
+  if (gamestatus[FLAG_INPUT_ERROR]) {
+    str_os << invalid_prompt_richtext.str();
+    gamestatus[FLAG_INPUT_ERROR] = false;
+  }
+  std::cout << str_os.str();
+}
+
 void Game::drawInputControls() {
   constexpr auto input_commands_text = u8R"(
   W or K or ↑ => Up
@@ -259,18 +273,8 @@ void Game::drawInputControls() {
 
 )";
 
-  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
-  constexpr auto sp = "  ";
   std::ostringstream str_os;
-  std::ostringstream invalid_prompt_richtext;
-  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
-
   str_os << input_commands_text;
-
-  if (gamestatus[FLAG_INPUT_ERROR]) {
-    str_os << invalid_prompt_richtext.str();
-    gamestatus[FLAG_INPUT_ERROR] = false;
-  }
   std::cout << str_os.str();
 }
 
@@ -500,6 +504,7 @@ void Game::drawGraphics() {
   drawBoard();
   drawGameState();
   drawInputControls();
+  drawInputError();
 }
 
 void Game::process_gamelogic() {

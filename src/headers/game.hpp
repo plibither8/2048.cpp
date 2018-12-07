@@ -74,6 +74,7 @@ private:
   void process_gamelogic();
   bool process_intendedMove();
   bool process_gameStatus();
+  void drawInputError();
   void drawInputControls();
 
 public:
