@@ -1,6 +1,13 @@
 #include "game.hpp"
 #include "menu.hpp"
-
+#include "scores.hpp"
+#include "statistics.hpp"
+#include <algorithm>
+#include <array>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 namespace {
 namespace Keypress {

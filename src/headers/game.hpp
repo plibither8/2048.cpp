@@ -1,30 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "color.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
-#include "point2d.hpp"
-#include "scores.hpp"
-#include "statistics.hpp"
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <functional>
-#include <iomanip>
-#include <iostream>
-#include <iterator>
-#include <limits>
-#include <random>
-#include <sstream>
-#include <string>
-#include <vector>
 
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
 class Game {
-
 private:
   ull bestScore;
   double duration;

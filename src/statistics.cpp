@@ -1,4 +1,5 @@
 #include "statistics.hpp"
+#include <fstream>
 
 bool Stats::collectStatistics(int size) {
 

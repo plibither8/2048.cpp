@@ -1,4 +1,9 @@
 #include "menu.hpp"
+#include "color.hpp"
+#include "game.hpp"
+#include "scores.hpp"
+#include <iostream>
+#include <sstream>
 
 void Menu::startMenu(int err) {
   constexpr auto greetings_text = "Welcome to ";

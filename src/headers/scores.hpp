@@ -2,11 +2,6 @@
 #define SCORES_H
 
 #include "global.hpp"
-#include "menu.hpp"
-#include "statistics.hpp"
-#include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <string>
 #include <vector>
 

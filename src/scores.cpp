@@ -1,4 +1,13 @@
 #include "scores.hpp"
+#include "color.hpp"
+#include "menu.hpp"
+#include "statistics.hpp"
+#include <algorithm>
+#include <array>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 
 bool compare(const Score &a, const Score &b) {
   return a.score < b.score;
