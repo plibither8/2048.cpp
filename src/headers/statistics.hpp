@@ -7,7 +7,7 @@
 class Stats {
 
 public:
-  bool collectStatistics();
+  bool collectStatistics(int size);
   ull bestScore;
   ull totalMoveCount;
   int gameCount;

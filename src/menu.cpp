@@ -81,10 +81,43 @@ void Menu::continueGame() {
 }
 
 void Menu::showScores() {
+  int boardsize = 0;
 
+  std::ostringstream error_prompt_richtext;
+  std::ostringstream str_os;
+  std::ostringstream board_size_prompt_richtext;
+
+    constexpr auto choose_playsize = "Enter the size of board (3 to 10). If you want to go back, enter '0': ";
+    const auto invalid_prompt_text ={
+      "Invalid input. Gameboard size should range from ", " to ", "."};
+    error_prompt_richtext << red << std::begin(invalid_prompt_text)[0]
+                            << 3
+                            << std::begin(invalid_prompt_text)[1]
+                            << 10
+                            << std::begin(invalid_prompt_text)[2] << def << "\n\n";
+    board_size_prompt_richtext << bold_on << " " << choose_playsize<< bold_off;
+
+
+ bool err = false;
+  while(boardsize < 3 || boardsize > 10){
+    clearScreen();
+    drawAscii();
+    if(err)
+      str_os << error_prompt_richtext.str();
+    str_os << board_size_prompt_richtext.str();
+    std::cout << str_os.str();
+    std::cin >> boardsize;
+    std::cin.clear();
+    std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
+    err = true;
+    if(boardsize==0){
+      Menu menu;
+      menu.startMenu();
+    }
+  }
   Scoreboard s;
-  s.printScore();
-  s.printStats();
+  s.printScore(boardsize);
+  s.printStats(boardsize);
 }
 
 void drawAscii() {

@@ -18,15 +18,16 @@ void Scoreboard::prompt() {
 
 void Scoreboard::writeToFile() {
 
-  std::fstream scores("../data/scores.txt", std::ios_base::app);
+  std::string file_dir = "../data/scores"+ std::to_string(playsize) + ".txt";
+  std::fstream scores(file_dir, std::ios_base::app);
   scores << std::endl
-         << name << " " << score << " " << win << " " << moveCount << " "
-         << largestTile << " " << duration;
+  << name << " " << score << " " << win << " " << moveCount << " "
+  << largestTile << " " << duration;
   newline();
   scores.close();
 }
 
-void Scoreboard::printScore() {
+void Scoreboard::printScore(int boardsize) {
   constexpr auto no_save_text = "No saved scores.";
   const auto score_attributes_text = {
       "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
@@ -43,7 +44,7 @@ void Scoreboard::printScore() {
 
   std::ostringstream str_os;
 
-  readFile();
+  readFile(boardsize);
 
   clearScreen();
   drawAscii();
@@ -77,8 +78,13 @@ void Scoreboard::printScore() {
                     std::to_string(i.score),     i.win ? "Yes" : "No",
                     std::to_string(i.moveCount), std::to_string(i.largestTile),
                     secondsFormat(i.duration)};
+      int hang=0, k;
+      for(k=0;k<data_stats[1].length();k++){
+          if(data_stats[1][k]<0) hang++;
+      }
+      hang = hang/3;
       str_os << sp << "│ " << std::setw(2) << data_stats[0] << ". │ "
-             << std::left << std::setw(18) << data_stats[1] << std::right
+             << std::left <<std::setw(18+hang) << data_stats[1] << std::right
              << " │ " << std::setw(8) << data_stats[2] << " │ " << std::setw(4)
              << data_stats[3] << " │ " << std::setw(5) << data_stats[4] << " │ "
              << std::setw(12) << data_stats[5] << " │ " << std::setw(12)
@@ -96,7 +102,7 @@ void Scoreboard::printScore() {
   std::cout << str_os.str();
 }
 
-void Scoreboard::printStats() {
+void Scoreboard::printStats(int boardsize) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
@@ -110,7 +116,7 @@ void Scoreboard::printStats() {
 
   Stats stats;
   std::ostringstream stats_richtext;
-  if (stats.collectStatistics()) {
+  if (stats.collectStatistics(boardsize)) {
     constexpr auto num_of_stats_attributes_text = 5;
     auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
     data_stats = {
@@ -160,9 +166,10 @@ void Scoreboard::padding(std::string name) {
   }
 }
 
-void Scoreboard::readFile() {
+void Scoreboard::readFile(int size) {
 
-  std::ifstream scores("../data/scores.txt");
+  std::string file_dir = "../data/scores" + std::to_string(size) + ".txt";
+  std::ifstream scores(file_dir);
   if (scores.fail()) {
     return;
   }
