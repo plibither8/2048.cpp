@@ -1,4 +1,15 @@
 #include "game.hpp"
+#include "menu.hpp"
+#include "scores.hpp"
+#include "statistics.hpp"
+#include <algorithm>
+#include <array>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+
+extern int language;
 
 namespace {
 namespace Keypress {
@@ -177,145 +188,284 @@ void Game::drawBoard() const {
 }
 
 void Game::drawScoreBoard(std::ostream &out_stream) const {
-  constexpr auto score_text_label = "SCORE:";
-  constexpr auto bestscore_text_label = "BEST SCORE:";
-  constexpr auto moves_text_label = "MOVES:";
-
-  // * border padding: vvv
-  // | l-outer: 2, r-outer: 0
-  // | l-inner: 1, r-inner: 1
-  // * top border / bottom border: vvv
-  // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
-  // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
-  enum {
-    UI_SCOREBOARD_SIZE = 27,
-    UI_BORDER_OUTER_PADDING = 2,
-    UI_BORDER_INNER_PADDING = 1
-  }; // length of horizontal board - (corners + border padding)
-  constexpr auto border_padding_char = ' ';
-  constexpr auto vertical_border_pattern = "│";
-  constexpr auto top_board =
-      "┌───────────────────────────┐"; // Multibyte character set
-  constexpr auto bottom_board =
-      "└───────────────────────────┘"; // Multibyte character set
-  const auto outer_border_padding =
-      std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
-  const auto inner_border_padding =
-      std::string(UI_BORDER_INNER_PADDING, border_padding_char);
-  const auto inner_padding_length =
-      UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
-  out_stream << outer_border_padding << top_board << "\n";
-  out_stream << outer_border_padding << vertical_border_pattern
-             << inner_border_padding << bold_on << score_text_label << bold_off
-             << std::string(inner_padding_length -
-                                std::string{score_text_label}.length() -
-                                std::to_string(gamePlayBoard.score).length(),
-                            border_padding_char)
-             << gamePlayBoard.score << inner_border_padding
-             << vertical_border_pattern << "\n";
-  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
-    const auto tempBestScore =
-        (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+  if(language == 2){
+    constexpr auto score_text_label = "점수:";
+    constexpr auto bestscore_text_label = "최고 점수:";
+    constexpr auto moves_text_label = "움직인 횟수:";
+  
+    // * border padding: vvv
+    // | l-outer: 2, r-outer: 0
+    // | l-inner: 1, r-inner: 1
+    // * top border / bottom border: vvv
+    // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
+    // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
+    enum {
+      UI_SCOREBOARD_SIZE = 27,
+      UI_BORDER_OUTER_PADDING = 2,
+      UI_BORDER_INNER_PADDING = 1
+    }; // length of horizontal board - (corners + border padding)
+    constexpr auto border_padding_char = ' ';
+    constexpr auto vertical_border_pattern = "│";
+    constexpr auto top_board =
+        "┌───────────────────────────┐"; // Multibyte character set
+    constexpr auto bottom_board =
+        "└───────────────────────────┘"; // Multibyte character set
+    const auto outer_border_padding =
+        std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
+    const auto inner_border_padding =
+        std::string(UI_BORDER_INNER_PADDING, border_padding_char);
+    const auto inner_padding_length =
+        UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
+    out_stream << outer_border_padding << top_board << "\n";
     out_stream << outer_border_padding << vertical_border_pattern
-               << inner_border_padding << bold_on << bestscore_text_label
-               << bold_off
+               << inner_border_padding << bold_on << score_text_label << bold_off
                << std::string(inner_padding_length -
-                                  std::string{bestscore_text_label}.length() -
-                                  std::to_string(tempBestScore).length(),
+                                  std::string{score_text_label}.length() + 2 -
+                                  std::to_string(gamePlayBoard.score).length(),
                               border_padding_char)
-               << tempBestScore << inner_border_padding
+               << gamePlayBoard.score << inner_border_padding
                << vertical_border_pattern << "\n";
+    if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+      const auto tempBestScore =
+          (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+      out_stream << outer_border_padding << vertical_border_pattern
+                 << inner_border_padding << bold_on << bestscore_text_label
+                 << bold_off
+                 << std::string(inner_padding_length -
+                                    std::string{bestscore_text_label}.length() + 4 -
+                                    std::to_string(tempBestScore).length(),
+                                border_padding_char)
+                 << tempBestScore << inner_border_padding
+                 << vertical_border_pattern << "\n";
+    }
+    out_stream << outer_border_padding << vertical_border_pattern
+               << inner_border_padding << bold_on << moves_text_label << bold_off
+               << std::string(
+                      inner_padding_length -
+                          std::string{moves_text_label}.length() + 5 -
+                          std::to_string(gamePlayBoard.MoveCount()).length(),
+                      border_padding_char)
+               << gamePlayBoard.MoveCount() << inner_border_padding
+               << vertical_border_pattern << "\n";
+    out_stream << outer_border_padding << bottom_board << "\n \n";
+  }else{
+    constexpr auto score_text_label = "SCORE:";
+    constexpr auto bestscore_text_label = "BEST SCORE:";
+    constexpr auto moves_text_label = "MOVES:";
+  
+    // * border padding: vvv
+    // | l-outer: 2, r-outer: 0
+    // | l-inner: 1, r-inner: 1
+    // * top border / bottom border: vvv
+    // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
+    // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
+    enum {
+      UI_SCOREBOARD_SIZE = 27,
+      UI_BORDER_OUTER_PADDING = 2,
+      UI_BORDER_INNER_PADDING = 1
+    }; // length of horizontal board - (corners + border padding)
+    constexpr auto border_padding_char = ' ';
+    constexpr auto vertical_border_pattern = "│";
+    constexpr auto top_board =
+        "┌───────────────────────────┐"; // Multibyte character set
+    constexpr auto bottom_board =
+        "└───────────────────────────┘"; // Multibyte character set
+    const auto outer_border_padding =
+        std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
+    const auto inner_border_padding =
+        std::string(UI_BORDER_INNER_PADDING, border_padding_char);
+    const auto inner_padding_length =
+        UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
+    out_stream << outer_border_padding << top_board << "\n";
+    out_stream << outer_border_padding << vertical_border_pattern
+               << inner_border_padding << bold_on << score_text_label << bold_off
+               << std::string(inner_padding_length -
+                                  std::string{score_text_label}.length() -
+                                  std::to_string(gamePlayBoard.score).length(),
+                              border_padding_char)
+               << gamePlayBoard.score << inner_border_padding
+               << vertical_border_pattern << "\n";
+    if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+      const auto tempBestScore =
+          (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+      out_stream << outer_border_padding << vertical_border_pattern
+                 << inner_border_padding << bold_on << bestscore_text_label
+                 << bold_off
+                 << std::string(inner_padding_length -
+                                    std::string{bestscore_text_label}.length() -
+                                    std::to_string(tempBestScore).length(),
+                                border_padding_char)
+                 << tempBestScore << inner_border_padding
+                 << vertical_border_pattern << "\n";
+    }
+    out_stream << outer_border_padding << vertical_border_pattern
+               << inner_border_padding << bold_on << moves_text_label << bold_off
+               << std::string(
+                      inner_padding_length -
+                          std::string{moves_text_label}.length() -
+                          std::to_string(gamePlayBoard.MoveCount()).length(),
+                      border_padding_char)
+               << gamePlayBoard.MoveCount() << inner_border_padding
+               << vertical_border_pattern << "\n";
+    out_stream << outer_border_padding << bottom_board << "\n \n";
   }
-  out_stream << outer_border_padding << vertical_border_pattern
-             << inner_border_padding << bold_on << moves_text_label << bold_off
-             << std::string(
-                    inner_padding_length -
-                        std::string{moves_text_label}.length() -
-                        std::to_string(gamePlayBoard.MoveCount()).length(),
-                    border_padding_char)
-             << gamePlayBoard.MoveCount() << inner_border_padding
-             << vertical_border_pattern << "\n";
-  out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
 void Game::input(KeyInputErrorStatus err) {
+  if(language == 2){
   constexpr auto input_commands_text = u8R"(
-  W or K or ↑ => Up
-  A or H or ← => Left
-  S or J or ↓ => Down
-  D or L or → => Right
-  Z or P => Save
+  W or K or ↑ => 위
+  A or H or ← => 왼쪽
+  S or J or ↓ => 아래
+  D or L or → => 오른쪽
+  Z or P => 저장
 
-  Press the keys to start and continue.
+  시작 및 계속하려면 키를 누르십시오.
 
 )";
+    constexpr auto invalid_prompt_text = "유효하지 않은 입력입니다. 다시 시도하십시오.";
+    constexpr auto sp = "  ";
+    std::ostringstream str_os;
+    std::ostringstream invalid_prompt_richtext;
+    invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
+    str_os << input_commands_text;
 
-  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
-  constexpr auto sp = "  ";
-  std::ostringstream str_os;
-  std::ostringstream invalid_prompt_richtext;
-  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
+    if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
+      str_os << invalid_prompt_richtext.str();
+    }
+    std::cout << str_os.str();
 
-  str_os << input_commands_text;
+    using namespace Keypress::Code;
 
-  if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
-    str_os << invalid_prompt_richtext.str();
-  }
-  std::cout << str_os.str();
-
-  using namespace Keypress::Code;
-
-  char c;
-  getInput(c);
-
-  if (c == CODE_ANSI_TRIGGER_1) {
+    char c;
     getInput(c);
-    if (c == CODE_ANSI_TRIGGER_2) {
+
+    if (c == CODE_ANSI_TRIGGER_1) {
       getInput(c);
-      switch (c) {
-      case CODE_ANSI_UP:
-        decideMove(UP);
-        return;
-      case CODE_ANSI_DOWN:
-        decideMove(DOWN);
-        return;
-      case CODE_ANSI_RIGHT:
-        decideMove(RIGHT);
-        return;
-      case CODE_ANSI_LEFT:
-        decideMove(LEFT);
-        return;
+      if (c == CODE_ANSI_TRIGGER_2) {
+        getInput(c);
+        switch (c) {
+        case CODE_ANSI_UP:
+          decideMove(UP);
+          return;
+        case CODE_ANSI_DOWN:
+          decideMove(DOWN);
+          return;
+        case CODE_ANSI_RIGHT:
+          decideMove(RIGHT);
+          return;
+        case CODE_ANSI_LEFT:
+          decideMove(LEFT);
+          return;
+        }
       }
     }
-  }
 
-  switch (toupper(c)) {
+    switch (toupper(c)) {
 
-  case CODE_WASD_UP:
-  case CODE_VIM_UP:
-    decideMove(UP);
-    break;
-  case CODE_WASD_LEFT:
-  case CODE_VIM_LEFT:
-    decideMove(LEFT);
-    break;
-  case CODE_WASD_DOWN:
-  case CODE_VIM_DOWN:
-    decideMove(DOWN);
-    break;
-  case CODE_WASD_RIGHT:
-  case CODE_VIM_RIGHT:
-    decideMove(RIGHT);
-    break;
-  case CODE_HOTKEY_ACTION_SAVE:
-  case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
-    saveState();
-    stateSaved = true;
-    break;
-  default:
-    drawBoard();
-    input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
-    break;
+    case CODE_WASD_UP:
+    case CODE_VIM_UP:
+      decideMove(UP);
+      break;
+    case CODE_WASD_LEFT:
+    case CODE_VIM_LEFT:
+      decideMove(LEFT);
+      break;
+    case CODE_WASD_DOWN:
+    case CODE_VIM_DOWN:
+      decideMove(DOWN);
+      break;
+    case CODE_WASD_RIGHT:
+    case CODE_VIM_RIGHT:
+      decideMove(RIGHT);
+      break;
+    case CODE_HOTKEY_ACTION_SAVE:
+    case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
+      saveState();
+      stateSaved = true;
+      break;
+    default:
+      drawBoard();
+      input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
+      break;
+    }
+  }else{
+    constexpr auto input_commands_text = u8R"(
+    W or K or ↑ => Up
+    A or H or ← => Left
+    S or J or ↓ => Down
+    D or L or → => Right
+    Z or P => Save
+
+    Press the keys to start and continue.
+
+  )";
+    constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
+    constexpr auto sp = "  ";
+    std::ostringstream str_os;
+    std::ostringstream invalid_prompt_richtext;
+    invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
+    str_os << input_commands_text;
+
+    if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
+      str_os << invalid_prompt_richtext.str();
+    }
+    std::cout << str_os.str();
+
+    using namespace Keypress::Code;
+
+    char c;
+    getInput(c);
+
+    if (c == CODE_ANSI_TRIGGER_1) {
+      getInput(c);
+      if (c == CODE_ANSI_TRIGGER_2) {
+        getInput(c);
+        switch (c) {
+        case CODE_ANSI_UP:
+          decideMove(UP);
+          return;
+        case CODE_ANSI_DOWN:
+          decideMove(DOWN);
+          return;
+        case CODE_ANSI_RIGHT:
+          decideMove(RIGHT);
+          return;
+        case CODE_ANSI_LEFT:
+          decideMove(LEFT);
+          return;
+        }
+      }
+    }
+
+    switch (toupper(c)) {
+
+    case CODE_WASD_UP:
+    case CODE_VIM_UP:
+      decideMove(UP);
+      break;
+    case CODE_WASD_LEFT:
+    case CODE_VIM_LEFT:
+      decideMove(LEFT);
+      break;
+    case CODE_WASD_DOWN:
+    case CODE_VIM_DOWN:
+      decideMove(DOWN);
+      break;
+    case CODE_WASD_RIGHT:
+    case CODE_VIM_RIGHT:
+      decideMove(RIGHT);
+      break;
+    case CODE_HOTKEY_ACTION_SAVE:
+    case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
+      saveState();
+      stateSaved = true;
+      break;
+    default:
+      drawBoard();
+      input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
+      break;
+    }
   }
 }
 
@@ -341,37 +491,68 @@ void Game::decideMove(Directions d) {
 }
 
 void Game::statistics() const {
-  constexpr auto stats_title_text = "STATISTICS";
-  constexpr auto divider_text = "──────────";
-  const auto stats_attributes_text = {
-      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
-  constexpr auto num_of_stats_attributes_text = 4;
-  constexpr auto sp = "  ";
+  if(language == 2){
+    constexpr auto stats_title_text = "기록";
+    constexpr auto divider_text = "──────────";
+    const auto stats_attributes_text = {
+        "최종 스코어:", "가장 큰 수:", "움직인 횟수:", "플레이 타임:"};
+    constexpr auto num_of_stats_attributes_text = 4;
+    constexpr auto sp = "  ";
 
-  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-  data_stats = {std::to_string(gamePlayBoard.score),
-                std::to_string(gamePlayBoard.largestTile),
-                std::to_string(gamePlayBoard.MoveCount()),
-                secondsFormat(duration)};
+    auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
+    data_stats = {std::to_string(gamePlayBoard.score),
+                  std::to_string(gamePlayBoard.largestTile),
+                  std::to_string(gamePlayBoard.MoveCount()),
+                  secondsFormat(duration)};
 
-  std::ostringstream stats_richtext;
-  stats_richtext << yellow << sp << stats_title_text << def << "\n";
-  stats_richtext << yellow << sp << divider_text << def << "\n";
+    std::ostringstream stats_richtext;
+    stats_richtext << yellow << sp << stats_title_text << def << "\n";
+    stats_richtext << yellow << sp << divider_text << def << "\n";
 
-  auto counter{0};
-  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
-                                    &stats_richtext](const std::string) {
-    stats_richtext << sp << std::left << std::setw(19)
-                   << std::begin(stats_attributes_text)[counter] << bold_on
-                   << std::begin(data_stats)[counter] << bold_off << "\n";
-    counter++;
-  };
-  std::for_each(std::begin(stats_attributes_text),
-                std::end(stats_attributes_text), populate_stats_info);
+    auto counter{0};
+    const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
+                                      &stats_richtext](const std::string) {
+      stats_richtext << sp << std::left << std::setw(19)
+                     << std::begin(stats_attributes_text)[counter] << bold_on
+                     << std::begin(data_stats)[counter] << bold_off << "\n";
+      counter++;
+    };
+    std::for_each(std::begin(stats_attributes_text),
+                  std::end(stats_attributes_text), populate_stats_info);
 
-  std::cout << stats_richtext.str();
+    std::cout << stats_richtext.str();
+  }else{
+    constexpr auto stats_title_text = "STATISTICS";
+    constexpr auto divider_text = "──────────";
+    const auto stats_attributes_text = {
+        "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+    constexpr auto num_of_stats_attributes_text = 4;
+    constexpr auto sp = "  ";
+
+    auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
+    data_stats = {std::to_string(gamePlayBoard.score),
+                  std::to_string(gamePlayBoard.largestTile),
+                  std::to_string(gamePlayBoard.MoveCount()),
+                  secondsFormat(duration)};
+
+    std::ostringstream stats_richtext;
+    stats_richtext << yellow << sp << stats_title_text << def << "\n";
+    stats_richtext << yellow << sp << divider_text << def << "\n";
+
+    auto counter{0};
+    const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
+                                      &stats_richtext](const std::string) {
+      stats_richtext << sp << std::left << std::setw(19)
+                     << std::begin(stats_attributes_text)[counter] << bold_on
+                     << std::begin(data_stats)[counter] << bold_off << "\n";
+      counter++;
+    };
+    std::for_each(std::begin(stats_attributes_text),
+                  std::end(stats_attributes_text), populate_stats_info);
+
+    std::cout << stats_richtext.str();
+  }
 }
-
 void Game::saveStats() const {
   Stats stats;
   stats.collectStatistics();
@@ -415,119 +596,244 @@ void Game::saveState() const {
 }
 
 void Game::playGame(ContinueStatus cont) {
-  constexpr auto state_saved_text =
-      "The game has been saved. Feel free to take a break.";
-  constexpr auto win_game_text = "You win! Congratulations!";
-  constexpr auto lose_game_text = "Game over! You lose.";
-  constexpr auto sp = "  ";
+  if(language == 2){
+    constexpr auto state_saved_text =
+        "게임이 저장되었습니다. 잠시 머리를 식히는 건 어떤가요?";
+    constexpr auto win_game_text = "게임을 클리어하셨습니다! 축하합니다!";
+    constexpr auto lose_game_text = "게임 오버! 실패하셨습니다.";
+    constexpr auto sp = "  ";
 
-  std::ostringstream state_saved_richtext;
-  state_saved_richtext << green << bold_on << sp << state_saved_text << def
-                       << bold_off << "\n\n";
-  std::ostringstream win_richtext;
-  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
-               << "\n\n\n";
+    std::ostringstream state_saved_richtext;
+    state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                         << bold_off << "\n\n";
+    std::ostringstream win_richtext;
+    win_richtext << green << bold_on << sp << win_game_text << def << bold_off
+                 << "\n\n\n";
 
-  std::ostringstream lose_richtext;
-  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
-                << "\n\n\n";
+    std::ostringstream lose_richtext;
+    lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
+                  << "\n\n\n";
+  
+    auto startTime = std::chrono::high_resolution_clock::now();
 
-  auto startTime = std::chrono::high_resolution_clock::now();
+    while (true) {
+      std::ostringstream str_os;
+      if (gamePlayBoard.moved) {
+        gamePlayBoard.addTile();
+        gamePlayBoard.registerMoveByOne();
+      }
 
-  while (true) {
+      drawBoard();
+
+      if (gamePlayBoard.hasWon() || !gamePlayBoard.canMove()) {
+        break;
+      }
+
+      if (stateSaved) {
+        str_os << state_saved_richtext.str();
+        stateSaved = false;
+      }
+      std::cout << str_os.str();
+      input();
+      gamePlayBoard.unblockTiles();
+    }
+
+    auto finishTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finishTime - startTime;
+    duration = elapsed.count();
+
     std::ostringstream str_os;
-    if (gamePlayBoard.moved) {
-      gamePlayBoard.addTile();
-      gamePlayBoard.registerMoveByOne();
-    }
-
-    drawBoard();
-
-    if (gamePlayBoard.hasWon() || !gamePlayBoard.canMove()) {
-      break;
-    }
-
-    if (stateSaved) {
-      str_os << state_saved_richtext.str();
-      stateSaved = false;
+    if (gamePlayBoard.hasWon()) {
+      str_os << win_richtext.str();
+    } else {
+      str_os << lose_richtext.str();
     }
     std::cout << str_os.str();
-    input();
-    gamePlayBoard.unblockTiles();
-  }
 
-  auto finishTime = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = finishTime - startTime;
-  duration = elapsed.count();
-
-  std::ostringstream str_os;
-  if (gamePlayBoard.hasWon()) {
-    str_os << win_richtext.str();
-  } else {
-    str_os << lose_richtext.str();
-  }
-  std::cout << str_os.str();
-
-  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
+    if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
     statistics();
     saveStats();
     newline(2);
     saveScore();
-  }
-}
+    }
+  }else{
+    constexpr auto state_saved_text =
+        "The game has been saved. Feel free to take a break.";
+    constexpr auto win_game_text = "You win! Congratulations!";
+    constexpr auto lose_game_text = "Game over! You lose.";
+    constexpr auto sp = "  ";
 
-ull Game::setBoardSize() {
-  const auto invalid_prompt_text = {
-      "Invalid input. Gameboard size should range from ", " to ", "."};
-  //  constexpr auto num_of_invalid_prompt_text = 3;
-  constexpr auto no_save_found_text =
-      "No saved game found. Starting a new game.";
-  constexpr auto board_size_prompt_text =
-      "Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
-  constexpr auto sp = "  ";
+    std::ostringstream state_saved_richtext;
+    state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                         << bold_off << "\n\n";
+    std::ostringstream win_richtext;
+    win_richtext << green << bold_on << sp << win_game_text << def << bold_off
+                 << "\n\n\n";
 
-  enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
+    std::ostringstream lose_richtext;
+    lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
+                  << "\n\n\n";
+  
+    auto startTime = std::chrono::high_resolution_clock::now();
 
-  std::ostringstream str_os;
-  std::ostringstream error_prompt_richtext;
-  error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
-                        << MIN_GAME_BOARD_PLAY_SIZE
-                        << std::begin(invalid_prompt_text)[1]
-                        << MAX_GAME_BOARD_PLAY_SIZE
-                        << std::begin(invalid_prompt_text)[2] << def << "\n\n";
-  std::ostringstream no_save_richtext;
-  no_save_richtext << red << bold_on << sp << no_save_found_text << def
-                   << bold_off << "\n\n";
-  std::ostringstream board_size_prompt_richtext;
-  board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
-                             << bold_off;
+    while (true) {
+      std::ostringstream str_os;
+      if (gamePlayBoard.moved) {
+        gamePlayBoard.addTile();
+        gamePlayBoard.registerMoveByOne();
+      }
 
-  bool err = false;
-  ull userInput_PlaySize{0};
+      drawBoard();
 
-  while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
-          userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
-    clearScreen();
-    drawAscii();
+      if (gamePlayBoard.hasWon() || !gamePlayBoard.canMove()) {
+        break;
+      }
 
-    if (err) {
-      str_os << error_prompt_richtext.str();
-    } else if (noSave) {
-      str_os << no_save_richtext.str();
-      noSave = false;
+      if (stateSaved) {
+        str_os << state_saved_richtext.str();
+        stateSaved = false;
+      }
+      std::cout << str_os.str();
+      input();
+      gamePlayBoard.unblockTiles();
     }
 
-    str_os << board_size_prompt_richtext.str();
+    auto finishTime = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = finishTime - startTime;
+    duration = elapsed.count();
+
+    std::ostringstream str_os;
+    if (gamePlayBoard.hasWon()) {
+      str_os << win_richtext.str();
+    } else {
+      str_os << lose_richtext.str();
+    }
     std::cout << str_os.str();
 
-    std::cin >> userInput_PlaySize;
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
-    err = true;
+    if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
+      cont == ContinueStatus::STATUS_END_GAME) {
+      statistics();
+      saveStats();
+      newline(2);
+      saveScore();
+    }
+      
   }
-  return userInput_PlaySize;
 }
+ull Game::setBoardSize() {
+  if(language == 2){
+    const auto invalid_prompt_text = {
+        "유효하지 않은 입력입니다. 게임보드 사이즈는 ", " 에서 ", "사이의 값입니다."};
+    //  constexpr auto num_of_invalid_prompt_text = 3;
+    constexpr auto no_save_found_text =
+        "저장된 게임이 없습니다. 새 게임을 시작합니다.";
+    constexpr auto board_size_prompt_text =
+        "게임보드 사이즈를 입력해주십시오 (3x3 to 10x10). 되돌아가고 싶다면, '0'을 입력하십시오: ";
+    constexpr auto sp = "  ";
+
+    enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
+
+    std::ostringstream str_os;
+    std::ostringstream error_prompt_richtext;
+    error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
+                          << MIN_GAME_BOARD_PLAY_SIZE
+                          << std::begin(invalid_prompt_text)[1]
+                          << MAX_GAME_BOARD_PLAY_SIZE
+                          << std::begin(invalid_prompt_text)[2] << def << "\n\n";
+    std::ostringstream no_save_richtext;
+    no_save_richtext << red << bold_on << sp << no_save_found_text << def
+                     << bold_off << "\n\n";
+    std::ostringstream board_size_prompt_richtext;
+    board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
+                               << bold_off;
+
+    bool err = false;
+    ull userInput_PlaySize{0};
+
+    while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
+            userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+      clearScreen();
+      drawAscii();
+
+      if (err) {
+        str_os << error_prompt_richtext.str();
+      } else if (noSave) {
+        str_os << no_save_richtext.str();
+        noSave = false;
+      }
+
+      str_os << board_size_prompt_richtext.str();
+      std::cout << str_os.str();
+
+      std::cin >> userInput_PlaySize;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
+      err = true;
+      if(userInput_PlaySize==0){
+        Menu menu;
+        menu.startMenu();
+      }
+    }
+    return userInput_PlaySize;
+  }
+  else{
+    const auto invalid_prompt_text = {
+        "Invalid input. Gameboard size should range from ", " to ", "."};
+    //  constexpr auto num_of_invalid_prompt_text = 3;
+    constexpr auto no_save_found_text =
+        "No saved game found. Starting a new game.";
+    constexpr auto board_size_prompt_text =
+        "Enter gameboard size (3x3 to 10x10). If you want to go back, enter '0': ";
+    constexpr auto sp = "  ";
+
+    enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
+
+    std::ostringstream str_os;
+    std::ostringstream error_prompt_richtext;
+    error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
+                          << MIN_GAME_BOARD_PLAY_SIZE
+                          << std::begin(invalid_prompt_text)[1]
+                          << MAX_GAME_BOARD_PLAY_SIZE
+                          << std::begin(invalid_prompt_text)[2] << def << "\n\n";
+    std::ostringstream no_save_richtext;
+    no_save_richtext << red << bold_on << sp << no_save_found_text << def
+                     << bold_off << "\n\n";
+    std::ostringstream board_size_prompt_richtext;
+    board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
+                               << bold_off;
+
+    bool err = false;
+    ull userInput_PlaySize{0};
+
+    while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
+            userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+      clearScreen();
+      drawAscii();
+
+      if (err) {
+        str_os << error_prompt_richtext.str();
+      } else if (noSave) {
+        str_os << no_save_richtext.str();
+        noSave = false;
+      }
+
+      str_os << board_size_prompt_richtext.str();
+      std::cout << str_os.str();
+
+      std::cin >> userInput_PlaySize;
+      std::cin.clear();
+      std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
+      err = true;
+      if(userInput_PlaySize==0){
+        Menu menu;
+        menu.startMenu();
+      }
+    }
+    return userInput_PlaySize;
+  }
+}
+
 
 void Game::startGame() {
 

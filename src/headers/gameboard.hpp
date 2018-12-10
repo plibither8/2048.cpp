@@ -1,15 +1,10 @@
 #ifndef GAMEBOARD_H
 #define GAMEBOARD_H
 
-#include <algorithm>
+#include "point2d.hpp"
+#include "tile.hpp"
 #include <chrono>
-#include <functional>
-#include <global.hpp>
-#include <limits>
-#include <point2d.hpp>
 #include <random>
-#include <sstream>
-#include <tile.hpp>
 
 class RandInt {
 public:
