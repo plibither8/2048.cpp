@@ -2,10 +2,8 @@
 #define STATISTICS_H
 
 #include "global.hpp"
-#include <fstream>
 
 class Stats {
-
 public:
   bool collectStatistics(int size);
   ull bestScore;

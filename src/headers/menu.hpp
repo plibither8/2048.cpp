@@ -1,15 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "game.hpp"
-#include "global.hpp"
-#include <cstdlib>
-#include <iomanip>
-#include <iostream>
-#include <string>
-
 class Menu {
-
 private:
   void startGame();
   void showScores();

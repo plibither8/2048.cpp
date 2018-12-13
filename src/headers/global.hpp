@@ -1,18 +1,12 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <cstdlib>
-#include <iomanip>
-#include <iostream>
+#include <string>
 
-typedef unsigned long long ull;
-
+using ull = unsigned long long;
 void getInput(char &);
-
 void newline(int n = 1);
-
 void clearScreen();
-
 std::string secondsFormat(double);
 
 #endif
