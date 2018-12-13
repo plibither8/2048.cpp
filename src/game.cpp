@@ -534,7 +534,11 @@ ull Game::setBoardSize() {
   constexpr auto no_save_found_text =
       "No saved game found. Starting a new game.";
   constexpr auto board_size_prompt_text =
+
       "Enter gameboard size (3x3 to 10x10). If you want to go back, enter '0': ";
+
+      "Enter gameboard size (3x3 to 10x10). If you want to go back, enter '0' (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
+
   constexpr auto sp = "  ";
 
   enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
@@ -579,6 +583,11 @@ ull Game::setBoardSize() {
       Menu menu;
       menu.startMenu();
     }
+
+	if(userInput_PlaySize == 0){
+		Menu menu;
+		menu.startMenu();
+	}
   }
   return userInput_PlaySize;
 }

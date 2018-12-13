@@ -111,7 +111,7 @@ void Scoreboard::printStats(int boardsize) {
                                       "Number of Wins", "Total Moves Played",
                                       "Total Duration"};
   constexpr auto no_save_text = "No saved statistics.";
-  constexpr auto any_key_exit_text = "Press any key to exit: ";
+  constexpr auto any_key_exit_text = "Press any key to exit. If you want to go back to menu, press 'm': ";
   constexpr auto sp = "  ";
 
   Stats stats;
@@ -155,6 +155,10 @@ void Scoreboard::printStats(int boardsize) {
   std::cout << stats_richtext.str();
   char c;
   std::cin >> c;
+  if(c == 'm'){
+	  Menu menu;
+	  menu.startMenu();
+  }
   exit(EXIT_SUCCESS);
 }
 
