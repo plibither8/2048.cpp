@@ -54,9 +54,19 @@ OR
 ```sh
 ninja
 ```
-6. Run the program and play the game! :tada:
+6. install the program (optional)
 ```sh
-./2048
+cmake --build . --target install
+```
+OR
+```sh
+meson configure --prefix=$HOME/.local
+
+ninja install
+```
+7. Run the program and play the game! :tada:
+```sh
+2048
 ```
 
 ## Contributing
