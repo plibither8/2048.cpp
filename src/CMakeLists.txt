@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)  # 3.3: CXX_STANDARD
+cmake_minimum_required(VERSION 3.7)  # 3.7: CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT, 3.3: CXX_STANDARD
 project(2048 CXX)
 
 set(SOURCES 2048.cpp  gameboard.cpp  game.cpp  global.cpp  menu.cpp  scores.cpp  statistics.cpp)
