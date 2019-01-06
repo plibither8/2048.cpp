@@ -21,7 +21,10 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ### Requirements
 
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
-* virtually any platform including: Linux, macOS, Windows, Cygwin, Windows Subsystem for Linux, etc.
+* virtually any platform including: 
+  * Linux
+  * macOS
+  * Windows (via Cygwin or Windows Subsystem for Linux)
 * [CMake](https://cmake.org/) or [Meson](https://mesonbuild.com/)
 
 ### Installation
