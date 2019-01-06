@@ -22,33 +22,41 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
 * Linux, macOS OR Windows with a working terminal (Cygwin, Windows Subsystem for Linux or Git bash is recommended for Windows)
-* [CMake](https://cmake.org/)
+* [CMake](https://cmake.org/) or [Meson](https://mesonbuild.com/)
 
 ### Installation
 
 1. Open your terminal in your preferred directory and clone this project:
 ```bash
-$ git clone https://github.com/plibither8/2048.cpp
+git clone https://github.com/plibither8/2048.cpp
 ```
 2. Enter the project directory:
-```bash
-$ cd 2048.cpp
+```sh
+cd 2048.cpp
 ```
 3. Create and enter the build directory:
-```bash
-$ mkdir build && cd build
+```sh
+cd build
 ```
-4. Compile the program with cmake
-```bash
-$ cmake ..
+4. Generate build configuration
+```sh
+cmake ../src
+```
+OR
+```sh
+meson ../src
 ```
 5. Build the executable
-```bash
-$ make
+```sh
+cmake --build .
+```
+OR
+```sh
+ninja ..
 ```
 6. Run the program and play the game! :tada:
-```bash
-$ ./2048
+```sh
+./2048
 ```
 
 ## Contributing
