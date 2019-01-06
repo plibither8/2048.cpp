@@ -3,11 +3,16 @@ project(2048 CXX)
 
 set(SOURCES 2048.cpp  gameboard.cpp  game.cpp  global.cpp  menu.cpp  scores.cpp  statistics.cpp)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+  list(APPEND FLAGS -Wall)
+endif()
+
 add_executable(2048 ${SOURCES})
 target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers/)
+target_compile_options(2048 PRIVATE ${FLAGS})
 
 set_target_properties(2048 PROPERTIES
-  CXX_STANDARD 11 
+  CXX_STANDARD 11
   CXX_STANDARD_REQUIRED true)
 
 # --- install
