@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.7)  # 3.7: CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT, 3.3: CXX_STANDARD
 project(2048 CXX)
 
-set(SOURCES 2048.cpp  gameboard.cpp  game.cpp  global.cpp  menu.cpp  scores.cpp  statistics.cpp)
+set(SOURCES src/2048.cpp src/gameboard.cpp src/game.cpp src/global.cpp src/menu.cpp src/scores.cpp src/statistics.cpp)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
   list(APPEND FLAGS -Wall)
 endif()
 
 add_executable(2048 ${SOURCES})
-target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/headers/)
+target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/headers/)
 target_compile_options(2048 PRIVATE ${FLAGS})
 
 set_target_properties(2048 PROPERTIES
@@ -24,5 +24,5 @@ endif()
 install(TARGETS 2048
   RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../data
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data
         DESTINATION ${CMAKE_INSTALL_PREFIX})

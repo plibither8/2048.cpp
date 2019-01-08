@@ -8,13 +8,13 @@ if cxx.get_id() == 'gcc'
 endif
 
 main_target_name = '2048'
-sources = ['2048.cpp', 'gameboard.cpp', 'game.cpp', 'global.cpp', 'menu.cpp', 'scores.cpp', 'statistics.cpp']
-hdrs = include_directories('headers')
+sources = ['src/2048.cpp', 'src/gameboard.cpp', 'src/game.cpp', 'src/global.cpp', 'src/menu.cpp', 'src/scores.cpp', 'src/statistics.cpp']
+hdrs = include_directories('src/headers')
 
 executable(main_target_name, sources, 
   include_directories : hdrs,
   install : true)
   
-install_data(['../data/scores.txt', '../data/statistics.txt'],
+install_data(['data/scores.txt', 'data/statistics.txt'],
   install_dir : 'data')
 

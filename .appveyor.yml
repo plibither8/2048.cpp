@@ -13,6 +13,6 @@ init:
 
 install:
 - cd build
-- cmake ../src
+- cmake ..
 - cmake --build .
 - echo 4 | ./2048
