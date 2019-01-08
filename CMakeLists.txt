@@ -5,6 +5,12 @@ set(SOURCES src/2048.cpp src/gameboard.cpp src/game.cpp src/global.cpp src/menu.
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
   list(APPEND FLAGS -Wall)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+  list(APPEND FLAGS -Wall)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL Intel)
+  list(APPEND FLAGS -w2)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL PGI)
+  list(APPEND FLAGS -a)
 endif()
 
 add_executable(2048 ${SOURCES})
@@ -12,7 +18,7 @@ target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/headers/
 target_compile_options(2048 PRIVATE ${FLAGS})
 
 set_target_properties(2048 PROPERTIES
-  CXX_STANDARD 11
+  CXX_STANDARD 14
   CXX_STANDARD_REQUIRED true)
 
 # --- install
