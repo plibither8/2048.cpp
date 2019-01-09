@@ -1,6 +1,6 @@
 # 2048.cpp
 
-[![Build Status](https://img.shields.io/travis/plibither8/2048.cpp.svg)](https://travis-ci.com/plibither8/2048.cpp)
+[![Build Status](https://travis-ci.org/plibither8/2048.cpp.svg?branch=master)](https://travis-ci.org/plibither8/2048.cpp)
 [![Build status](https://ci.appveyor.com/api/projects/status/sljhlvcx8k11ckw7?svg=true)](https://ci.appveyor.com/project/plibither8/2048-cpp)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37414d66e7d4146bf72a4a467fdc84d)](https://app.codacy.com/app/plibither8/2048.cpp?utm_source=github.com&utm_medium=referral&utm_content=plibither8/2048.cpp&utm_campaign=Badge_Grade_Dashboard)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/plibither8/2048.cpp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/plibither8/2048.cpp/context:cpp)
@@ -21,34 +21,55 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ### Requirements
 
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
-* Linux, macOS OR Windows with a working terminal (Cygwin, Windows Subsystem for Linux or Git bash is recommended for Windows)
-* [CMake](https://cmake.org/)
+* virtually any platform including: 
+  * Linux
+  * macOS
+  * Windows (via Cygwin or Windows Subsystem for Linux)
+* [CMake](https://cmake.org/) or [Meson](https://mesonbuild.com/)
 
 ### Installation
 
 1. Open your terminal in your preferred directory and clone this project:
 ```bash
-$ git clone https://github.com/plibither8/2048.cpp
+git clone https://github.com/plibither8/2048.cpp
 ```
 2. Enter the project directory:
-```bash
-$ cd 2048.cpp
+```sh
+cd 2048.cpp
 ```
 3. Create and enter the build directory:
-```bash
-$ mkdir build && cd build
+```sh
+cd build
 ```
-4. Compile the program with cmake
-```bash
-$ cmake ..
+4. Generate build configuration
+```sh
+cmake ../src
+```
+OR
+```sh
+meson ../src
 ```
 5. Build the executable
-```bash
-$ make
+```sh
+cmake --build .
 ```
-6. Run the program and play the game! :tada:
-```bash
-$ ./2048
+OR
+```sh
+ninja
+```
+6. install the program (optional)
+```sh
+cmake --build . --target install
+```
+OR
+```sh
+meson configure --prefix=$HOME/.local
+
+ninja install
+```
+7. Run the program and play the game! :tada:
+```sh
+2048
 ```
 
 ## Contributing

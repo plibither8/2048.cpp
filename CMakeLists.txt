@@ -1,18 +1,34 @@
-cmake_minimum_required(VERSION 3.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.7)  # 3.7: CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT, 3.3: CXX_STANDARD
 project(2048 CXX)
 
-set(MAIN_TARGET_NAME 2048)
+set(SOURCES src/2048.cpp src/gameboard.cpp src/game.cpp src/global.cpp src/menu.cpp src/scores.cpp src/statistics.cpp)
 
-# Source Files
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
-	"src/*.cpp"
-)
-file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS
-	"src/headers/*.hpp"
-)
+if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+  list(APPEND FLAGS -Wall)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL Clang)
+  list(APPEND FLAGS -Wall)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL Intel)
+  list(APPEND FLAGS -w2)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL PGI)
+  list(APPEND FLAGS -a)
+endif()
 
-add_executable(${MAIN_TARGET_NAME} ${SOURCES} ${HEADERS})
+add_executable(2048 ${SOURCES})
+target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/headers/)
+target_compile_options(2048 PRIVATE ${FLAGS})
 
-target_compile_features(${MAIN_TARGET_NAME} PRIVATE cxx_std_11)
+set_target_properties(2048 PROPERTIES
+  CXX_STANDARD 14
+  CXX_STANDARD_REQUIRED true)
 
-target_include_directories(${MAIN_TARGET_NAME} PRIVATE "src/headers/")
+# --- install
+
+if(UNIX AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "~/.local" CACHE PATH "..." FORCE)
+endif()
+
+install(TARGETS 2048
+  RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/data
+        DESTINATION ${CMAKE_INSTALL_PREFIX})

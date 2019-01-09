@@ -1,23 +1,25 @@
 language: cpp
 group: travis_latest
+dist: xenial
 
 git:
   depth: 3
   quiet: true
 
-os:
-  - linux
-  - osx
-  
-compiler:
-  - clang
-  - gcc
+matrix:
+  include:
+  - os: linux
+  - os: osx
+  - os: windows
+    install:
+    - cd build
+    - cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
+    - cmake --build .
 
 install:
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make
+- cd build
+- cmake ..
+- cmake --build .
 
 script:
-  - 4 | ./2048
+- echo 4 | ./2048
