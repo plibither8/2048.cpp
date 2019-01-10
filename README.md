@@ -43,7 +43,7 @@ cd build
 ```
 4. Generate build configuration
 ```sh
-cmake ../src
+cmake ../
 ```
 OR
 ```sh
