@@ -262,19 +262,21 @@ void Game::drawInputError() {
 }
 
 void Game::drawInputControls() {
-  constexpr auto input_commands_text = u8R"(
-  W or K or ↑ => Up
-  A or H or ← => Left
-  S or J or ↓ => Down
-  D or L or → => Right
-  Z or P => Save
-
-  Press the keys to start and continue.
-
-)";
+  constexpr auto sp = "  ";
+  const auto input_commands_list_text = {
+      "W or K or ↑ => Up",
+      "A or H or ← => Left",
+      "S or J or ↓ => Down",
+      "D or L or → => Right",
+      "Z or P => Save",
+      "",
+      "Press the keys to start and continue.",
+      "\n"};
 
   std::ostringstream str_os;
-  str_os << input_commands_text;
+  for (const auto txt : input_commands_list_text) {
+    str_os << sp << txt << "\n";
+  }
   std::cout << str_os.str();
 }
 
@@ -600,7 +602,6 @@ ull Game::setBoardSize() {
 
   enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
 
-  std::ostringstream str_os;
   std::ostringstream error_prompt_richtext;
   error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
                         << MIN_GAME_BOARD_PLAY_SIZE
@@ -619,6 +620,7 @@ ull Game::setBoardSize() {
 
   while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
           userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+    std::ostringstream str_os;
     clearScreen();
     drawAscii();
 
