@@ -33,31 +33,27 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ```sh
 git clone https://github.com/plibither8/2048.cpp
 ```
-2. Enter the project directory:
+2. Enter the project's build directory:
 ```sh
-cd 2048.cpp
-```
-3. Create and enter the build directory:
-```sh
-cd build
+cd 2048.cpp/build
 ```
 
 #### Building with CMake
 
-4. Generate build configuration
+3. Generate build configuration
 ```sh
 cmake ../
 ```
-5. Build the executable
+4. Build the executable
 ```sh
 cmake --build .
 ```
-6. Install the program (optional)
+5. Install the program (optional)
 ```sh
 cmake --build . --target install
 ```
 
-7. Run the program and play the game! :tada:
+6. Run the program and play the game! :tada:
 ```sh
 2048    # run `./2048` if game is not installed
 ```
@@ -68,22 +64,22 @@ cmake --build . --target install
 
 #### Building with Meson
 
-4. Generate build configuration
+3. Generate build configuration
 ```sh
 meson ../
 ```
-5. Build the executable
+4. Build the executable
 ```sh
 ninja
 ```
-6. Install the program (optional)
+5. Install the program (optional)
 ```sh
 meson configure --prefix=$HOME/.local
 
 ninja install
 ```
 
-7. Run the program and play the game! :tada:
+6. Run the program and play the game! :tada:
 ```sh
 2048    # run `./2048` if game is not installed
 ```
@@ -104,7 +100,7 @@ I deeply appreciate the help of the following people:
 
 * [Michael Hirsch](https://github.com/scivision)
   * cleaned up the code,
-  * organised the header files in a better way for a more efficient build
+  * organised the header files in a better way for a more efficient build,
   * added the AppVeyor CI,
   * added the Meson build system and, fixed CMake and added install feature.
 * [Aiman Ismail](https://github.com/pokgak) added support for Vim keybinding.
@@ -113,7 +109,7 @@ I deeply appreciate the help of the following people:
 * [Pascal J. Bourguignon](https://github.com/informatimago) added support for ANSI arrow keys.
 * [Jean-Michaël Celerier](https://github.com/jcelerier) added `CMakeLists.txt` file.
 * [comwrg](https://github.com/comwrg) made the duration in the statistics and highscores human-readable, wrapping seconds to minutes and hours.
-* [Christian Bundy](https://github.com/christianbundy) changed the ugly -, + and | to box-drawing characters.
+* [Christian Bundy](https://github.com/christianbundy) replaced the ugly -, + and | with box-drawing characters.
 * [Tor E Hagemann](https://github.com/hagemt) fixed issue #10, causing unwanted character `1` to be printed.
 * [farazxameer](https://github.com/farazxameer) implemented feature to save a game state and continue from a saved game state, refined game logic.
 * [drodil](https://github.com/drodil) implemented checks to ascertain existance of data files, fixed issue #12
