@@ -75,7 +75,6 @@ ninja
 5. Install the program (optional)
 ```sh
 meson configure --prefix=$HOME/.local
-
 ninja install
 ```
 
