@@ -21,7 +21,7 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ### Requirements
 
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
-* virtually any platform including: 
+* Virtually any platform including:
   * Linux
   * macOS
   * Windows (via Cygwin or Windows Subsystem for Linux)
@@ -30,7 +30,7 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ### Installation
 
 1. Open your terminal in your preferred directory and clone this project:
-```bash
+```sh
 git clone https://github.com/plibither8/2048.cpp
 ```
 2. Enter the project directory:
@@ -41,35 +41,51 @@ cd 2048.cpp
 ```sh
 cd build
 ```
+
+#### Building with CMake
+
 4. Generate build configuration
 ```sh
 cmake ../
-```
-OR
-```sh
-meson ../src
 ```
 5. Build the executable
 ```sh
 cmake --build .
 ```
-OR
-```sh
-ninja
-```
-6. install the program (optional)
+6. Install the program (optional)
 ```sh
 cmake --build . --target install
 ```
-OR
+
+7. Run the program and play the game! :tada:
+```sh
+2048    # run `./2048` if game is not installed
+```
+
+<p align="center">
+    <b>OR</b>
+</p>
+
+#### Building with Meson
+
+4. Generate build configuration
+```sh
+meson ../
+```
+5. Build the executable
+```sh
+ninja
+```
+6. Install the program (optional)
 ```sh
 meson configure --prefix=$HOME/.local
 
 ninja install
 ```
+
 7. Run the program and play the game! :tada:
 ```sh
-2048
+2048    # run `./2048` if game is not installed
 ```
 
 ## Contributing
@@ -86,7 +102,11 @@ First of all, thank you for contributing :smile:! A few things to note:
 
 I deeply appreciate the help of the following people:
 
-* [Michael Hirsch](https://github.com/scivision) cleaned up the code, organised the header files in a better way for a more efficient build and added the AppVeyor CI.
+* [Michael Hirsch](https://github.com/scivision)
+  * cleaned up the code,
+  * organised the header files in a better way for a more efficient build
+  * added the AppVeyor CI,
+  * added the Meson build system and, fixed CMake and added install feature.
 * [Aiman Ismail](https://github.com/pokgak) added support for Vim keybinding.
 * [Patrik Huber](https://github.com/patrikhuber) fixed a typo in the Readme.
 * [zestze](https://github.com/zestze) changed `cstdlib rand` to C++ random int generator.
@@ -106,6 +126,7 @@ I deeply appreciate the help of the following people:
 * [Cong](https://github.com/cxong) edited the `Game` class constructor.
 * [Tien Do](https://github.com/tiendq) added the 'exit' option in the main menu, updated the `CMakeLists.txt` file and made `Color` enum to a scoped enum.
 * [ScorrMorr](https://github.com/ScorrMorr) made many methods `const`s.
+* [tangmengqiu](https://github.com/tangmengqiu) fixed an error-causing instruction step in the readme.
 
 ### Maintainers
 
