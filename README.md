@@ -21,7 +21,7 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ### Requirements
 
 * C++ compiler (e.g. `g++`, `clang++`, etc.)
-* virtually any platform including: 
+* Virtually any platform including:
   * Linux
   * macOS
   * Windows (via Cygwin or Windows Subsystem for Linux)
@@ -30,46 +30,57 @@ The game and code is made to run natively on the GNU/Linux and macOS platforms, 
 ### Installation
 
 1. Open your terminal in your preferred directory and clone this project:
-```bash
+```sh
 git clone https://github.com/plibither8/2048.cpp
 ```
-2. Enter the project directory:
+2. Enter the project's build directory:
 ```sh
-cd 2048.cpp
+cd 2048.cpp/build
 ```
-3. Create and enter the build directory:
-```sh
-cd build
-```
-4. Generate build configuration
+
+#### Building with CMake
+
+3. Generate build configuration
 ```sh
 cmake ../
 ```
-OR
-```sh
-meson ../src
-```
-5. Build the executable
+4. Build the executable
 ```sh
 cmake --build .
 ```
-OR
-```sh
-ninja
-```
-6. install the program (optional)
+5. Install the program (optional)
 ```sh
 cmake --build . --target install
 ```
-OR
+
+6. Run the program and play the game! :tada:
+```sh
+2048    # run `./2048` if game is not installed
+```
+
+<p align="center">
+    <b>OR</b>
+</p>
+
+#### Building with Meson
+
+3. Generate build configuration
+```sh
+meson ../
+```
+4. Build the executable
+```sh
+ninja
+```
+5. Install the program (optional)
 ```sh
 meson configure --prefix=$HOME/.local
-
 ninja install
 ```
-7. Run the program and play the game! :tada:
+
+6. Run the program and play the game! :tada:
 ```sh
-2048
+2048    # run `./2048` if game is not installed
 ```
 
 ## Contributing
@@ -86,14 +97,18 @@ First of all, thank you for contributing :smile:! A few things to note:
 
 I deeply appreciate the help of the following people:
 
-* [Michael Hirsch](https://github.com/scivision) cleaned up the code, organised the header files in a better way for a more efficient build and added the AppVeyor CI.
+* [Michael Hirsch](https://github.com/scivision)
+  * cleaned up the code,
+  * organised the header files in a better way for a more efficient build,
+  * added the AppVeyor CI,
+  * added the Meson build system and, fixed CMake and added install feature.
 * [Aiman Ismail](https://github.com/pokgak) added support for Vim keybinding.
 * [Patrik Huber](https://github.com/patrikhuber) fixed a typo in the Readme.
 * [zestze](https://github.com/zestze) changed `cstdlib rand` to C++ random int generator.
 * [Pascal J. Bourguignon](https://github.com/informatimago) added support for ANSI arrow keys.
 * [Jean-Michaël Celerier](https://github.com/jcelerier) added `CMakeLists.txt` file.
 * [comwrg](https://github.com/comwrg) made the duration in the statistics and highscores human-readable, wrapping seconds to minutes and hours.
-* [Christian Bundy](https://github.com/christianbundy) changed the ugly -, + and | to box-drawing characters.
+* [Christian Bundy](https://github.com/christianbundy) replaced the ugly -, + and | with box-drawing characters.
 * [Tor E Hagemann](https://github.com/hagemt) fixed issue #10, causing unwanted character `1` to be printed.
 * [farazxameer](https://github.com/farazxameer) implemented feature to save a game state and continue from a saved game state, refined game logic.
 * [drodil](https://github.com/drodil) implemented checks to ascertain existance of data files, fixed issue #12
@@ -106,6 +121,7 @@ I deeply appreciate the help of the following people:
 * [Cong](https://github.com/cxong) edited the `Game` class constructor.
 * [Tien Do](https://github.com/tiendq) added the 'exit' option in the main menu, updated the `CMakeLists.txt` file and made `Color` enum to a scoped enum.
 * [ScorrMorr](https://github.com/ScorrMorr) made many methods `const`s.
+* [tangmengqiu](https://github.com/tangmengqiu) fixed an error-causing instruction step in the readme.
 
 ### Maintainers
 
