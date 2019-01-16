@@ -247,84 +247,124 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
-void Game::input(KeyInputErrorStatus err) {
-  constexpr auto input_commands_text = u8R"(
-  W or K or ↑ => Up
-  A or H or ← => Left
-  S or J or ↓ => Down
-  D or L or → => Right
-  Z or P => Save
-
-  Press the keys to start and continue.
-
-)";
-
+void Game::drawInputError() {
   constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
   constexpr auto sp = "  ";
   std::ostringstream str_os;
   std::ostringstream invalid_prompt_richtext;
   invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
 
-  str_os << input_commands_text;
-
-  if (err == KeyInputErrorStatus::STATUS_INPUT_ERROR) {
+  if (gamestatus[FLAG_INPUT_ERROR]) {
     str_os << invalid_prompt_richtext.str();
+    gamestatus[FLAG_INPUT_ERROR] = false;
   }
   std::cout << str_os.str();
+}
 
+void Game::drawInputControls() {
+  constexpr auto sp = "  ";
+  const auto input_commands_list_text = {
+      "W or K or ↑ => Up",
+      "A or H or ← => Left",
+      "S or J or ↓ => Down",
+      "D or L or → => Right",
+      "Z or P => Save",
+      "",
+      "Press the keys to start and continue.",
+      "\n"};
+
+  std::ostringstream str_os;
+  for (const auto txt : input_commands_list_text) {
+    str_os << sp << txt << "\n";
+  }
+  std::cout << str_os.str();
+}
+
+bool Game::check_input_ansi(char c) {
   using namespace Keypress::Code;
-
-  char c;
-  getInput(c);
-
   if (c == CODE_ANSI_TRIGGER_1) {
     getInput(c);
     if (c == CODE_ANSI_TRIGGER_2) {
       getInput(c);
       switch (c) {
       case CODE_ANSI_UP:
-        decideMove(UP);
-        return;
+        intendedmove[FLAG_MOVE_UP] = true;
+        return false;
       case CODE_ANSI_DOWN:
-        decideMove(DOWN);
-        return;
+        intendedmove[FLAG_MOVE_DOWN] = true;
+        return false;
       case CODE_ANSI_RIGHT:
-        decideMove(RIGHT);
-        return;
+        intendedmove[FLAG_MOVE_RIGHT] = true;
+        return false;
       case CODE_ANSI_LEFT:
-        decideMove(LEFT);
-        return;
+        intendedmove[FLAG_MOVE_LEFT] = true;
+        return false;
       }
     }
   }
+  return true;
+}
 
+bool Game::check_input_vim(char c) {
+  using namespace Keypress::Code;
   switch (toupper(c)) {
-
-  case CODE_WASD_UP:
   case CODE_VIM_UP:
-    decideMove(UP);
-    break;
-  case CODE_WASD_LEFT:
+    intendedmove[FLAG_MOVE_UP] = true;
+    return false;
   case CODE_VIM_LEFT:
-    decideMove(LEFT);
-    break;
-  case CODE_WASD_DOWN:
+    intendedmove[FLAG_MOVE_LEFT] = true;
+    return false;
   case CODE_VIM_DOWN:
-    decideMove(DOWN);
-    break;
-  case CODE_WASD_RIGHT:
+    intendedmove[FLAG_MOVE_DOWN] = true;
+    return false;
   case CODE_VIM_RIGHT:
-    decideMove(RIGHT);
-    break;
+    intendedmove[FLAG_MOVE_RIGHT] = true;
+    return false;
+  }
+  return true;
+}
+
+bool Game::check_input_wasd(char c) {
+  using namespace Keypress::Code;
+  switch (toupper(c)) {
+  case CODE_WASD_UP:
+    intendedmove[FLAG_MOVE_UP] = true;
+    return false;
+  case CODE_WASD_LEFT:
+    intendedmove[FLAG_MOVE_LEFT] = true;
+    return false;
+  case CODE_WASD_DOWN:
+    intendedmove[FLAG_MOVE_DOWN] = true;
+    return false;
+  case CODE_WASD_RIGHT:
+    intendedmove[FLAG_MOVE_RIGHT] = true;
+    return false;
+  }
+  return true;
+}
+
+bool Game::check_input_other(char c) {
+  using namespace Keypress::Code;
+  switch (toupper(c)) {
   case CODE_HOTKEY_ACTION_SAVE:
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
-    saveState();
-    stateSaved = true;
-    break;
-  default:
-    drawBoard();
-    input(KeyInputErrorStatus::STATUS_INPUT_ERROR);
-    break;
+    gamestatus[FLAG_SAVED_GAME] = true;
+    return false;
+  }
+  return true;
+}
+
+void Game::input() {
+  if (!gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN]) {
+    // Game still in play. Take input commands for next turn.
+    char c;
+    getInput(c);
+    const auto is_invalid_keypress_code =
+        check_input_ansi(c) && check_input_wasd(c) && check_input_vim(c) &&
+        check_input_other(c);
+    if (is_invalid_keypress_code) {
+      gamestatus[FLAG_INPUT_ERROR] = true;
+    }
   }
 }
 
@@ -423,16 +463,12 @@ void Game::saveState() const {
   stats.close();
 }
 
-void Game::playGame(ContinueStatus cont) {
-  constexpr auto state_saved_text =
-      "The game has been saved. Feel free to take a break.";
+void Game::drawEndScreen() {
   constexpr auto win_game_text = "You win! Congratulations!";
   constexpr auto lose_game_text = "Game over! You lose.";
   constexpr auto sp = "  ";
 
-  std::ostringstream state_saved_richtext;
-  state_saved_richtext << green << bold_on << sp << state_saved_text << def
-                       << bold_off << "\n\n";
+  std::ostringstream str_os;
   std::ostringstream win_richtext;
   win_richtext << green << bold_on << sp << win_game_text << def << bold_off
                << "\n\n\n";
@@ -441,41 +477,109 @@ void Game::playGame(ContinueStatus cont) {
   lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
                 << "\n\n\n";
 
-  auto startTime = std::chrono::high_resolution_clock::now();
-
-  while (true) {
-    std::ostringstream str_os;
-    if (gamePlayBoard.moved) {
-      gamePlayBoard.addTile();
-      gamePlayBoard.registerMoveByOne();
-    }
-
-    drawBoard();
-
-    if (gamePlayBoard.hasWon() || !gamePlayBoard.canMove()) {
-      break;
-    }
-
-    if (stateSaved) {
-      str_os << state_saved_richtext.str();
-      stateSaved = false;
-    }
-    std::cout << str_os.str();
-    input();
-    gamePlayBoard.unblockTiles();
-  }
-
-  auto finishTime = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = finishTime - startTime;
-  duration = elapsed.count();
-
-  std::ostringstream str_os;
   if (gamePlayBoard.hasWon()) {
     str_os << win_richtext.str();
   } else {
     str_os << lose_richtext.str();
   }
   std::cout << str_os.str();
+}
+
+void Game::drawGameState() {
+  constexpr auto state_saved_text =
+      "The game has been saved. Feel free to take a break.";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
+  std::ostringstream state_saved_richtext;
+  state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                       << bold_off << "\n\n";
+
+  if (gamestatus[FLAG_SAVED_GAME]) {
+    str_os << state_saved_richtext.str();
+    gamestatus[FLAG_SAVED_GAME] = false;
+  }
+  std::cout << str_os.str();
+}
+
+void Game::drawGraphics() {
+  drawBoard();
+  drawGameState();
+  drawInputControls();
+  drawInputError();
+}
+
+void Game::process_gamelogic() {
+  gamePlayBoard.unblockTiles();
+  if (gamePlayBoard.moved) {
+    gamePlayBoard.addTile();
+    gamePlayBoard.registerMoveByOne();
+  }
+
+  if (gamePlayBoard.hasWon()) {
+    gamestatus[FLAG_WIN] = true;
+  }
+  if (!gamePlayBoard.canMove()) {
+    gamestatus[FLAG_END_GAME] = true;
+  }
+}
+
+bool Game::process_intendedMove() {
+  if (intendedmove[FLAG_MOVE_LEFT]) {
+    decideMove(LEFT);
+  }
+  if (intendedmove[FLAG_MOVE_RIGHT]) {
+    decideMove(RIGHT);
+  }
+  if (intendedmove[FLAG_MOVE_UP]) {
+    decideMove(UP);
+  }
+  if (intendedmove[FLAG_MOVE_DOWN]) {
+    decideMove(DOWN);
+  }
+  // Reset all move flags...
+  intendedmove = intendedmove_t{};
+  return true;
+}
+
+bool Game::process_gameStatus() {
+  if (gamestatus[FLAG_WIN]) {
+    // break if question asked
+    return false;
+  }
+  if (gamestatus[FLAG_END_GAME]) {
+    // End endless_mode;
+    return false;
+  }
+  if (gamestatus[FLAG_SAVED_GAME]) {
+    saveState();
+  }
+  return true;
+}
+
+bool Game::soloGameLoop() {
+  process_gamelogic();
+  drawGraphics();
+  input();
+  process_intendedMove();
+  const auto loop_again = process_gameStatus();
+  return loop_again;
+}
+
+void Game::endlessGameLoop() {
+  while (soloGameLoop())
+    ;
+}
+
+void Game::playGame(ContinueStatus cont) {
+  auto startTime = std::chrono::high_resolution_clock::now();
+  endlessGameLoop();
+  auto finishTime = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = finishTime - startTime;
+  duration = elapsed.count();
+
+  drawBoard();
+  drawEndScreen();
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
@@ -498,7 +602,6 @@ ull Game::setBoardSize() {
 
   enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
 
-  std::ostringstream str_os;
   std::ostringstream error_prompt_richtext;
   error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
                         << MIN_GAME_BOARD_PLAY_SIZE
@@ -517,6 +620,7 @@ ull Game::setBoardSize() {
 
   while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
           userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+    std::ostringstream str_os;
     clearScreen();
     drawAscii();
 

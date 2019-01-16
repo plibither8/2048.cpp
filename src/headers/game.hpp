@@ -3,28 +3,57 @@
 
 #include "gameboard.hpp"
 #include "global.hpp"
+#include <array>
 
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
 class Game {
 private:
+  enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
+  enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
+
+  enum GameStatusFlag {
+    FLAG_WIN,
+    FLAG_END_GAME,
+    FLAG_SAVED_GAME,
+    FLAG_INPUT_ERROR,
+    MAX_NO_GAME_STATUS_FLAGS
+  };
+
+  using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
+
+  gamestatus_t gamestatus{};
+
+  enum IntendedMoveFlag {
+    FLAG_MOVE_LEFT,
+    FLAG_MOVE_RIGHT,
+    FLAG_MOVE_UP,
+    FLAG_MOVE_DOWN,
+    MAX_NO_INTENDED_MOVE_FLAGS
+  };
+
+  using intendedmove_t = std::array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
+  intendedmove_t intendedmove{};
+
   ull bestScore;
   double duration;
   GameBoard gamePlayBoard;
   RandInt randInt;
-  bool stateSaved;
   bool noSave;
-
-  enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
-  enum KeyInputErrorStatus { STATUS_INPUT_VALID = 0, STATUS_INPUT_ERROR = 1 };
-  enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
   bool get_and_process_game_stats_string_data(std::istream &stats_file);
   bool load_game_stats_from_file(std::string filename);
   bool initialiseContinueBoardArray();
+  bool soloGameLoop();
+  void drawEndScreen();
   void drawBoard() const;
+  void drawGameState();
   void drawScoreBoard(std::ostream &out_stream) const;
-  void input(KeyInputErrorStatus err = STATUS_INPUT_VALID);
+  bool check_input_ansi(char c);
+  bool check_input_wasd(char c);
+  bool check_input_vim(char c);
+  bool check_input_other(char c);
+  void input();
   void decideMove(Directions);
 
   bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
@@ -40,8 +69,16 @@ private:
   void playGame(ContinueStatus);
   ull setBoardSize();
 
+  void drawGraphics();
+  void endlessGameLoop();
+  void process_gamelogic();
+  bool process_intendedMove();
+  bool process_gameStatus();
+  void drawInputError();
+  void drawInputControls();
+
 public:
-  Game() : bestScore(0), duration(0.0), stateSaved(false), noSave(false) {}
+  Game() : bestScore(0), duration(0.0), noSave(false) {}
   void startGame();
   void continueGame();
 };
