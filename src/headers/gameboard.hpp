@@ -24,8 +24,8 @@ private:
 };
 
 class GameBoard {
-  std::vector<Tile> board;
   ull playsize{0};
+  std::vector<Tile> board;
   bool win{};
 
   Tile getTile(point2D_t pt) const;
