@@ -16,14 +16,14 @@
 
 ## Setup
 
-The game and code is made to run natively on the GNU/Linux and macOS platforms, but cross-platform compatibility for Windows has been added too.
+The game and code is made to run natively on the GNU/Linux and MacOS platforms, but cross-platform compatibility for Windows has been added too.
 
 ### Requirements
 
-* C++ compiler (e.g. `g++`, `clang++`, etc.)
+* C++11 compiler (e.g. `g++`, `clang++`, `pgc++`, `icpc`, etc.)
 * Virtually any platform including:
   * Linux
-  * macOS
+  * MacOS
   * Windows (via Cygwin or Windows Subsystem for Linux)
 * [CMake](https://cmake.org/) or [Meson](https://mesonbuild.com/)
 
@@ -37,6 +37,11 @@ git clone https://github.com/plibither8/2048.cpp
 ```sh
 cd 2048.cpp/build
 ```
+
+---
+
+For both CMake and Meson, the default C++ compiler on your system will be used.
+If you wish to manually select a C++ compiler, optionally add `CXX=clang++ cmake` or `CXX=clang++ meson` etc.
 
 #### Building with CMake
 
@@ -87,7 +92,7 @@ ninja install
 
 First of all, thank you for contributing :smile:! A few things to note:
 
-* If you have found a bug, or have a feature that you'd like implemeted, [raise an issue](https://github.com/plibither8/2048.cpp/issues).
+* If you have found a bug, or have a feature that you'd like implemented, [raise an issue](https://github.com/plibither8/2048.cpp/issues).
 
 * If you have proposed a pull request, make sure that you run `clang-format` on the source code (both, `.cpp` and `.hpp`) files if you've made changes there.
 
@@ -111,13 +116,13 @@ I deeply appreciate the help of the following people:
 * [Christian Bundy](https://github.com/christianbundy) replaced the ugly -, + and | with box-drawing characters.
 * [Tor E Hagemann](https://github.com/hagemt) fixed issue #10, causing unwanted character `1` to be printed.
 * [farazxameer](https://github.com/farazxameer) implemented feature to save a game state and continue from a saved game state, refined game logic.
-* [drodil](https://github.com/drodil) implemented checks to ascertain existance of data files, fixed issue #12
+* [drodil](https://github.com/drodil) implemented checks to ascertain existence of data files, fixed issue #12
 * [Aviskar KC](https://github.com/aviskarkc10) added arrow keys to game instructions.
 * [Peter Squicciarini](https://github.com/stripedpajamas) fixed readme instructions.
 * [Mark Fischer, Jr.](https://github.com/flyingfisch) fixed a typo.
 * [Hugo Brandão](https://github.com/jhugobb) completely reorganised the existing project structure and updated the build method to enfore CMake.
 * [Alton Alvarez](https://github.com/mathematicalist) fixed a typo.
-* [cawvyoct](https://github.com/cawvyoct) made the source code much, much easier to read: removed most magic numbers, replacing them with variables to ease maintanence. Implemented `clang-format`.
+* [cawvyoct](https://github.com/cawvyoct) made the source code much, much easier to read: removed most magic numbers, replacing them with variables to ease maintenance. Implemented `clang-format`.
 * [Cong](https://github.com/cxong) edited the `Game` class constructor.
 * [Tien Do](https://github.com/tiendq) added the 'exit' option in the main menu, updated the `CMakeLists.txt` file and made `Color` enum to a scoped enum.
 * [ScorrMorr](https://github.com/ScorrMorr) made many methods `const`s.
