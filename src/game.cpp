@@ -47,7 +47,9 @@ enum {
 enum {
   CODE_HOTKEY_ACTION_SAVE = 'Z',
   CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P',
-  CODE_HOTKEY_QUIT_ENDLESS_STAGE = 'X'
+  CODE_HOTKEY_QUIT_ENDLESS_MODE = 'X',
+  CODE_HOTKEY_CHOICE_NO = 'N',
+  CODE_HOTKEY_CHOICE_YES = 'Y'
 };
 
 } // namespace Code
@@ -270,7 +272,7 @@ void Game::drawInputControls() {
   const auto input_commands_list_text = {
       "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
       "D or L or → => Right", "Z or P => Save"};
-  const auto endless_stage_list_text = {"X => Quit Endless Stage"};
+  const auto endless_mode_list_text = {"X => Quit Endless Mode"};
   const auto input_commands_list_end_text = {
       "", "Press the keys to start and continue.", "\n"};
 
@@ -278,8 +280,8 @@ void Game::drawInputControls() {
   for (const auto txt : input_commands_list_text) {
     str_os << sp << txt << "\n";
   }
-  if (gamestatus[FLAG_POST_WIN_STAGE]) {
-    for (const auto txt : endless_stage_list_text) {
+  if (gamestatus[FLAG_ENDLESS_MODE]) {
+    for (const auto txt : endless_mode_list_text) {
       str_os << sp << txt << "\n";
     }
   }
@@ -361,8 +363,8 @@ bool Game::check_input_other(char c) {
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
     gamestatus[FLAG_SAVED_GAME] = true;
     return false;
-  case CODE_HOTKEY_QUIT_ENDLESS_STAGE:
-    if (gamestatus[FLAG_POST_WIN_STAGE]) {
+  case CODE_HOTKEY_QUIT_ENDLESS_MODE:
+    if (gamestatus[FLAG_ENDLESS_MODE]) {
       gamestatus[FLAG_END_GAME] = true;
       return false;
     }
@@ -483,8 +485,8 @@ void Game::saveState() const {
 void Game::drawEndScreen() {
   constexpr auto win_game_text = "You win! Congratulations!";
   constexpr auto lose_game_text = "Game over! You lose.";
-  constexpr auto endless_stage_text =
-      "End of endless stage! Thank you for playing!";
+  constexpr auto endless_mode_text =
+      "End of endless mode! Thank you for playing!";
   constexpr auto sp = "  ";
 
   std::ostringstream str_os;
@@ -496,18 +498,18 @@ void Game::drawEndScreen() {
   lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
                 << "\n\n\n";
 
-  std::ostringstream endless_stage_richtext;
-  endless_stage_richtext << red << bold_on << sp << endless_stage_text << def
-                         << bold_off << "\n\n\n";
+  std::ostringstream endless_mode_richtext;
+  endless_mode_richtext << red << bold_on << sp << endless_mode_text << def
+                        << bold_off << "\n\n\n";
 
-  if (!gamestatus[FLAG_POST_WIN_STAGE]) {
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (gamestatus[FLAG_WIN]) {
       str_os << win_richtext.str();
     } else {
       str_os << lose_richtext.str();
     }
   } else {
-    str_os << endless_stage_richtext.str();
+    str_os << endless_mode_richtext.str();
   }
   std::cout << str_os.str();
 }
@@ -530,8 +532,7 @@ void Game::drawGameState() {
 }
 
 void Game::drawEndOfGamePrompt() {
-  constexpr auto win_but_what_next =
-      "You Won! Start endless mode? (Enter 'x' to quit.)";
+  constexpr auto win_but_what_next = "You Won! Continue playing current game? [y/n]";
   constexpr auto sp = "  ";
 
   std::ostringstream str_os;
@@ -541,8 +542,8 @@ void Game::drawEndOfGamePrompt() {
 
   if (gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
     str_os << win_richtext.str();
+    std::cout << str_os.str();
   }
-  std::cout << str_os.str();
 }
 
 void Game::drawGraphics() {
@@ -560,7 +561,7 @@ void Game::process_gamelogic() {
     gamePlayBoard.registerMoveByOne();
   }
 
-  if (!gamestatus[FLAG_POST_WIN_STAGE]) {
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (gamePlayBoard.hasWon()) {
       gamestatus[FLAG_WIN] = true;
       gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
@@ -592,7 +593,7 @@ bool Game::process_intendedMove() {
 bool check_input_check_to_end_game(char c) {
   using namespace Keypress::Code;
   switch (std::toupper(c)) {
-  case CODE_HOTKEY_QUIT_ENDLESS_STAGE:
+  case CODE_HOTKEY_CHOICE_NO:
     return true;
   }
   return false;
@@ -608,10 +609,10 @@ bool continue_playing_game(std::istream &in_os) {
 }
 
 bool Game::process_gameStatus() {
-  if (!gamestatus[FLAG_POST_WIN_STAGE]) {
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (gamestatus[FLAG_WIN]) {
       if (continue_playing_game(std::cin)) {
-        gamestatus[FLAG_POST_WIN_STAGE] = true;
+        gamestatus[FLAG_ENDLESS_MODE] = true;
         gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = false;
         gamestatus[FLAG_WIN] = false;
       } else {
