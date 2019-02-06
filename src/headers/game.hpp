@@ -17,6 +17,8 @@ private:
     FLAG_END_GAME,
     FLAG_SAVED_GAME,
     FLAG_INPUT_ERROR,
+    FLAG_ENDLESS_MODE,
+    FLAG_QUESTION_STAY_OR_QUIT,
     MAX_NO_GAME_STATUS_FLAGS
   };
 
@@ -69,6 +71,7 @@ private:
   void playGame(ContinueStatus);
   ull setBoardSize();
 
+  void drawEndOfGamePrompt();
   void drawGraphics();
   void endlessGameLoop();
   void process_gamelogic();

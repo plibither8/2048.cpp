@@ -44,7 +44,13 @@ enum {
   CODE_VIM_RIGHT = 'L'
 };
 
-enum { CODE_HOTKEY_ACTION_SAVE = 'Z', CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P' };
+enum {
+  CODE_HOTKEY_ACTION_SAVE = 'Z',
+  CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P',
+  CODE_HOTKEY_QUIT_ENDLESS_MODE = 'X',
+  CODE_HOTKEY_CHOICE_NO = 'N',
+  CODE_HOTKEY_CHOICE_YES = 'Y'
+};
 
 } // namespace Code
 } // namespace Keypress
@@ -264,20 +270,27 @@ void Game::drawInputError() {
 void Game::drawInputControls() {
   constexpr auto sp = "  ";
   const auto input_commands_list_text = {
-      "W or K or ↑ => Up",
-      "A or H or ← => Left",
-      "S or J or ↓ => Down",
-      "D or L or → => Right",
-      "Z or P => Save",
-      "",
-      "Press the keys to start and continue.",
-      "\n"};
+      "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
+      "D or L or → => Right", "Z or P => Save"};
+  const auto endless_mode_list_text = {"X => Quit Endless Mode"};
+  const auto input_commands_list_end_text = {
+      "", "Press the keys to start and continue.", "\n"};
 
   std::ostringstream str_os;
   for (const auto txt : input_commands_list_text) {
     str_os << sp << txt << "\n";
   }
-  std::cout << str_os.str();
+  if (gamestatus[FLAG_ENDLESS_MODE]) {
+    for (const auto txt : endless_mode_list_text) {
+      str_os << sp << txt << "\n";
+    }
+  }
+  for (const auto txt : input_commands_list_end_text) {
+    str_os << sp << txt << "\n";
+  }
+  if (!gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
+    std::cout << str_os.str();
+  }
 }
 
 bool Game::check_input_ansi(char c) {
@@ -350,6 +363,12 @@ bool Game::check_input_other(char c) {
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
     gamestatus[FLAG_SAVED_GAME] = true;
     return false;
+  case CODE_HOTKEY_QUIT_ENDLESS_MODE:
+    if (gamestatus[FLAG_ENDLESS_MODE]) {
+      gamestatus[FLAG_END_GAME] = true;
+      return false;
+    }
+    break;
   }
   return true;
 }
@@ -466,6 +485,8 @@ void Game::saveState() const {
 void Game::drawEndScreen() {
   constexpr auto win_game_text = "You win! Congratulations!";
   constexpr auto lose_game_text = "Game over! You lose.";
+  constexpr auto endless_mode_text =
+      "End of endless mode! Thank you for playing!";
   constexpr auto sp = "  ";
 
   std::ostringstream str_os;
@@ -477,10 +498,18 @@ void Game::drawEndScreen() {
   lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
                 << "\n\n\n";
 
-  if (gamePlayBoard.hasWon()) {
-    str_os << win_richtext.str();
+  std::ostringstream endless_mode_richtext;
+  endless_mode_richtext << red << bold_on << sp << endless_mode_text << def
+                        << bold_off << "\n\n\n";
+
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
+    if (gamestatus[FLAG_WIN]) {
+      str_os << win_richtext.str();
+    } else {
+      str_os << lose_richtext.str();
+    }
   } else {
-    str_os << lose_richtext.str();
+    str_os << endless_mode_richtext.str();
   }
   std::cout << str_os.str();
 }
@@ -502,9 +531,25 @@ void Game::drawGameState() {
   std::cout << str_os.str();
 }
 
+void Game::drawEndOfGamePrompt() {
+  constexpr auto win_but_what_next = "You Won! Continue playing current game? [y/n]";
+  constexpr auto sp = "  ";
+
+  std::ostringstream str_os;
+  std::ostringstream win_richtext;
+  win_richtext << green << bold_on << sp << win_but_what_next << def << bold_off
+               << ": ";
+
+  if (gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
+    str_os << win_richtext.str();
+    std::cout << str_os.str();
+  }
+}
+
 void Game::drawGraphics() {
   drawBoard();
   drawGameState();
+  drawEndOfGamePrompt();
   drawInputControls();
   drawInputError();
 }
@@ -516,8 +561,11 @@ void Game::process_gamelogic() {
     gamePlayBoard.registerMoveByOne();
   }
 
-  if (gamePlayBoard.hasWon()) {
-    gamestatus[FLAG_WIN] = true;
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
+    if (gamePlayBoard.hasWon()) {
+      gamestatus[FLAG_WIN] = true;
+      gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
+    }
   }
   if (!gamePlayBoard.canMove()) {
     gamestatus[FLAG_END_GAME] = true;
@@ -542,10 +590,35 @@ bool Game::process_intendedMove() {
   return true;
 }
 
-bool Game::process_gameStatus() {
-  if (gamestatus[FLAG_WIN]) {
-    // break if question asked
+bool check_input_check_to_end_game(char c) {
+  using namespace Keypress::Code;
+  switch (std::toupper(c)) {
+  case CODE_HOTKEY_CHOICE_NO:
+    return true;
+  }
+  return false;
+}
+
+bool continue_playing_game(std::istream &in_os) {
+  char letter_choice;
+  in_os >> letter_choice;
+  if (check_input_check_to_end_game(letter_choice)) {
     return false;
+  }
+  return true;
+}
+
+bool Game::process_gameStatus() {
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
+    if (gamestatus[FLAG_WIN]) {
+      if (continue_playing_game(std::cin)) {
+        gamestatus[FLAG_ENDLESS_MODE] = true;
+        gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = false;
+        gamestatus[FLAG_WIN] = false;
+      } else {
+        return false;
+      }
+    }
   }
   if (gamestatus[FLAG_END_GAME]) {
     // End endless_mode;
