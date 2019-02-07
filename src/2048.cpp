@@ -4,8 +4,7 @@
 
 int main() {
 
-  Menu menu;
-  menu.startMenu();
+  Menu::startMenu();
 
   return EXIT_SUCCESS;
 }
