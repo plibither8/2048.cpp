@@ -3,10 +3,25 @@
 #include "game.hpp"
 #include "global.hpp"
 #include "scores.hpp"
+#include <array>
 #include <iostream>
 #include <sstream>
 
 namespace {
+
+enum MainMenuStatusFlag {
+  FLAG_NULL,
+  FLAG_START_GAME,
+  FLAG_CONTINUE_GAME,
+  FLAG_DISPLAY_HIGHSCORES,
+  FLAG_EXIT_GAME,
+  MAX_NO_MAIN_MENU_STATUS_FLAGS
+};
+
+using mainmenustatus_t = std::array<bool, MAX_NO_MAIN_MENU_STATUS_FLAGS>;
+
+mainmenustatus_t mainmenustatus{};
+bool FlagInputErrornousChoice{};
 
 void startGame() {
   Game g;
@@ -52,7 +67,7 @@ void drawMainMenuOptions() {
   std::cout << str_os.str();
 }
 
-void drawInputMenuPrompt(int err) {
+void drawInputMenuPrompt(bool err) {
   constexpr auto err_input_text = "Invalid input. Please try again.";
   constexpr auto prompt_choice_text = "Enter Choice: ";
   constexpr auto sp = "  ";
@@ -72,45 +87,74 @@ void drawInputMenuPrompt(int err) {
   std::cout << str_os.str();
 }
 
+void drawMainMenuGraphics() {
+  drawAscii();
+  drawMainMenuTitle();
+  drawMainMenuOptions();
+  drawInputMenuPrompt(FlagInputErrornousChoice);
+}
+
 void input() {
-  using Menu::startMenu;
+  // Reset ErrornousChoice flag...
+  FlagInputErrornousChoice = bool{};
   char c;
   std::cin >> c;
 
-  if (std::cin.eof()) {
-    std::cout << std::endl;
-    exit(EXIT_SUCCESS);
-  }
-
   switch (c) {
   case '1':
-    startGame();
+    mainmenustatus[FLAG_START_GAME] = true;
     break;
   case '2':
-    continueGame();
+    mainmenustatus[FLAG_CONTINUE_GAME] = true;
     break;
   case '3':
-    showScores();
+    mainmenustatus[FLAG_DISPLAY_HIGHSCORES] = true;
     break;
   case '4':
-    exit(EXIT_SUCCESS);
+    mainmenustatus[FLAG_EXIT_GAME] = true;
+    break;
   default:
-    startMenu(1);
+    FlagInputErrornousChoice = true;
     break;
   }
+}
+
+void process_MainMenu() {
+  if (mainmenustatus[FLAG_START_GAME]) {
+    startGame();
+  }
+  if (mainmenustatus[FLAG_CONTINUE_GAME]) {
+    continueGame();
+  }
+  if (mainmenustatus[FLAG_DISPLAY_HIGHSCORES]) {
+    showScores();
+  }
+  if (mainmenustatus[FLAG_EXIT_GAME]) {
+    exit(EXIT_SUCCESS);
+  }
+}
+
+bool soloLoop() {
+  // No choice in Menu selected, reset all flags...
+  mainmenustatus = mainmenustatus_t{};
+  clearScreen();
+  drawMainMenuGraphics();
+  input();
+  process_MainMenu();
+  return FlagInputErrornousChoice;
+}
+
+void endlessLoop() {
+  while (soloLoop())
+    ;
 }
 
 } // namespace
 
 namespace Menu {
 
-void startMenu(int err) {
-  clearScreen();
-  drawAscii();
-  drawMainMenuTitle();
-  drawMainMenuOptions();
-  drawInputMenuPrompt(err);
-  input();
+void startMenu() {
+  endlessLoop();
 }
 
 } // namespace Menu
