@@ -39,7 +39,7 @@ void showScores() {
   s.printStats();
 }
 
-void drawMainMenuTitle() {
+void drawMainMenuTitle(std::ostream &out_os) {
   constexpr auto greetings_text = "Welcome to ";
   constexpr auto gamename_text = "2048!";
   constexpr auto sp = "  ";
@@ -50,10 +50,10 @@ void drawMainMenuTitle() {
                  << def << bold_off << "\n";
 
   str_os << title_richtext.str();
-  std::cout << str_os.str();
+  out_os << str_os.str();
 }
 
-void drawMainMenuOptions() {
+void drawMainMenuOptions(std::ostream &out_os) {
   const auto menu_list_txt = {"1. Play a New Game", "2. Continue Previous Game",
                               "3. View Highscores and Statistics", "4. Exit"};
   constexpr auto sp = "        ";
@@ -66,10 +66,10 @@ void drawMainMenuOptions() {
   }
   str_os << "\n";
 
-  std::cout << str_os.str();
+  out_os << str_os.str();
 }
 
-void drawInputMenuPrompt(bool err) {
+void drawInputMenuPrompt(std::ostream &out_os, bool err) {
   constexpr auto err_input_text = "Invalid input. Please try again.";
   constexpr auto prompt_choice_text = "Enter Choice: ";
   constexpr auto sp = "  ";
@@ -86,14 +86,14 @@ void drawInputMenuPrompt(bool err) {
   }
   str_os << prompt_choice_richtext.str();
 
-  std::cout << str_os.str();
+  out_os << str_os.str();
 }
 
-void drawMainMenuGraphics() {
+void drawMainMenuGraphics(std::ostream &out_os) {
   drawAscii();
-  drawMainMenuTitle();
-  drawMainMenuOptions();
-  drawInputMenuPrompt(FlagInputErrornousChoice);
+  drawMainMenuTitle(out_os);
+  drawMainMenuOptions(out_os);
+  drawInputMenuPrompt(out_os, FlagInputErrornousChoice);
 }
 
 void receive_input_flags(std::istream &in_os) {
@@ -140,7 +140,7 @@ bool soloLoop() {
   // No choice in Menu selected, reset all flags...
   mainmenustatus = mainmenustatus_t{};
   clearScreen();
-  drawMainMenuGraphics();
+  drawMainMenuGraphics(std::cout);
   receive_input_flags(std::cin);
   process_MainMenu();
   return FlagInputErrornousChoice;
