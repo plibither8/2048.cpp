@@ -96,11 +96,11 @@ void drawMainMenuGraphics() {
   drawInputMenuPrompt(FlagInputErrornousChoice);
 }
 
-void input() {
+void receive_input_flags(std::istream &in_os) {
   // Reset ErrornousChoice flag...
   FlagInputErrornousChoice = bool{};
   char c;
-  std::cin >> c;
+  in_os >> c;
 
   switch (c) {
   case '1':
@@ -141,7 +141,7 @@ bool soloLoop() {
   mainmenustatus = mainmenustatus_t{};
   clearScreen();
   drawMainMenuGraphics();
-  input();
+  receive_input_flags(std::cin);
   process_MainMenu();
   return FlagInputErrornousChoice;
 }
