@@ -54,16 +54,18 @@ void drawMainMenuTitle() {
 }
 
 void drawMainMenuOptions() {
-  constexpr auto menu_entry_text = R"(
-        1. Play a New Game
-        2. Continue Previous Game
-        3. View Highscores and Statistics
-        4. Exit
-
-)";
+  const auto menu_list_txt = {"1. Play a New Game", "2. Continue Previous Game",
+                              "3. View Highscores and Statistics", "4. Exit"};
+  constexpr auto sp = "        ";
 
   std::ostringstream str_os;
-  str_os << menu_entry_text;
+
+  str_os << "\n";
+  for (const auto txt : menu_list_txt) {
+    str_os << sp << txt << "\n";
+  }
+  str_os << "\n";
+
   std::cout << str_os.str();
 }
 
