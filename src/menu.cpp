@@ -69,21 +69,29 @@ void drawMainMenuOptions(std::ostream &out_os) {
   out_os << str_os.str();
 }
 
-void drawInputMenuPrompt(std::ostream &out_os, bool err) {
-  constexpr auto err_input_text = "Invalid input. Please try again.";
+void drawInputMenuErrorInvalidInput(std::ostream &out_os, bool err) {
+  if (err) {
+    constexpr auto err_input_text = "Invalid input. Please try again.";
+    constexpr auto sp = "  ";
+
+    std::ostringstream str_os;
+    std::ostringstream err_input_richtext;
+    err_input_richtext << red << sp << err_input_text << def << "\n\n";
+
+    str_os << err_input_richtext.str();
+    out_os << str_os.str();
+  }
+}
+
+void drawInputMenuPrompt(std::ostream &out_os) {
   constexpr auto prompt_choice_text = "Enter Choice: ";
   constexpr auto sp = "  ";
 
   std::ostringstream str_os;
-  std::ostringstream err_input_richtext;
   std::ostringstream prompt_choice_richtext;
 
-  err_input_richtext << red << sp << err_input_text << def << "\n\n";
   prompt_choice_richtext << sp << prompt_choice_text;
 
-  if (err) {
-    str_os << err_input_richtext.str();
-  }
   str_os << prompt_choice_richtext.str();
 
   out_os << str_os.str();
@@ -93,7 +101,9 @@ void drawMainMenuGraphics(std::ostream &out_os) {
   drawAscii();
   drawMainMenuTitle(out_os);
   drawMainMenuOptions(out_os);
-  drawInputMenuPrompt(out_os, FlagInputErrornousChoice);
+  // Only outputs if there is an input error...
+  drawInputMenuErrorInvalidInput(out_os, FlagInputErrornousChoice);
+  drawInputMenuPrompt(out_os);
 }
 
 void receive_input_flags(std::istream &in_os) {
