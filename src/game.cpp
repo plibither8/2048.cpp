@@ -532,7 +532,8 @@ void Game::drawGameState() {
 }
 
 void Game::drawEndOfGamePrompt() {
-  constexpr auto win_but_what_next = "You Won! Continue playing current game? [y/n]";
+  constexpr auto win_but_what_next =
+      "You Won! Continue playing current game? [y/n]";
   constexpr auto sp = "  ";
 
   std::ostringstream str_os;

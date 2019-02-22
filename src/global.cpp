@@ -1,4 +1,5 @@
 #include "global.hpp"
+#include "color.hpp"
 #include <iostream>
 #include <sstream>
 
@@ -47,6 +48,24 @@ void newline(int n) {
 void clearScreen() {
   system("clear");
 };
+
+void drawAscii() {
+  constexpr auto title_card_2048 = R"(
+   /\\\\\\\\\          /\\\\\\\                /\\\         /\\\\\\\\\
+  /\\\///////\\\      /\\\/////\\\            /\\\\\       /\\\///////\\\
+  \///      \//\\\    /\\\    \//\\\         /\\\/\\\      \/\\\     \/\\\
+             /\\\/    \/\\\     \/\\\       /\\\/\/\\\      \///\\\\\\\\\/
+           /\\\//      \/\\\     \/\\\     /\\\/  \/\\\       /\\\///////\\\
+         /\\\//         \/\\\     \/\\\   /\\\\\\\\\\\\\\\\   /\\\      \//\\\
+        /\\\/            \//\\\    /\\\   \///////////\\\//   \//\\\      /\\\
+        /\\\\\\\\\\\\\\\   \///\\\\\\\/              \/\\\      \///\\\\\\\\\/
+        \///////////////      \///////                \///         \/////////
+  )";
+  std::ostringstream title_card_richtext;
+  title_card_richtext << green << bold_on << title_card_2048 << bold_off << def;
+  title_card_richtext << "\n\n\n";
+  std::cout << title_card_richtext.str();
+}
 
 std::string secondsFormat(double sec) {
   double s = sec;
