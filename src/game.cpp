@@ -452,12 +452,7 @@ void Game::saveStats() const {
   stats.totalDuration += duration;
 
   std::fstream statistics("../data/statistics.txt");
-  statistics << stats.bestScore << std::endl
-             << stats.gameCount << std::endl
-             << stats.winCount << std::endl
-             << stats.totalMoveCount << std::endl
-             << stats.totalDuration;
-
+  statistics << stats;
   statistics.close();
 }
 

@@ -8,7 +8,21 @@ bool Stats::collectStatistics() {
     return false;
   }
 
-  statistics >> bestScore >> gameCount >> winCount >> totalMoveCount >>
-      totalDuration;
+  statistics >> *this;
   return true;
+}
+
+std::istream &operator>>(std::istream &is, Stats &s) {
+  is >> s.bestScore >> s.gameCount >> s.winCount >> s.totalMoveCount >>
+      s.totalDuration;
+  return is;
+}
+
+std::ostream &operator<<(std::ostream &os, Stats &s) {
+  os << s.bestScore << "\n"
+     << s.gameCount << "\n"
+     << s.winCount << "\n"
+     << s.totalMoveCount << "\n"
+     << s.totalDuration;
+  return os;
 }
