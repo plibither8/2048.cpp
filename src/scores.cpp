@@ -119,7 +119,7 @@ void Scoreboard::printStats() {
 
   Stats stats;
   std::ostringstream stats_richtext;
-  if (stats.collectStatistics()) {
+  if (collectStatistics(stats)) {
     constexpr auto num_of_stats_attributes_text = 5;
     auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
     data_stats = {

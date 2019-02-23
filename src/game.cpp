@@ -442,7 +442,7 @@ void Game::statistics() const {
 
 void Game::saveStats() const {
   Stats stats;
-  stats.collectStatistics();
+  collectStatistics(stats);
   stats.bestScore = stats.bestScore < gamePlayBoard.score ?
                         gamePlayBoard.score :
                         stats.bestScore;
@@ -714,7 +714,7 @@ ull Game::setBoardSize() {
 void Game::startGame() {
 
   Stats stats;
-  if (stats.collectStatistics()) {
+  if (collectStatistics(stats)) {
     bestScore = stats.bestScore;
   }
 
@@ -729,7 +729,7 @@ void Game::startGame() {
 void Game::continueGame() {
 
   Stats stats;
-  if (stats.collectStatistics()) {
+  if (collectStatistics(stats)) {
     bestScore = stats.bestScore;
   }
 

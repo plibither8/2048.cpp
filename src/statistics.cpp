@@ -1,14 +1,14 @@
 #include "statistics.hpp"
 #include <fstream>
 
-bool Stats::collectStatistics() {
+bool collectStatistics(Stats &stats) {
 
   std::ifstream statistics("../data/statistics.txt");
   if (statistics.fail()) {
     return false;
   }
 
-  statistics >> *this;
+  statistics >> stats;
   return true;
 }
 

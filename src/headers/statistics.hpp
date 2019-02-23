@@ -6,7 +6,6 @@
 
 class Stats {
 public:
-  bool collectStatistics();
   ull bestScore;
   ull totalMoveCount;
   int gameCount;
@@ -17,5 +16,6 @@ public:
   friend std::ostream& operator<<(std::ostream& os, Stats &s);
 };
 
+bool collectStatistics(Stats &stats);
 
 #endif
