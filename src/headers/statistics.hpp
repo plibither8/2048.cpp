@@ -4,17 +4,16 @@
 #include "global.hpp"
 #include <iosfwd>
 
-class Stats {
-public:
-  ull bestScore;
-  ull totalMoveCount;
-  int gameCount;
-  double totalDuration;
-  int winCount;
-
-  friend std::istream& operator>>(std::istream& is, Stats &s);
-  friend std::ostream& operator<<(std::ostream& os, Stats &s);
+struct Stats {
+  ull bestScore{};
+  ull totalMoveCount{};
+  int gameCount{};
+  double totalDuration{};
+  int winCount{};
 };
+
+std::istream &operator>>(std::istream &is, Stats &s);
+std::ostream &operator<<(std::ostream &os, Stats &s);
 
 bool collectStatistics(Stats &stats);
 
