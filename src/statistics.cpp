@@ -1,15 +1,23 @@
 #include "statistics.hpp"
 #include <fstream>
 
+namespace {
+
+Stats loadFromFileStatistics(std::istream &is) {
+  Stats stats;
+  is >> stats;
+  return stats;
+}
+
+} // namespace
+
 bool collectStatistics(Stats &stats) {
-
   std::ifstream statistics("../data/statistics.txt");
-  if (statistics.fail()) {
-    return false;
+  if (statistics) {
+    stats = loadFromFileStatistics(statistics);
+    return true;
   }
-
-  statistics >> stats;
-  return true;
+  return false;
 }
 
 std::istream &operator>>(std::istream &is, Stats &s) {
