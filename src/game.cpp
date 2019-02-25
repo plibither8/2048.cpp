@@ -444,7 +444,7 @@ void Game::saveStats() const {
   Stats stats;
   // Need some sort of stats data values only.
   // No need to care if file loaded successfully or not...
-  std::tie(std::ignore, stats) = collectStatistics();
+  std::tie(std::ignore, stats) = loadFromFileStatistics();
   stats.bestScore = stats.bestScore < gamePlayBoard.score ?
                         gamePlayBoard.score :
                         stats.bestScore;
@@ -716,7 +716,7 @@ ull Game::setBoardSize() {
 void Game::startGame() {
   Stats stats;
   bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) = collectStatistics();
+  std::tie(stats_file_loaded, stats) = loadFromFileStatistics();
   if (stats_file_loaded) {
     bestScore = stats.bestScore;
   }
@@ -732,7 +732,7 @@ void Game::startGame() {
 void Game::continueGame() {
   Stats stats;
   bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) = collectStatistics();
+  std::tie(stats_file_loaded, stats) = loadFromFileStatistics();
   if (stats_file_loaded) {
     bestScore = stats.bestScore;
   }

@@ -3,7 +3,7 @@
 
 namespace {
 
-Stats loadFromFileStatistics(std::istream &is) {
+Stats generateStatsFromInputData(std::istream &is) {
   Stats stats;
   is >> stats;
   return stats;
@@ -11,10 +11,10 @@ Stats loadFromFileStatistics(std::istream &is) {
 
 } // namespace
 
-load_stats_status_t collectStatistics() {
+load_stats_status_t loadFromFileStatistics() {
   std::ifstream statistics("../data/statistics.txt");
   if (statistics) {
-    Stats stats = loadFromFileStatistics(statistics);
+    Stats stats = generateStatsFromInputData(statistics);
     return load_stats_status_t{true, stats};
   }
   return load_stats_status_t{false, Stats{}};
