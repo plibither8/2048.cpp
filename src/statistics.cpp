@@ -11,13 +11,13 @@ Stats loadFromFileStatistics(std::istream &is) {
 
 } // namespace
 
-bool collectStatistics(Stats &stats) {
+load_stats_status_t collectStatistics() {
   std::ifstream statistics("../data/statistics.txt");
   if (statistics) {
-    stats = loadFromFileStatistics(statistics);
-    return true;
+    Stats stats = loadFromFileStatistics(statistics);
+    return load_stats_status_t{true, stats};
   }
-  return false;
+  return load_stats_status_t{false, Stats{}};
 }
 
 std::istream &operator>>(std::istream &is, Stats &s) {

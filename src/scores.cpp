@@ -117,9 +117,12 @@ void Scoreboard::printStats() {
   constexpr auto any_key_exit_text = "Press any key to exit: ";
   constexpr auto sp = "  ";
 
-  Stats stats;
   std::ostringstream stats_richtext;
-  if (collectStatistics(stats)) {
+
+  Stats stats;
+  bool stats_file_loaded{};
+  std::tie(stats_file_loaded, stats) = collectStatistics();
+  if (stats_file_loaded) {
     constexpr auto num_of_stats_attributes_text = 5;
     auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
     data_stats = {

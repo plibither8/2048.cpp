@@ -3,6 +3,7 @@
 
 #include "global.hpp"
 #include <iosfwd>
+#include <tuple>
 
 struct Stats {
   ull bestScore{};
@@ -12,9 +13,11 @@ struct Stats {
   int winCount{};
 };
 
+using load_stats_status_t = std::tuple<bool, Stats>;
+
 std::istream &operator>>(std::istream &is, Stats &s);
 std::ostream &operator<<(std::ostream &os, Stats &s);
 
-bool collectStatistics(Stats &stats);
+load_stats_status_t collectStatistics();
 
 #endif
