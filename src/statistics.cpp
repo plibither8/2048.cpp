@@ -11,8 +11,8 @@ Stats generateStatsFromInputData(std::istream &is) {
 
 } // namespace
 
-load_stats_status_t loadFromFileStatistics() {
-  std::ifstream statistics("../data/statistics.txt");
+load_stats_status_t loadFromFileStatistics(std::string filename) {
+  std::ifstream statistics(filename);
   if (statistics) {
     Stats stats = generateStatsFromInputData(statistics);
     return load_stats_status_t{true, stats};

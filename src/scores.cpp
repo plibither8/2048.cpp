@@ -121,7 +121,8 @@ void Scoreboard::printStats() {
 
   Stats stats;
   bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) = loadFromFileStatistics();
+  std::tie(stats_file_loaded, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
   if (stats_file_loaded) {
     constexpr auto num_of_stats_attributes_text = 5;
     auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
