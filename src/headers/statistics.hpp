@@ -6,6 +6,7 @@
 #include <string>
 #include <tuple>
 
+namespace Statistics {
 struct total_game_stats_t {
   ull bestScore{};
   ull totalMoveCount{};
@@ -16,10 +17,11 @@ struct total_game_stats_t {
 
 using load_stats_status_t = std::tuple<bool, total_game_stats_t>;
 
-std::istream &operator>>(std::istream &is, total_game_stats_t &s);
-std::ostream &operator<<(std::ostream &os, total_game_stats_t &s);
-
 load_stats_status_t loadFromFileStatistics(std::string filename);
 bool saveToFileStatistics(std::string filename, total_game_stats_t s);
+} // namespace Statistics
+
+std::istream &operator>>(std::istream &is, Statistics::total_game_stats_t &s);
+std::ostream &operator<<(std::ostream &os, Statistics::total_game_stats_t &s);
 
 #endif

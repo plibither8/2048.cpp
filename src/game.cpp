@@ -441,6 +441,7 @@ void Game::statistics() const {
 }
 
 void Game::saveStats() const {
+  using namespace Statistics;
   total_game_stats_t stats;
   // Need some sort of stats data values only.
   // No need to care if file loaded successfully or not...
@@ -713,6 +714,7 @@ ull Game::setBoardSize() {
 }
 
 void Game::startGame() {
+  using namespace Statistics;
   total_game_stats_t stats;
   bool stats_file_loaded{};
   std::tie(stats_file_loaded, stats) =
@@ -730,6 +732,7 @@ void Game::startGame() {
 }
 
 void Game::continueGame() {
+  using namespace Statistics;
   total_game_stats_t stats;
   bool stats_file_loaded{};
   std::tie(stats_file_loaded, stats) =

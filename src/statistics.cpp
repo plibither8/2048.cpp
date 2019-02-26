@@ -1,6 +1,8 @@
 #include "statistics.hpp"
 #include <fstream>
 
+namespace Statistics {
+
 namespace {
 
 total_game_stats_t generateStatsFromInputData(std::istream &is) {
@@ -29,6 +31,10 @@ bool saveToFileStatistics(std::string filename, total_game_stats_t s) {
   std::ofstream filedata(filename);
   return generateFilefromStatsData(filedata, s);
 }
+
+} // namespace Statistics
+
+using namespace Statistics;
 
 std::istream &operator>>(std::istream &is, total_game_stats_t &s) {
   is >> s.bestScore >> s.gameCount >> s.winCount >> s.totalMoveCount >>

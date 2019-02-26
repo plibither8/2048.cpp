@@ -106,6 +106,7 @@ void Scoreboard::printScore() {
 }
 
 void Scoreboard::printStats() {
+  using namespace Statistics;
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
