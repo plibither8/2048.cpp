@@ -454,9 +454,7 @@ void Game::saveStats() const {
   stats.totalMoveCount += gamePlayBoard.MoveCount();
   stats.totalDuration += duration;
 
-  std::fstream statistics("../data/statistics.txt");
-  statistics << stats;
-  statistics.close();
+  saveToFileStatistics("../data/statistics.txt", stats);
 }
 
 void Game::saveScore() const {

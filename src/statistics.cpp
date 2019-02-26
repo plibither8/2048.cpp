@@ -9,6 +9,11 @@ Stats generateStatsFromInputData(std::istream &is) {
   return stats;
 }
 
+bool generateFilefromStatsData(std::ostream &os, Stats stats) {
+  os << stats;
+  return true;
+}
+
 } // namespace
 
 load_stats_status_t loadFromFileStatistics(std::string filename) {
@@ -18,6 +23,11 @@ load_stats_status_t loadFromFileStatistics(std::string filename) {
     return load_stats_status_t{true, stats};
   }
   return load_stats_status_t{false, Stats{}};
+}
+
+bool saveToFileStatistics(std::string filename, Stats s) {
+  std::ofstream filedata(filename);
+  return generateFilefromStatsData(filedata, s);
 }
 
 std::istream &operator>>(std::istream &is, Stats &s) {

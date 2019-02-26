@@ -20,5 +20,6 @@ std::istream &operator>>(std::istream &is, Stats &s);
 std::ostream &operator<<(std::ostream &os, Stats &s);
 
 load_stats_status_t loadFromFileStatistics(std::string filename);
+bool saveToFileStatistics(std::string filename, Stats s);
 
 #endif
