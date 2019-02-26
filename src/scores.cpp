@@ -119,7 +119,7 @@ void Scoreboard::printStats() {
 
   std::ostringstream stats_richtext;
 
-  Stats stats;
+  total_game_stats_t stats;
   bool stats_file_loaded{};
   std::tie(stats_file_loaded, stats) =
       loadFromFileStatistics("../data/statistics.txt");
