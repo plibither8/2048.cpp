@@ -25,7 +25,6 @@ private:
   void prompt();
   void writeToFile();
   void readFile();
-  void padding(std::string name);
 
 public:
   ull score = 0;

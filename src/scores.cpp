@@ -8,10 +8,6 @@
 #include <iostream>
 #include <sstream>
 
-bool compare(const Score &a, const Score &b) {
-  return a.score < b.score;
-};
-
 void Scoreboard::prompt() {
   constexpr auto score_prompt_text =
       "Please enter your name to save this score: ";
@@ -100,14 +96,6 @@ void Scoreboard::printScore() {
   }
   str_os << "\n\n";
   std::cout << str_os.str();
-}
-
-void Scoreboard::padding(std::string name) {
-
-  int length = name.length();
-  while (18 - length++) {
-    std::cout << " ";
-  }
 }
 
 std::istream &operator>>(std::istream &is, Score &s) {
