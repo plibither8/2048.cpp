@@ -25,11 +25,9 @@ void Scoreboard::prompt() {
 }
 
 void Scoreboard::writeToFile() {
-
   std::fstream scores("../data/scores.txt", std::ios_base::app);
-  scores << std::endl
-         << name << " " << score << " " << win << " " << moveCount << " "
-         << largestTile << " " << duration;
+  Score tempscore{name, score, win, largestTile, moveCount, duration};
+  scores << tempscore;
   newline();
   scores.close();
 }
@@ -112,6 +110,19 @@ void Scoreboard::padding(std::string name) {
   }
 }
 
+std::istream &operator>>(std::istream &is, Score &s) {
+  is >> s.name >> s.score >> s.win >> s.moveCount >> s.largestTile >>
+      s.duration;
+  return is;
+}
+
+std::ostream &operator<<(std::ostream &os, Score &s) {
+  os << "\n"
+     << s.name << " " << s.score << " " << s.win << " " << s.moveCount << " "
+     << s.largestTile << " " << s.duration;
+  return os;
+}
+
 void Scoreboard::readFile() {
 
   std::ifstream scores("../data/scores.txt");
@@ -119,25 +130,9 @@ void Scoreboard::readFile() {
     return;
   }
 
-  std::string playerName;
-  ull playerScore;
-  bool win;
-  ull largestTile;
-  long long moveCount;
-  double duration;
-
-  while (scores >> playerName >> playerScore >> win >> moveCount >>
-         largestTile >> duration) {
-
-    Score bufferScore;
-    bufferScore.name = playerName;
-    bufferScore.score = playerScore;
-    bufferScore.win = win;
-    bufferScore.largestTile = largestTile;
-    bufferScore.moveCount = moveCount;
-    bufferScore.duration = duration;
-
-    scoreList.push_back(bufferScore);
+  Score tempscore{};
+  while (scores >> tempscore) {
+    scoreList.push_back(tempscore);
   };
 
   const auto predicate = [](const Score a, const Score b) {

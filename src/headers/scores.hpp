@@ -2,6 +2,7 @@
 #define SCORES_H
 
 #include "global.hpp"
+#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -13,6 +14,9 @@ struct Score {
   long long moveCount;
   double duration;
 };
+
+std::istream &operator>>(std::istream &is, Score &s);
+std::ostream &operator<<(std::ostream &os, Score &s);
 
 class Scoreboard {
 private:
