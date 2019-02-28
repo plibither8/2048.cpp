@@ -1,9 +1,10 @@
 #include "statistics.hpp"
 #include "color.hpp"
 #include <algorithm>
+#include <array>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
+#include <sstream>
 
 namespace Statistics {
 
@@ -36,7 +37,7 @@ bool saveToFileStatistics(std::string filename, total_game_stats_t s) {
   return generateFilefromStatsData(filedata, s);
 }
 
-void prettyPrintStats(std::string filename) {
+void prettyPrintStats(std::ostream &os) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
@@ -52,7 +53,8 @@ void prettyPrintStats(std::string filename) {
 
   total_game_stats_t stats;
   bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) = loadFromFileStatistics(filename);
+  std::tie(stats_file_loaded, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
   if (stats_file_loaded) {
     constexpr auto num_of_stats_attributes_text = 5;
     auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
@@ -89,9 +91,7 @@ void prettyPrintStats(std::string filename) {
   stats_richtext << "\n\n\n";
   stats_richtext << sp << any_key_exit_text;
 
-  std::cout << stats_richtext.str();
-  char c;
-  std::cin >> c;
+  os << stats_richtext.str();
 }
 
 } // namespace Statistics
