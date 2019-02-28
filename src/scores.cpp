@@ -8,23 +8,9 @@
 #include <iostream>
 #include <sstream>
 
-void Scoreboard::prompt() {
-  constexpr auto score_prompt_text =
-      "Please enter your name to save this score: ";
-  constexpr auto sp = "  ";
-
-  std::ostringstream score_prompt_richtext;
-  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
-
-  std::cout << score_prompt_richtext.str();
-  std::cin >> name;
-}
-
-void Scoreboard::writeToFile() {
+void saveToFileScore(Score &tempscore) {
   std::fstream scores("../data/scores.txt", std::ios_base::app);
-  Score tempscore{name, score, win, largestTile, moveCount, duration};
   scores << tempscore;
-  newline();
   scores.close();
 }
 
@@ -127,16 +113,4 @@ void Scoreboard::readFile() {
     return a.score > b.score;
   };
   std::sort(scoreList.begin(), scoreList.end(), predicate);
-}
-
-void Scoreboard::save() {
-  constexpr auto score_saved_text = "Score saved!";
-  constexpr auto sp = "  ";
-  std::ostringstream score_saved_richtext;
-  score_saved_richtext << green << bold_on << sp << score_saved_text << bold_off
-                       << def << "\n";
-
-  prompt();
-  writeToFile();
-  std::cout << score_saved_richtext.str();
 }

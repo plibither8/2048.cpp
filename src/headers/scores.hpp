@@ -15,6 +15,8 @@ struct Score {
   double duration;
 };
 
+void saveToFileScore(Score &tempscore);
+
 std::istream &operator>>(std::istream &is, Score &s);
 std::ostream &operator<<(std::ostream &os, Score &s);
 
@@ -22,8 +24,6 @@ class Scoreboard {
 private:
   std::string name;
   std::vector<Score> scoreList;
-  void prompt();
-  void writeToFile();
   void readFile();
 
 public:
@@ -33,6 +33,5 @@ public:
   long long moveCount;
   double duration;
   void printScore();
-  void save();
 };
 #endif
