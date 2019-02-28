@@ -496,7 +496,7 @@ void Game::saveScore() const {
   tempscore.moveCount = gamePlayBoard.MoveCount();
   tempscore.largestTile = gamePlayBoard.largestTile;
   tempscore.duration = duration;
-  saveToFileScore(tempscore);
+  saveToFileScore("../data/scores.txt", tempscore);
   drawMessageScoreSaved(std::cout);
 }
 

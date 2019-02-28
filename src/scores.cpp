@@ -8,10 +8,16 @@
 #include <iostream>
 #include <sstream>
 
-void saveToFileScore(Score &tempscore) {
-  std::fstream scores("../data/scores.txt", std::ios_base::app);
-  scores << tempscore;
-  scores.close();
+namespace {
+bool generateFilefromScoreData(std::ostream &os, Score score) {
+  os << score;
+  return true;
+}
+} // namespace
+
+bool saveToFileScore(std::string filename, Score s) {
+  std::ofstream os(filename, std::ios_base::app);
+  return generateFilefromScoreData(os, s);
 }
 
 void Scoreboard::printScore() {

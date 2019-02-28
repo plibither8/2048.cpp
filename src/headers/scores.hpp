@@ -15,7 +15,7 @@ struct Score {
   double duration;
 };
 
-void saveToFileScore(Score &tempscore);
+bool saveToFileScore(std::string filename, Score s);
 
 std::istream &operator>>(std::istream &is, Score &s);
 std::ostream &operator<<(std::ostream &os, Score &s);
