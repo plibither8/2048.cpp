@@ -3,6 +3,7 @@
 #include "game.hpp"
 #include "global.hpp"
 #include "scores.hpp"
+#include "statistics.hpp"
 #include <array>
 #include <iostream>
 #include <sstream>
@@ -36,7 +37,8 @@ void continueGame() {
 void showScores() {
   Scoreboard s;
   s.printScore();
-  s.printStats();
+  Statistics::prettyPrintStats("../data/statistics.txt");
+  exit(EXIT_SUCCESS);
 }
 
 void drawMainMenuTitle(std::ostream &out_os) {

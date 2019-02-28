@@ -30,7 +30,6 @@ public:
   long long moveCount;
   double duration;
   void printScore();
-  void printStats();
   void save();
 };
 #endif
