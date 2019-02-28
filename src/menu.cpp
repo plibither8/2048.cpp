@@ -37,7 +37,8 @@ void continueGame() {
 void showScores() {
   Scoreboard s;
   s.printScore();
-  Statistics::prettyPrintStats();
+  Statistics::prettyPrintStats(std::cout);
+  wait_for_any_letter_input(std::cin);
   exit(EXIT_SUCCESS);
 }
 

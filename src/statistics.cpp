@@ -4,7 +4,6 @@
 #include <array>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <sstream>
 
 namespace Statistics {
@@ -38,7 +37,7 @@ bool saveToFileStatistics(std::string filename, total_game_stats_t s) {
   return generateFilefromStatsData(filedata, s);
 }
 
-void prettyPrintStats() {
+void prettyPrintStats(std::ostream &os) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
@@ -92,9 +91,7 @@ void prettyPrintStats() {
   stats_richtext << "\n\n\n";
   stats_richtext << sp << any_key_exit_text;
 
-  std::cout << stats_richtext.str();
-  char c;
-  std::cin >> c;
+  os << stats_richtext.str();
 }
 
 } // namespace Statistics

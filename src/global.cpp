@@ -39,6 +39,11 @@ void getInput(char &c) {
 
 #endif
 
+void wait_for_any_letter_input(std::istream &is) {
+  char c;
+  is >> c;
+}
+
 void newline(int n) {
   for (int i = 0; i < n; i++) {
     std::cout << "\n";
