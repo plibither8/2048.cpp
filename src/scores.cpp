@@ -13,7 +13,27 @@ bool generateFilefromScoreData(std::ostream &os, Score score) {
   os << score;
   return true;
 }
+
+Scoreboard_t generateScorefromFileData(std::istream &is) {
+  Score tempscore{};
+  Scoreboard_t scoreList{};
+  while (is >> tempscore) {
+    scoreList.push_back(tempscore);
+  };
+  return scoreList;
+}
 } // namespace
+
+load_score_status_t loadFromFileScore(std::string filename) {
+  std::ifstream scores(filename);
+  if (scores) {
+    Scoreboard_t scoreList = generateScorefromFileData(scores);
+    std::sort(std::begin(scoreList), std::end(scoreList),
+              std::greater<Score>{});
+    return load_score_status_t{true, scoreList};
+  }
+  return load_score_status_t{false, Scoreboard_t{}};
+}
 
 bool saveToFileScore(std::string filename, Score s) {
   std::ofstream os(filename, std::ios_base::app);
@@ -37,7 +57,10 @@ void Scoreboard::prettyPrintScoreboard(std::ostream &os) {
 
   std::ostringstream str_os;
 
-  readFile();
+  std::vector<Score> scoreList{};
+  // bool loaded_scorelist;
+  // Warning: Does not care if file exists or not!
+  std::tie(std::ignore, scoreList) = loadFromFileScore("../data/scores.txt");
 
   clearScreen();
   drawAscii();
@@ -90,6 +113,10 @@ void Scoreboard::prettyPrintScoreboard(std::ostream &os) {
   os << str_os.str();
 }
 
+bool operator>(const Score &a, const Score &b) {
+  return a.score > b.score;
+}
+
 std::istream &operator>>(std::istream &is, Score &s) {
   is >> s.name >> s.score >> s.win >> s.moveCount >> s.largestTile >>
       s.duration;
@@ -101,22 +128,4 @@ std::ostream &operator<<(std::ostream &os, Score &s) {
      << s.name << " " << s.score << " " << s.win << " " << s.moveCount << " "
      << s.largestTile << " " << s.duration;
   return os;
-}
-
-void Scoreboard::readFile() {
-
-  std::ifstream scores("../data/scores.txt");
-  if (scores.fail()) {
-    return;
-  }
-
-  Score tempscore{};
-  while (scores >> tempscore) {
-    scoreList.push_back(tempscore);
-  };
-
-  const auto predicate = [](const Score a, const Score b) {
-    return a.score > b.score;
-  };
-  std::sort(scoreList.begin(), scoreList.end(), predicate);
 }
