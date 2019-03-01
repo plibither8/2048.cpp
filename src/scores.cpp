@@ -20,7 +20,7 @@ bool saveToFileScore(std::string filename, Score s) {
   return generateFilefromScoreData(os, s);
 }
 
-void Scoreboard::printScore() {
+void Scoreboard::prettyPrintScoreboard(std::ostream &os) {
   constexpr auto no_save_text = "No saved scores.";
   const auto score_attributes_text = {
       "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
@@ -87,7 +87,7 @@ void Scoreboard::printScore() {
     str_os << sp << no_save_text << "\n";
   }
   str_os << "\n\n";
-  std::cout << str_os.str();
+  os << str_os.str();
 }
 
 std::istream &operator>>(std::istream &is, Score &s) {

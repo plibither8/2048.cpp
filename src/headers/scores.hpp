@@ -26,6 +26,6 @@ private:
   void readFile();
 
 public:
-  void printScore();
+  void prettyPrintScoreboard(std::ostream &os);
 };
 #endif
