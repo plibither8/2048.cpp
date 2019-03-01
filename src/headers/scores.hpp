@@ -22,16 +22,10 @@ std::ostream &operator<<(std::ostream &os, Score &s);
 
 class Scoreboard {
 private:
-  std::string name;
   std::vector<Score> scoreList;
   void readFile();
 
 public:
-  ull score = 0;
-  bool win;
-  ull largestTile;
-  long long moveCount;
-  double duration;
   void printScore();
 };
 #endif
