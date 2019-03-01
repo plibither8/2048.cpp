@@ -1,6 +1,5 @@
 #include "scores.hpp"
 #include "color.hpp"
-#include "menu.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -9,6 +8,7 @@
 #include <sstream>
 
 namespace {
+using namespace Scoreboard;
 bool generateFilefromScoreData(std::ostream &os, Score score) {
   os << score;
   return true;
@@ -24,6 +24,7 @@ Scoreboard_t generateScorefromFileData(std::istream &is) {
 }
 } // namespace
 
+namespace Scoreboard {
 load_score_status_t loadFromFileScore(std::string filename) {
   std::ifstream scores(filename);
   if (scores) {
@@ -40,7 +41,7 @@ bool saveToFileScore(std::string filename, Score s) {
   return generateFilefromScoreData(os, s);
 }
 
-void Scoreboard::prettyPrintScoreboard(std::ostream &os) {
+void prettyPrintScoreboard(std::ostream &os) {
   constexpr auto no_save_text = "No saved scores.";
   const auto score_attributes_text = {
       "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
@@ -62,8 +63,6 @@ void Scoreboard::prettyPrintScoreboard(std::ostream &os) {
   // Warning: Does not care if file exists or not!
   std::tie(std::ignore, scoreList) = loadFromFileScore("../data/scores.txt");
 
-  clearScreen();
-  drawAscii();
   str_os << green << bold_on << sp << score_title_text << bold_off << def
          << "\n";
   str_os << green << bold_on << sp << divider_text << bold_off << def << "\n";
@@ -116,6 +115,10 @@ void Scoreboard::prettyPrintScoreboard(std::ostream &os) {
 bool operator>(const Score &a, const Score &b) {
   return a.score > b.score;
 }
+
+} // namespace Scoreboard
+
+using namespace Scoreboard;
 
 std::istream &operator>>(std::istream &is, Score &s) {
   is >> s.name >> s.score >> s.win >> s.moveCount >> s.largestTile >>

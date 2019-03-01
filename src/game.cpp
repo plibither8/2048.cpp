@@ -486,7 +486,7 @@ void Game::saveStats() const {
 }
 
 void Game::saveScore() const {
-  Score tempscore{};
+  Scoreboard::Score tempscore{};
   drawPromptForPlayerName(std::cout);
   auto name = receive_input_player_name(std::cin);
 
@@ -496,7 +496,7 @@ void Game::saveScore() const {
   tempscore.moveCount = gamePlayBoard.MoveCount();
   tempscore.largestTile = gamePlayBoard.largestTile;
   tempscore.duration = duration;
-  saveToFileScore("../data/scores.txt", tempscore);
+  Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
   drawMessageScoreSaved(std::cout);
 }
 

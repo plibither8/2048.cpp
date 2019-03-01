@@ -7,6 +7,7 @@
 #include <tuple>
 #include <vector>
 
+namespace Scoreboard {
 struct Score {
   std::string name;
   ull score;
@@ -16,6 +17,8 @@ struct Score {
   double duration;
 };
 
+bool operator>(const Score &a, const Score &b);
+
 using Scoreboard_t = std::vector<Score>;
 using load_score_status_t = std::tuple<bool, Scoreboard_t>;
 
@@ -23,16 +26,10 @@ using load_score_status_t = std::tuple<bool, Scoreboard_t>;
 // Note: returns a tuple containing a std::vector<Score> of all read scores.
 load_score_status_t loadFromFileScore(std::string filename);
 bool saveToFileScore(std::string filename, Score s);
+void prettyPrintScoreboard(std::ostream &os);
+} // namespace Scoreboard
 
-bool operator>(const Score &a, const Score &b);
-std::istream &operator>>(std::istream &is, Score &s);
-std::ostream &operator<<(std::ostream &os, Score &s);
+std::istream &operator>>(std::istream &is, Scoreboard::Score &s);
+std::ostream &operator<<(std::ostream &os, Scoreboard::Score &s);
 
-class Scoreboard {
-private:
-  std::vector<Score> scoreList;
-
-public:
-  void prettyPrintScoreboard(std::ostream &os);
-};
 #endif
