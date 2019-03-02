@@ -127,6 +127,33 @@ load_GameBoard_data_from_file(std::string filename) {
   return std::make_tuple(false, GameBoard{});
 }
 
+void drawMessageScoreSaved(std::ostream &os) {
+  constexpr auto score_saved_text = "Score saved!";
+  constexpr auto sp = "  ";
+  std::ostringstream score_saved_richtext;
+  score_saved_richtext << "\n"
+                       << green << bold_on << sp << score_saved_text << bold_off
+                       << def << "\n";
+  os << score_saved_richtext.str();
+}
+
+void drawPromptForPlayerName(std::ostream &os) {
+  constexpr auto score_prompt_text =
+      "Please enter your name to save this score: ";
+  constexpr auto sp = "  ";
+
+  std::ostringstream score_prompt_richtext;
+  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
+
+  os << score_prompt_richtext.str();
+}
+
+std::string receive_input_player_name(std::istream &is) {
+  std::string name;
+  is >> name;
+  return name;
+}
+
 } // namespace
 
 Color::Modifier Tile::tileColor(ull value) {
@@ -459,13 +486,18 @@ void Game::saveStats() const {
 }
 
 void Game::saveScore() const {
-  Scoreboard s;
-  s.score = gamePlayBoard.score;
-  s.win = gamePlayBoard.hasWon();
-  s.moveCount = gamePlayBoard.MoveCount();
-  s.largestTile = gamePlayBoard.largestTile;
-  s.duration = duration;
-  s.save();
+  Scoreboard::Score tempscore{};
+  drawPromptForPlayerName(std::cout);
+  auto name = receive_input_player_name(std::cin);
+
+  tempscore.name = name;
+  tempscore.score = gamePlayBoard.score;
+  tempscore.win = gamePlayBoard.hasWon();
+  tempscore.moveCount = gamePlayBoard.MoveCount();
+  tempscore.largestTile = gamePlayBoard.largestTile;
+  tempscore.duration = duration;
+  Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
+  drawMessageScoreSaved(std::cout);
 }
 
 void Game::saveState() const {

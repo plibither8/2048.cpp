@@ -1,6 +1,5 @@
 #include "scores.hpp"
 #include "color.hpp"
-#include "menu.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -8,33 +7,41 @@
 #include <iostream>
 #include <sstream>
 
-bool compare(const Score &a, const Score &b) {
-  return a.score < b.score;
-};
-
-void Scoreboard::prompt() {
-  constexpr auto score_prompt_text =
-      "Please enter your name to save this score: ";
-  constexpr auto sp = "  ";
-
-  std::ostringstream score_prompt_richtext;
-  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
-
-  std::cout << score_prompt_richtext.str();
-  std::cin >> name;
+namespace {
+using namespace Scoreboard;
+bool generateFilefromScoreData(std::ostream &os, Score score) {
+  os << score;
+  return true;
 }
 
-void Scoreboard::writeToFile() {
+Scoreboard_t generateScorefromFileData(std::istream &is) {
+  Score tempscore{};
+  Scoreboard_t scoreList{};
+  while (is >> tempscore) {
+    scoreList.push_back(tempscore);
+  };
+  return scoreList;
+}
+} // namespace
 
-  std::fstream scores("../data/scores.txt", std::ios_base::app);
-  scores << std::endl
-         << name << " " << score << " " << win << " " << moveCount << " "
-         << largestTile << " " << duration;
-  newline();
-  scores.close();
+namespace Scoreboard {
+load_score_status_t loadFromFileScore(std::string filename) {
+  std::ifstream scores(filename);
+  if (scores) {
+    Scoreboard_t scoreList = generateScorefromFileData(scores);
+    std::sort(std::begin(scoreList), std::end(scoreList),
+              std::greater<Score>{});
+    return load_score_status_t{true, scoreList};
+  }
+  return load_score_status_t{false, Scoreboard_t{}};
 }
 
-void Scoreboard::printScore() {
+bool saveToFileScore(std::string filename, Score s) {
+  std::ofstream os(filename, std::ios_base::app);
+  return generateFilefromScoreData(os, s);
+}
+
+void prettyPrintScoreboard(std::ostream &os) {
   constexpr auto no_save_text = "No saved scores.";
   const auto score_attributes_text = {
       "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
@@ -51,10 +58,11 @@ void Scoreboard::printScore() {
 
   std::ostringstream str_os;
 
-  readFile();
+  std::vector<Score> scoreList{};
+  // bool loaded_scorelist;
+  // Warning: Does not care if file exists or not!
+  std::tie(std::ignore, scoreList) = loadFromFileScore("../data/scores.txt");
 
-  clearScreen();
-  drawAscii();
   str_os << green << bold_on << sp << score_title_text << bold_off << def
          << "\n";
   str_os << green << bold_on << sp << divider_text << bold_off << def << "\n";
@@ -101,59 +109,26 @@ void Scoreboard::printScore() {
     str_os << sp << no_save_text << "\n";
   }
   str_os << "\n\n";
-  std::cout << str_os.str();
+  os << str_os.str();
 }
 
-void Scoreboard::padding(std::string name) {
-
-  int length = name.length();
-  while (18 - length++) {
-    std::cout << " ";
-  }
+bool operator>(const Score &a, const Score &b) {
+  return a.score > b.score;
 }
 
-void Scoreboard::readFile() {
+} // namespace Scoreboard
 
-  std::ifstream scores("../data/scores.txt");
-  if (scores.fail()) {
-    return;
-  }
+using namespace Scoreboard;
 
-  std::string playerName;
-  ull playerScore;
-  bool win;
-  ull largestTile;
-  long long moveCount;
-  double duration;
-
-  while (scores >> playerName >> playerScore >> win >> moveCount >>
-         largestTile >> duration) {
-
-    Score bufferScore;
-    bufferScore.name = playerName;
-    bufferScore.score = playerScore;
-    bufferScore.win = win;
-    bufferScore.largestTile = largestTile;
-    bufferScore.moveCount = moveCount;
-    bufferScore.duration = duration;
-
-    scoreList.push_back(bufferScore);
-  };
-
-  const auto predicate = [](const Score a, const Score b) {
-    return a.score > b.score;
-  };
-  std::sort(scoreList.begin(), scoreList.end(), predicate);
+std::istream &operator>>(std::istream &is, Score &s) {
+  is >> s.name >> s.score >> s.win >> s.moveCount >> s.largestTile >>
+      s.duration;
+  return is;
 }
 
-void Scoreboard::save() {
-  constexpr auto score_saved_text = "Score saved!";
-  constexpr auto sp = "  ";
-  std::ostringstream score_saved_richtext;
-  score_saved_richtext << green << bold_on << sp << score_saved_text << bold_off
-                       << def << "\n";
-
-  prompt();
-  writeToFile();
-  std::cout << score_saved_richtext.str();
+std::ostream &operator<<(std::ostream &os, Score &s) {
+  os << "\n"
+     << s.name << " " << s.score << " " << s.win << " " << s.moveCount << " "
+     << s.largestTile << " " << s.duration;
+  return os;
 }

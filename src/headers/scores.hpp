@@ -2,9 +2,12 @@
 #define SCORES_H
 
 #include "global.hpp"
+#include <iosfwd>
 #include <string>
+#include <tuple>
 #include <vector>
 
+namespace Scoreboard {
 struct Score {
   std::string name;
   ull score;
@@ -14,22 +17,19 @@ struct Score {
   double duration;
 };
 
-class Scoreboard {
-private:
-  std::string name;
-  std::vector<Score> scoreList;
-  void prompt();
-  void writeToFile();
-  void readFile();
-  void padding(std::string name);
+bool operator>(const Score &a, const Score &b);
 
-public:
-  ull score = 0;
-  bool win;
-  ull largestTile;
-  long long moveCount;
-  double duration;
-  void printScore();
-  void save();
-};
+using Scoreboard_t = std::vector<Score>;
+using load_score_status_t = std::tuple<bool, Scoreboard_t>;
+
+// List of scores read until "exhausted".
+// Note: returns a tuple containing a std::vector<Score> of all read scores.
+load_score_status_t loadFromFileScore(std::string filename);
+bool saveToFileScore(std::string filename, Score s);
+void prettyPrintScoreboard(std::ostream &os);
+} // namespace Scoreboard
+
+std::istream &operator>>(std::istream &is, Scoreboard::Score &s);
+std::ostream &operator<<(std::ostream &os, Scoreboard::Score &s);
+
 #endif
