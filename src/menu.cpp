@@ -25,13 +25,11 @@ mainmenustatus_t mainmenustatus{};
 bool FlagInputErrornousChoice{};
 
 void startGame() {
-  Game g;
-  g.startGame();
+  Game::startGame();
 }
 
 void continueGame() {
-  Game g;
-  g.continueGame();
+  Game::continueGame();
 }
 
 void showScores() {

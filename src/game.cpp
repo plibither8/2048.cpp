@@ -57,6 +57,9 @@ enum {
 } // namespace Code
 } // namespace Keypress
 
+Game::gamestatus_t gamestatus{};
+Game::intendedmove_t intendedmove{};
+
 ull bestScore;
 double duration;
 GameBoard gamePlayBoard;
@@ -220,7 +223,7 @@ bool Game::initialiseContinueBoardArray() {
           load_game_stats_from_file(game_stats_data_filename));
 }
 
-void Game::drawBoard() const {
+void Game::drawBoard() {
 
   clearScreen();
   drawAscii();
@@ -228,7 +231,7 @@ void Game::drawBoard() const {
   std::cout << gamePlayBoard;
 }
 
-void Game::drawScoreBoard(std::ostream &out_stream) const {
+void Game::drawScoreBoard(std::ostream &out_stream) {
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
@@ -445,7 +448,7 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::statistics() const {
+void Game::statistics() {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   const auto stats_attributes_text = {
@@ -477,7 +480,7 @@ void Game::statistics() const {
   std::cout << stats_richtext.str();
 }
 
-void Game::saveStats() const {
+void Game::saveStats() {
   using namespace Statistics;
   total_game_stats_t stats;
   // Need some sort of stats data values only.
@@ -495,7 +498,7 @@ void Game::saveStats() const {
   saveToFileStatistics("../data/statistics.txt", stats);
 }
 
-void Game::saveScore() const {
+void Game::saveScore() {
   Scoreboard::Score tempscore{};
   drawPromptForPlayerName(std::cout);
   auto name = receive_input_player_name(std::cin);
@@ -510,7 +513,7 @@ void Game::saveScore() const {
   drawMessageScoreSaved(std::cout);
 }
 
-void Game::saveState() const {
+void Game::saveState() {
   std::remove("../data/previousGame");
   std::remove("../data/previousGameStats");
   std::fstream stats("../data/previousGameStats", std::ios_base::app);
