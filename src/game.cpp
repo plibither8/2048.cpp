@@ -308,14 +308,14 @@ void drawScoreBoard(std::ostream &out_stream) {
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
-void drawBoard() {
+void drawBoard(std::ostream &os) {
   clearScreen();
   drawAscii();
-  drawScoreBoard(std::cout);
-  std::cout << gamePlayBoard;
+  drawScoreBoard(os);
+  os << gamePlayBoard;
 }
 
-void drawInputError() {
+void drawInputError(std::ostream &os) {
   constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
   constexpr auto sp = "  ";
   std::ostringstream str_os;
@@ -326,10 +326,10 @@ void drawInputError() {
     str_os << invalid_prompt_richtext.str();
     gamestatus[FLAG_INPUT_ERROR] = false;
   }
-  std::cout << str_os.str();
+  os << str_os.str();
 }
 
-void drawInputControls() {
+void drawInputControls(std::ostream &os) {
   constexpr auto sp = "  ";
   const auto input_commands_list_text = {
       "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
@@ -351,7 +351,7 @@ void drawInputControls() {
     str_os << sp << txt << "\n";
   }
   if (!gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
-    std::cout << str_os.str();
+    os << str_os.str();
   }
 }
 
@@ -469,7 +469,7 @@ void decideMove(Directions d) {
   }
 }
 
-void statistics() {
+void statistics(std::ostream &os) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   const auto stats_attributes_text = {
@@ -498,7 +498,7 @@ void statistics() {
   std::for_each(std::begin(stats_attributes_text),
                 std::end(stats_attributes_text), populate_stats_info);
 
-  std::cout << stats_richtext.str();
+  os << stats_richtext.str();
 }
 
 void saveStats() {
@@ -521,7 +521,6 @@ void saveStats() {
 
 void saveScore() {
   Scoreboard::Score tempscore{};
-  drawPromptForPlayerName(std::cout);
   auto name = receive_input_player_name(std::cin);
 
   tempscore.name = name;
@@ -531,7 +530,6 @@ void saveScore() {
   tempscore.largestTile = gamePlayBoard.largestTile;
   tempscore.duration = duration;
   Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
-  drawMessageScoreSaved(std::cout);
 }
 
 void saveState() {
@@ -545,7 +543,7 @@ void saveState() {
   stats.close();
 }
 
-void drawEndScreen() {
+void drawEndScreen(std::ostream &os) {
   constexpr auto win_game_text = "You win! Congratulations!";
   constexpr auto lose_game_text = "Game over! You lose.";
   constexpr auto endless_mode_text =
@@ -574,10 +572,10 @@ void drawEndScreen() {
   } else {
     str_os << endless_mode_richtext.str();
   }
-  std::cout << str_os.str();
+  os << str_os.str();
 }
 
-void drawGameState() {
+void drawGameState(std::ostream &os) {
   constexpr auto state_saved_text =
       "The game has been saved. Feel free to take a break.";
   constexpr auto sp = "  ";
@@ -591,10 +589,10 @@ void drawGameState() {
     str_os << state_saved_richtext.str();
     gamestatus[FLAG_SAVED_GAME] = false;
   }
-  std::cout << str_os.str();
+  os << str_os.str();
 }
 
-void drawEndOfGamePrompt() {
+void drawEndOfGamePrompt(std::ostream &os) {
   constexpr auto win_but_what_next =
       "You Won! Continue playing current game? [y/n]";
   constexpr auto sp = "  ";
@@ -606,16 +604,16 @@ void drawEndOfGamePrompt() {
 
   if (gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
     str_os << win_richtext.str();
-    std::cout << str_os.str();
+    os << str_os.str();
   }
 }
 
-void drawGraphics() {
-  drawBoard();
-  drawGameState();
-  drawEndOfGamePrompt();
-  drawInputControls();
-  drawInputError();
+void drawGraphics(std::ostream &os) {
+  drawBoard(os);
+  drawGameState(os);
+  drawEndOfGamePrompt(os);
+  drawInputControls(os);
+  drawInputError(os);
 }
 
 void process_gamelogic() {
@@ -696,7 +694,7 @@ bool process_gameStatus() {
 
 bool soloGameLoop() {
   process_gamelogic();
-  drawGraphics();
+  drawGraphics(std::cout);
   input();
   process_intendedMove();
   const auto loop_again = process_gameStatus();
@@ -716,15 +714,17 @@ void playGame(ContinueStatus cont) {
   std::chrono::duration<double> elapsed = finishTime - startTime;
   duration = elapsed.count();
 
-  drawBoard();
-  drawEndScreen();
+  drawBoard(std::cout);
+  drawEndScreen(std::cout);
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
-    statistics();
+    statistics(std::cout);
     saveStats();
     newline(2);
+    drawPromptForPlayerName(std::cout);
     saveScore();
+    drawMessageScoreSaved(std::cout);
   }
 }
 
