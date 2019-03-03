@@ -1,9 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "gameboard.hpp"
 #include "global.hpp"
 #include <array>
+
+class point2D_t;
 
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
@@ -36,12 +37,6 @@ private:
 
   using intendedmove_t = std::array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
   intendedmove_t intendedmove{};
-
-  ull bestScore;
-  double duration;
-  GameBoard gamePlayBoard;
-  RandInt randInt;
-  bool noSave;
 
   bool get_and_process_game_stats_string_data(std::istream &stats_file);
   bool load_game_stats_from_file(std::string filename);
@@ -81,7 +76,6 @@ private:
   void drawInputControls();
 
 public:
-  Game() : bestScore(0), duration(0.0), noSave(false) {}
   void startGame();
   void continueGame();
 };

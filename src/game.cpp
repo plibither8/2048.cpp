@@ -1,5 +1,7 @@
 #include "game.hpp"
+#include "gameboard.hpp"
 #include "menu.hpp"
+#include "point2d.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <algorithm>
@@ -54,6 +56,12 @@ enum {
 
 } // namespace Code
 } // namespace Keypress
+
+ull bestScore;
+double duration;
+GameBoard gamePlayBoard;
+RandInt randInt;
+bool noSave;
 
 int GetLines(std::string filename) {
   std::ifstream stateFile(filename);
