@@ -162,6 +162,17 @@ std::string receive_input_player_name(std::istream &is) {
   return name;
 }
 
+void load_game_best_score() {
+  using namespace Statistics;
+  total_game_stats_t stats;
+  bool stats_file_loaded{};
+  std::tie(stats_file_loaded, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
+  if (stats_file_loaded) {
+    bestScore = stats.bestScore;
+  }
+}
+
 } // namespace
 
 Color::Modifier Tile::tileColor(ull value) {
@@ -683,6 +694,7 @@ void Game::endlessGameLoop() {
 }
 
 void Game::playGame(ContinueStatus cont) {
+  load_game_best_score();
   auto startTime = std::chrono::high_resolution_clock::now();
   endlessGameLoop();
   auto finishTime = std::chrono::high_resolution_clock::now();
@@ -754,33 +766,13 @@ ull Game::setBoardSize() {
 }
 
 void Game::startGame() {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  if (stats_file_loaded) {
-    bestScore = stats.bestScore;
-  }
-
   ull userInput_PlaySize = setBoardSize();
-
   gamePlayBoard = GameBoard(userInput_PlaySize);
   gamePlayBoard.addTile();
-
   playGame(ContinueStatus::STATUS_END_GAME);
 }
 
 void Game::continueGame() {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  if (stats_file_loaded) {
-    bestScore = stats.bestScore;
-  }
-
   if (initialiseContinueBoardArray()) {
     playGame(ContinueStatus::STATUS_CONTINUE);
   } else {
