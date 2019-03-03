@@ -1,6 +1,6 @@
 #include "game.hpp"
 #include "gameboard.hpp"
-#include "menu.hpp"
+#include "global.hpp"
 #include "point2d.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
@@ -57,8 +57,33 @@ enum {
 } // namespace Code
 } // namespace Keypress
 
-Game::gamestatus_t gamestatus{};
-Game::intendedmove_t intendedmove{};
+enum Directions { UP, DOWN, RIGHT, LEFT };
+
+enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
+enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
+
+enum GameStatusFlag {
+  FLAG_WIN,
+  FLAG_END_GAME,
+  FLAG_SAVED_GAME,
+  FLAG_INPUT_ERROR,
+  FLAG_ENDLESS_MODE,
+  FLAG_QUESTION_STAY_OR_QUIT,
+  MAX_NO_GAME_STATUS_FLAGS
+};
+using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
+
+enum IntendedMoveFlag {
+  FLAG_MOVE_LEFT,
+  FLAG_MOVE_RIGHT,
+  FLAG_MOVE_UP,
+  FLAG_MOVE_DOWN,
+  MAX_NO_INTENDED_MOVE_FLAGS
+};
+using intendedmove_t = std::array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
+
+gamestatus_t gamestatus{};
+intendedmove_t intendedmove{};
 
 ull bestScore;
 double duration;
@@ -176,9 +201,7 @@ void load_game_best_score() {
   }
 }
 
-} // namespace
-
-bool Game::get_and_process_game_stats_string_data(std::istream &stats_file) {
+bool get_and_process_game_stats_string_data(std::istream &stats_file) {
   if (stats_file) {
     for (std::string tempLine; std::getline(stats_file, tempLine);) {
       enum GameStatsFieldIndex {
@@ -207,12 +230,12 @@ bool Game::get_and_process_game_stats_string_data(std::istream &stats_file) {
   return false;
 }
 
-bool Game::load_game_stats_from_file(std::string filename) {
+bool load_game_stats_from_file(std::string filename) {
   std::ifstream stats(filename);
   return get_and_process_game_stats_string_data(stats);
 }
 
-bool Game::initialiseContinueBoardArray() {
+bool initialiseContinueBoardArray() {
   constexpr auto gameboard_data_filename = "../data/previousGame";
   constexpr auto game_stats_data_filename = "../data/previousGameStats";
   auto loaded_gameboard{false};
@@ -223,15 +246,7 @@ bool Game::initialiseContinueBoardArray() {
           load_game_stats_from_file(game_stats_data_filename));
 }
 
-void Game::drawBoard() {
-
-  clearScreen();
-  drawAscii();
-  drawScoreBoard(std::cout);
-  std::cout << gamePlayBoard;
-}
-
-void Game::drawScoreBoard(std::ostream &out_stream) {
+void drawScoreBoard(std::ostream &out_stream) {
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
@@ -293,7 +308,14 @@ void Game::drawScoreBoard(std::ostream &out_stream) {
   out_stream << outer_border_padding << bottom_board << "\n \n";
 }
 
-void Game::drawInputError() {
+void drawBoard() {
+  clearScreen();
+  drawAscii();
+  drawScoreBoard(std::cout);
+  std::cout << gamePlayBoard;
+}
+
+void drawInputError() {
   constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
   constexpr auto sp = "  ";
   std::ostringstream str_os;
@@ -307,7 +329,7 @@ void Game::drawInputError() {
   std::cout << str_os.str();
 }
 
-void Game::drawInputControls() {
+void drawInputControls() {
   constexpr auto sp = "  ";
   const auto input_commands_list_text = {
       "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
@@ -333,7 +355,7 @@ void Game::drawInputControls() {
   }
 }
 
-bool Game::check_input_ansi(char c) {
+bool check_input_ansi(char c) {
   using namespace Keypress::Code;
   if (c == CODE_ANSI_TRIGGER_1) {
     getInput(c);
@@ -358,7 +380,7 @@ bool Game::check_input_ansi(char c) {
   return true;
 }
 
-bool Game::check_input_vim(char c) {
+bool check_input_vim(char c) {
   using namespace Keypress::Code;
   switch (toupper(c)) {
   case CODE_VIM_UP:
@@ -377,7 +399,7 @@ bool Game::check_input_vim(char c) {
   return true;
 }
 
-bool Game::check_input_wasd(char c) {
+bool check_input_wasd(char c) {
   using namespace Keypress::Code;
   switch (toupper(c)) {
   case CODE_WASD_UP:
@@ -396,7 +418,7 @@ bool Game::check_input_wasd(char c) {
   return true;
 }
 
-bool Game::check_input_other(char c) {
+bool check_input_other(char c) {
   using namespace Keypress::Code;
   switch (toupper(c)) {
   case CODE_HOTKEY_ACTION_SAVE:
@@ -413,7 +435,7 @@ bool Game::check_input_other(char c) {
   return true;
 }
 
-void Game::input() {
+void input() {
   if (!gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN]) {
     // Game still in play. Take input commands for next turn.
     char c;
@@ -427,8 +449,7 @@ void Game::input() {
   }
 }
 
-void Game::decideMove(Directions d) {
-
+void decideMove(Directions d) {
   switch (d) {
   case UP:
     gamePlayBoard.tumbleTilesUp();
@@ -448,7 +469,7 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::statistics() {
+void statistics() {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   const auto stats_attributes_text = {
@@ -480,7 +501,7 @@ void Game::statistics() {
   std::cout << stats_richtext.str();
 }
 
-void Game::saveStats() {
+void saveStats() {
   using namespace Statistics;
   total_game_stats_t stats;
   // Need some sort of stats data values only.
@@ -498,7 +519,7 @@ void Game::saveStats() {
   saveToFileStatistics("../data/statistics.txt", stats);
 }
 
-void Game::saveScore() {
+void saveScore() {
   Scoreboard::Score tempscore{};
   drawPromptForPlayerName(std::cout);
   auto name = receive_input_player_name(std::cin);
@@ -513,7 +534,7 @@ void Game::saveScore() {
   drawMessageScoreSaved(std::cout);
 }
 
-void Game::saveState() {
+void saveState() {
   std::remove("../data/previousGame");
   std::remove("../data/previousGameStats");
   std::fstream stats("../data/previousGameStats", std::ios_base::app);
@@ -524,7 +545,7 @@ void Game::saveState() {
   stats.close();
 }
 
-void Game::drawEndScreen() {
+void drawEndScreen() {
   constexpr auto win_game_text = "You win! Congratulations!";
   constexpr auto lose_game_text = "Game over! You lose.";
   constexpr auto endless_mode_text =
@@ -556,7 +577,7 @@ void Game::drawEndScreen() {
   std::cout << str_os.str();
 }
 
-void Game::drawGameState() {
+void drawGameState() {
   constexpr auto state_saved_text =
       "The game has been saved. Feel free to take a break.";
   constexpr auto sp = "  ";
@@ -573,7 +594,7 @@ void Game::drawGameState() {
   std::cout << str_os.str();
 }
 
-void Game::drawEndOfGamePrompt() {
+void drawEndOfGamePrompt() {
   constexpr auto win_but_what_next =
       "You Won! Continue playing current game? [y/n]";
   constexpr auto sp = "  ";
@@ -589,7 +610,7 @@ void Game::drawEndOfGamePrompt() {
   }
 }
 
-void Game::drawGraphics() {
+void drawGraphics() {
   drawBoard();
   drawGameState();
   drawEndOfGamePrompt();
@@ -597,7 +618,7 @@ void Game::drawGraphics() {
   drawInputError();
 }
 
-void Game::process_gamelogic() {
+void process_gamelogic() {
   gamePlayBoard.unblockTiles();
   if (gamePlayBoard.moved) {
     gamePlayBoard.addTile();
@@ -615,7 +636,7 @@ void Game::process_gamelogic() {
   }
 }
 
-bool Game::process_intendedMove() {
+bool process_intendedMove() {
   if (intendedmove[FLAG_MOVE_LEFT]) {
     decideMove(LEFT);
   }
@@ -651,7 +672,7 @@ bool continue_playing_game(std::istream &in_os) {
   return true;
 }
 
-bool Game::process_gameStatus() {
+bool process_gameStatus() {
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (gamestatus[FLAG_WIN]) {
       if (continue_playing_game(std::cin)) {
@@ -673,7 +694,7 @@ bool Game::process_gameStatus() {
   return true;
 }
 
-bool Game::soloGameLoop() {
+bool soloGameLoop() {
   process_gamelogic();
   drawGraphics();
   input();
@@ -682,12 +703,12 @@ bool Game::soloGameLoop() {
   return loop_again;
 }
 
-void Game::endlessGameLoop() {
+void endlessGameLoop() {
   while (soloGameLoop())
     ;
 }
 
-void Game::playGame(ContinueStatus cont) {
+void playGame(ContinueStatus cont) {
   load_game_best_score();
   auto startTime = std::chrono::high_resolution_clock::now();
   endlessGameLoop();
@@ -707,7 +728,7 @@ void Game::playGame(ContinueStatus cont) {
   }
 }
 
-ull Game::setBoardSize() {
+ull setBoardSize() {
   const auto invalid_prompt_text = {
       "Invalid input. Gameboard size should range from ", " to ", "."};
   //  constexpr auto num_of_invalid_prompt_text = 3;
@@ -758,6 +779,8 @@ ull Game::setBoardSize() {
   }
   return userInput_PlaySize;
 }
+
+} // namespace
 
 void Game::startGame() {
   ull userInput_PlaySize = setBoardSize();
