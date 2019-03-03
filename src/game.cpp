@@ -175,15 +175,6 @@ void load_game_best_score() {
 
 } // namespace
 
-Color::Modifier Tile::tileColor(ull value) {
-  std::vector<Color::Modifier> colors{red, yellow, magenta, blue, cyan, yellow,
-                                      red, yellow, magenta, blue, green};
-  int log = log2(value);
-  int index = log < 12 ? log - 1 : 10;
-
-  return colors[index];
-}
-
 bool Game::get_and_process_game_stats_string_data(std::istream &stats_file) {
   if (stats_file) {
     for (std::string tempLine; std::getline(stats_file, tempLine);) {

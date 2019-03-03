@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.7)  # 3.7: CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT, 3.3: CXX_STANDARD
 project(2048 CXX)
 
-set(SOURCES src/2048.cpp src/gameboard.cpp src/game.cpp src/global.cpp src/menu.cpp src/scores.cpp src/statistics.cpp)
+set(SOURCES src/2048.cpp src/gameboard.cpp src/game.cpp src/global.cpp src/menu.cpp src/scores.cpp src/statistics.cpp src/tile.cpp)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
   list(APPEND FLAGS -Wall)
