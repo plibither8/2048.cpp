@@ -93,7 +93,6 @@ ull bestScore;
 double duration;
 GameBoard gamePlayBoard;
 RandInt randInt;
-bool noSave;
 
 int GetLines(std::string filename) {
   std::ifstream stateFile(filename);
@@ -788,11 +787,14 @@ ull Receive_Input_Playsize(std::istream &is) {
   return userInput_PlaySize;
 }
 
-ull askWhatIsBoardSize(std::ostream &os) {
+enum class NewGameFlag { NewGameFlagNull, NoPreviousSaveAvailable };
+
+ull askWhatIsBoardSize(std::ostream &os, NewGameFlag ns) {
+  bool noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
   bool invalidInputValue = false;
   ull userInput_PlaySize{0};
 
-  const auto DrawGraphics = [&invalidInputValue](std::ostream &os) {
+  const auto DrawGraphics = [&invalidInputValue, &noSave](std::ostream &os) {
     clearScreen();
     drawAscii();
     // Prints only if "invalidInputValue" is true
@@ -812,20 +814,23 @@ ull askWhatIsBoardSize(std::ostream &os) {
   return userInput_PlaySize;
 }
 
-} // namespace
-
-void Game::startGame() {
-  ull userInput_PlaySize = askWhatIsBoardSize(std::cout);
+void SetUpNewGame(NewGameFlag ns = NewGameFlag::NewGameFlagNull) {
+  ull userInput_PlaySize = askWhatIsBoardSize(std::cout, ns);
   gamePlayBoard = GameBoard(userInput_PlaySize);
   gamePlayBoard.addTile();
   playGame(ContinueStatus::STATUS_END_GAME);
+}
+
+} // namespace
+
+void Game::startGame() {
+  SetUpNewGame();
 }
 
 void Game::continueGame() {
   if (initialiseContinueBoardArray()) {
     playGame(ContinueStatus::STATUS_CONTINUE);
   } else {
-    noSave = true;
-    startGame();
+    SetUpNewGame(NewGameFlag::NoPreviousSaveAvailable);
   }
 }
