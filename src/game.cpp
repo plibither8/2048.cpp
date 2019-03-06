@@ -180,10 +180,8 @@ void drawPromptForPlayerName(std::ostream &os) {
   constexpr auto score_prompt_text =
       "Please enter your name to save this score: ";
   constexpr auto sp = "  ";
-
   std::ostringstream score_prompt_richtext;
   score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
-
   os << score_prompt_richtext.str();
 }
 
@@ -249,7 +247,7 @@ bool initialiseContinueBoardArray() {
           load_game_stats_from_file(game_stats_data_filename));
 }
 
-void drawScoreBoard(std::ostream &out_stream) {
+void drawScoreBoard(std::ostream &os) {
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
@@ -277,38 +275,36 @@ void drawScoreBoard(std::ostream &out_stream) {
       std::string(UI_BORDER_INNER_PADDING, border_padding_char);
   const auto inner_padding_length =
       UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
-  out_stream << outer_border_padding << top_board << "\n";
-  out_stream << outer_border_padding << vertical_border_pattern
-             << inner_border_padding << bold_on << score_text_label << bold_off
-             << std::string(inner_padding_length -
-                                std::string{score_text_label}.length() -
-                                std::to_string(gamePlayBoard.score).length(),
-                            border_padding_char)
-             << gamePlayBoard.score << inner_border_padding
-             << vertical_border_pattern << "\n";
+  os << outer_border_padding << top_board << "\n";
+  os << outer_border_padding << vertical_border_pattern << inner_border_padding
+     << bold_on << score_text_label << bold_off
+     << std::string(inner_padding_length -
+                        std::string{score_text_label}.length() -
+                        std::to_string(gamePlayBoard.score).length(),
+                    border_padding_char)
+     << gamePlayBoard.score << inner_border_padding << vertical_border_pattern
+     << "\n";
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     const auto tempBestScore =
         (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
-    out_stream << outer_border_padding << vertical_border_pattern
-               << inner_border_padding << bold_on << bestscore_text_label
-               << bold_off
-               << std::string(inner_padding_length -
-                                  std::string{bestscore_text_label}.length() -
-                                  std::to_string(tempBestScore).length(),
-                              border_padding_char)
-               << tempBestScore << inner_border_padding
-               << vertical_border_pattern << "\n";
+    os << outer_border_padding << vertical_border_pattern
+       << inner_border_padding << bold_on << bestscore_text_label << bold_off
+       << std::string(inner_padding_length -
+                          std::string{bestscore_text_label}.length() -
+                          std::to_string(tempBestScore).length(),
+                      border_padding_char)
+       << tempBestScore << inner_border_padding << vertical_border_pattern
+       << "\n";
   }
-  out_stream << outer_border_padding << vertical_border_pattern
-             << inner_border_padding << bold_on << moves_text_label << bold_off
-             << std::string(
-                    inner_padding_length -
+  os << outer_border_padding << vertical_border_pattern << inner_border_padding
+     << bold_on << moves_text_label << bold_off
+     << std::string(inner_padding_length -
                         std::string{moves_text_label}.length() -
                         std::to_string(gamePlayBoard.MoveCount()).length(),
                     border_padding_char)
-             << gamePlayBoard.MoveCount() << inner_border_padding
-             << vertical_border_pattern << "\n";
-  out_stream << outer_border_padding << bottom_board << "\n \n";
+     << gamePlayBoard.MoveCount() << inner_border_padding
+     << vertical_border_pattern << "\n";
+  os << outer_border_padding << bottom_board << "\n \n";
 }
 
 void drawBoard(std::ostream &os) {
@@ -319,17 +315,15 @@ void drawBoard(std::ostream &os) {
 }
 
 void drawInputError(std::ostream &os) {
-  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
-  constexpr auto sp = "  ";
-  std::ostringstream str_os;
-  std::ostringstream invalid_prompt_richtext;
-  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
-
   if (gamestatus[FLAG_INPUT_ERROR]) {
-    str_os << invalid_prompt_richtext.str();
+    constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
+    constexpr auto sp = "  ";
+    std::ostringstream invalid_prompt_richtext;
+    invalid_prompt_richtext << red << sp << invalid_prompt_text << def
+                            << "\n\n";
+    os << invalid_prompt_richtext.str();
     gamestatus[FLAG_INPUT_ERROR] = false;
   }
-  os << str_os.str();
 }
 
 void drawInputControls(std::ostream &os) {
@@ -587,35 +581,27 @@ void drawEndScreen(std::ostream &os) {
 }
 
 void drawGameState(std::ostream &os) {
-  constexpr auto state_saved_text =
-      "The game has been saved. Feel free to take a break.";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream state_saved_richtext;
-  state_saved_richtext << green << bold_on << sp << state_saved_text << def
-                       << bold_off << "\n\n";
-
   if (gamestatus[FLAG_SAVED_GAME]) {
-    str_os << state_saved_richtext.str();
+    constexpr auto state_saved_text =
+        "The game has been saved. Feel free to take a break.";
+    constexpr auto sp = "  ";
+    std::ostringstream state_saved_richtext;
+    state_saved_richtext << green << bold_on << sp << state_saved_text << def
+                         << bold_off << "\n\n";
+    os << state_saved_richtext.str();
     gamestatus[FLAG_SAVED_GAME] = false;
   }
-  os << str_os.str();
 }
 
 void drawEndOfGamePrompt(std::ostream &os) {
-  constexpr auto win_but_what_next =
-      "You Won! Continue playing current game? [y/n]";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream win_richtext;
-  win_richtext << green << bold_on << sp << win_but_what_next << def << bold_off
-               << ": ";
-
   if (gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
-    str_os << win_richtext.str();
-    os << str_os.str();
+    constexpr auto win_but_what_next =
+        "You Won! Continue playing current game? [y/n]";
+    constexpr auto sp = "  ";
+    std::ostringstream win_richtext;
+    win_richtext << green << bold_on << sp << win_but_what_next << def
+                 << bold_off << ": ";
+    os << win_richtext.str();
   }
 }
 
