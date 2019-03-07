@@ -3,6 +3,7 @@
 #include "game-input.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
+#include "loadresource.hpp"
 #include "point2d.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
@@ -56,78 +57,6 @@ void DrawAsOneTimeFlag(std::ostream &os, bool &trigger, T f) {
   }
 }
 
-int GetLines(std::string filename) {
-  std::ifstream stateFile(filename);
-  using iter = std::istreambuf_iterator<char>;
-  const auto noOfLines = std::count(iter{stateFile}, iter{}, '\n');
-  return noOfLines;
-}
-
-std::vector<std::string> get_file_tile_data(std::istream &buf) {
-  std::vector<std::string> tempbuffer;
-  enum { MAX_WIDTH = 10, MAX_HEIGHT = 10 };
-  auto i{0};
-  for (std::string tempLine; std::getline(buf, tempLine) && i < MAX_WIDTH;
-       i++) {
-    std::istringstream temp_filestream(tempLine);
-    auto j{0};
-    for (std::string a_word;
-         std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
-      tempbuffer.push_back(a_word);
-    }
-  }
-  return tempbuffer;
-}
-
-std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
-  std::vector<Tile> result_buf;
-  auto tile_processed_counter{0};
-  const auto prime_tile_data =
-      [&tile_processed_counter](const std::string tile_data) {
-        enum FieldIndex { IDX_TILE_VALUE, IDX_TILE_BLOCKED, MAX_NO_TILE_IDXS };
-        std::array<int, MAX_NO_TILE_IDXS> tile_internal;
-        std::istringstream blocks(tile_data);
-        auto idx_id{0};
-        for (std::string temptiledata; std::getline(
-                 blocks, temptiledata, ':') /*&& idx_id < MAX_NO_TILE_IDXS*/;
-             idx_id++) {
-          switch (idx_id) {
-          case IDX_TILE_VALUE:
-            std::get<IDX_TILE_VALUE>(tile_internal) = std::stoi(temptiledata);
-            break;
-          case IDX_TILE_BLOCKED:
-            std::get<IDX_TILE_BLOCKED>(tile_internal) = std::stoi(temptiledata);
-            break;
-          default:
-            std::cout << "ERROR: [tile_processed_counter: "
-                      << tile_processed_counter
-                      << "]: Read past MAX_NO_TILE_IDXS! (idx no:"
-                      << MAX_NO_TILE_IDXS << ")\n";
-          }
-        }
-        tile_processed_counter++;
-        return Tile(std::get<IDX_TILE_VALUE>(tile_internal),
-                    std::get<IDX_TILE_BLOCKED>(tile_internal));
-      };
-  std::transform(std::begin(buf), std::end(buf), std::back_inserter(result_buf),
-                 prime_tile_data);
-  return result_buf;
-}
-
-std::tuple<bool, GameBoard>
-load_GameBoard_data_from_file(std::string filename) {
-  std::ifstream stateFile(filename);
-  if (stateFile) {
-    const ull savedBoardPlaySize = GetLines(filename);
-    const auto file_tile_data = get_file_tile_data(stateFile);
-    const auto processed_tile_data =
-        process_file_tile_string_data(file_tile_data);
-    return std::make_tuple(true,
-                           GameBoard(savedBoardPlaySize, processed_tile_data));
-  }
-  return std::make_tuple(false, GameBoard{});
-}
-
 std::string receive_input_player_name(std::istream &is) {
   std::string name;
   is >> name;
@@ -145,49 +74,25 @@ void load_game_best_score() {
   }
 }
 
-bool get_and_process_game_stats_string_data(std::istream &stats_file) {
-  if (stats_file) {
-    for (std::string tempLine; std::getline(stats_file, tempLine);) {
-      enum GameStatsFieldIndex {
-        IDX_GAME_SCORE_VALUE,
-        IDX_GAME_MOVECOUNT,
-        MAX_NO_GAME_STATS_IDXS
-      };
-      std::istringstream line(tempLine);
-      auto idx_id{0};
-      for (std::string temp; std::getline(line, temp, ':'); idx_id++) {
-        switch (idx_id) {
-        case IDX_GAME_SCORE_VALUE:
-          gamePlayBoard.score = std::stoi(temp);
-          break;
-        case IDX_GAME_MOVECOUNT:
-          gamePlayBoard.moveCount = std::stoi(temp) - 1;
-          break;
-        default:
-          // Error: No fields to process!
-          break;
-        }
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
-bool load_game_stats_from_file(std::string filename) {
-  std::ifstream stats(filename);
-  return get_and_process_game_stats_string_data(stats);
-}
-
 bool initialiseContinueBoardArray() {
+  using namespace Game::Loader;
   constexpr auto gameboard_data_filename = "../data/previousGame";
   constexpr auto game_stats_data_filename = "../data/previousGameStats";
   auto loaded_gameboard{false};
+  auto loaded_game_stats{false};
+  // Note: Reserved for gameboard.score and gameboard.moveCount!
+  // TODO: Combine data into one resource file.
+  auto score_and_movecount = std::tuple<decltype(gamePlayBoard.score),
+                                        decltype(gamePlayBoard.moveCount)>{};
   std::tie(loaded_gameboard, gamePlayBoard) =
       load_GameBoard_data_from_file(gameboard_data_filename);
+  std::tie(loaded_game_stats, score_and_movecount) =
+      load_game_stats_from_file(game_stats_data_filename);
+  std::tie(gamePlayBoard.score, gamePlayBoard.moveCount) = score_and_movecount;
 
-  return (loaded_gameboard &&
-          load_game_stats_from_file(game_stats_data_filename));
+  const auto all_files_loaded_ok = (loaded_gameboard && loaded_game_stats);
+
+  return all_files_loaded_ok;
 }
 
 void drawScoreBoard(std::ostream &os) {
