@@ -470,7 +470,7 @@ void drawEndGameStatistics(std::ostream &os) {
   os << stats_richtext.str();
 }
 
-void saveStats() {
+void saveEndGameStats() {
   using namespace Statistics;
   total_game_stats_t stats;
   // Need some sort of stats data values only.
@@ -485,7 +485,7 @@ void saveStats() {
   stats.totalMoveCount += gamePlayBoard.MoveCount();
   stats.totalDuration += duration;
 
-  saveToFileStatistics("../data/statistics.txt", stats);
+  saveToFileEndGameStatistics("../data/statistics.txt", stats);
 }
 
 void saveScore() {
@@ -501,15 +501,34 @@ void saveScore() {
   Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
 }
 
-void saveState() {
+bool generateFilefromPreviousGameStatisticsData(std::ostream &os) {
+  os << gamePlayBoard.score << ":" << gamePlayBoard.MoveCount();
+  return true;
+}
+
+void saveToFilePreviousGameStatisticsData(std::string filename) {
+  std::ofstream stats(filename, std::ios_base::app);
+  generateFilefromPreviousGameStatisticsData(stats);
+}
+
+bool generateFilefromPreviousGameStateData(std::ostream &os) {
+  os << gamePlayBoard.printState();
+  return true;
+}
+
+void saveToFilePreviousGameStateData(std::string filename) {
+  std::ofstream stateFile(filename, std::ios_base::app);
+  generateFilefromPreviousGameStateData(stateFile);
+}
+
+void saveGamePlayState() {
+  // Currently two datafiles for now.
+  // Will be merged into one datafile in a future PR.
   std::remove("../data/previousGame");
   std::remove("../data/previousGameStats");
-  std::fstream stats("../data/previousGameStats", std::ios_base::app);
-  std::fstream stateFile("../data/previousGame", std::ios_base::app);
-  stateFile << gamePlayBoard.printState();
-  stateFile.close();
-  stats << gamePlayBoard.score << ":" << gamePlayBoard.MoveCount();
-  stats.close();
+
+  saveToFilePreviousGameStateData("../data/previousGame");
+  saveToFilePreviousGameStatisticsData("../data/previousGameStats");
 }
 
 void drawEndScreen(std::ostream &os) {
@@ -608,7 +627,7 @@ bool process_gameStatus() {
     return false;
   }
   if (gamestatus[FLAG_SAVED_GAME]) {
-    saveState();
+    saveGamePlayState();
   }
   return true;
 }
@@ -641,7 +660,7 @@ void playGame(ContinueStatus cont) {
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
     drawEndGameStatistics(std::cout);
-    saveStats();
+    saveEndGameStats();
     newline(2);
     DrawAlways(std::cout, Game::Graphics::AskForPlayerNamePrompt);
     saveScore();

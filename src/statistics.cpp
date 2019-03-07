@@ -32,7 +32,7 @@ load_stats_status_t loadFromFileStatistics(std::string filename) {
   return load_stats_status_t{false, total_game_stats_t{}};
 }
 
-bool saveToFileStatistics(std::string filename, total_game_stats_t s) {
+bool saveToFileEndGameStatistics(std::string filename, total_game_stats_t s) {
   std::ofstream filedata(filename);
   return generateFilefromStatsData(filedata, s);
 }
