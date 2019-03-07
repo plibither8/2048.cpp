@@ -5,7 +5,7 @@
 
 #ifdef _WIN32
 
-void getInput(char &c) {
+void getKeypressDownInput(char &c) {
   std::cin >> c;
 }
 
@@ -33,7 +33,7 @@ char getch() {
   return (buf);
 }
 
-void getInput(char &c) {
+void getKeypressDownInput(char &c) {
   c = getch();
 }
 

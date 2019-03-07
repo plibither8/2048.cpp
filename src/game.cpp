@@ -1,5 +1,6 @@
 #include "game.hpp"
 #include "game-graphics.hpp"
+#include "game-input.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
 #include "point2d.hpp"
@@ -13,51 +14,6 @@
 #include <sstream>
 
 namespace {
-namespace Keypress {
-namespace Code {
-
-enum { CODE_ESC = 27, CODE_LSQUAREBRACKET = '[' };
-
-// Hotkey bindings:
-// Style: ANSI (Arrow Keys)
-enum {
-  CODE_ANSI_TRIGGER_1 = CODE_ESC,
-  CODE_ANSI_TRIGGER_2 = CODE_LSQUAREBRACKET
-};
-enum {
-  CODE_ANSI_UP = 'A',
-  CODE_ANSI_DOWN = 'B',
-  CODE_ANSI_LEFT = 'D',
-  CODE_ANSI_RIGHT = 'C'
-};
-
-// Style: WASD
-enum {
-  CODE_WASD_UP = 'W',
-  CODE_WASD_DOWN = 'S',
-  CODE_WASD_LEFT = 'A',
-  CODE_WASD_RIGHT = 'D'
-};
-
-// Style: Vim
-enum {
-  CODE_VIM_UP = 'K',
-  CODE_VIM_DOWN = 'J',
-  CODE_VIM_LEFT = 'H',
-  CODE_VIM_RIGHT = 'L'
-};
-
-enum {
-  CODE_HOTKEY_ACTION_SAVE = 'Z',
-  CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P',
-  CODE_HOTKEY_QUIT_ENDLESS_MODE = 'X',
-  CODE_HOTKEY_CHOICE_NO = 'N',
-  CODE_HOTKEY_CHOICE_YES = 'Y'
-};
-
-} // namespace Code
-} // namespace Keypress
-
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
 enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
@@ -71,19 +27,9 @@ enum GameStatusFlag {
   FLAG_QUESTION_STAY_OR_QUIT,
   MAX_NO_GAME_STATUS_FLAGS
 };
+
 using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
-
-enum IntendedMoveFlag {
-  FLAG_MOVE_LEFT,
-  FLAG_MOVE_RIGHT,
-  FLAG_MOVE_UP,
-  FLAG_MOVE_DOWN,
-  MAX_NO_INTENDED_MOVE_FLAGS
-};
-using intendedmove_t = std::array<bool, MAX_NO_INTENDED_MOVE_FLAGS>;
-
 gamestatus_t gamestatus{};
-intendedmove_t intendedmove{};
 
 ull bestScore;
 double duration;
@@ -324,71 +270,8 @@ void drawInputControls(std::ostream &os) {
   DrawOnlyWhen(os, !gamestatus[FLAG_QUESTION_STAY_OR_QUIT], InputControlLists);
 }
 
-bool check_input_ansi(char c) {
-  using namespace Keypress::Code;
-  if (c == CODE_ANSI_TRIGGER_1) {
-    getInput(c);
-    if (c == CODE_ANSI_TRIGGER_2) {
-      getInput(c);
-      switch (c) {
-      case CODE_ANSI_UP:
-        intendedmove[FLAG_MOVE_UP] = true;
-        return false;
-      case CODE_ANSI_DOWN:
-        intendedmove[FLAG_MOVE_DOWN] = true;
-        return false;
-      case CODE_ANSI_RIGHT:
-        intendedmove[FLAG_MOVE_RIGHT] = true;
-        return false;
-      case CODE_ANSI_LEFT:
-        intendedmove[FLAG_MOVE_LEFT] = true;
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool check_input_vim(char c) {
-  using namespace Keypress::Code;
-  switch (toupper(c)) {
-  case CODE_VIM_UP:
-    intendedmove[FLAG_MOVE_UP] = true;
-    return false;
-  case CODE_VIM_LEFT:
-    intendedmove[FLAG_MOVE_LEFT] = true;
-    return false;
-  case CODE_VIM_DOWN:
-    intendedmove[FLAG_MOVE_DOWN] = true;
-    return false;
-  case CODE_VIM_RIGHT:
-    intendedmove[FLAG_MOVE_RIGHT] = true;
-    return false;
-  }
-  return true;
-}
-
-bool check_input_wasd(char c) {
-  using namespace Keypress::Code;
-  switch (toupper(c)) {
-  case CODE_WASD_UP:
-    intendedmove[FLAG_MOVE_UP] = true;
-    return false;
-  case CODE_WASD_LEFT:
-    intendedmove[FLAG_MOVE_LEFT] = true;
-    return false;
-  case CODE_WASD_DOWN:
-    intendedmove[FLAG_MOVE_DOWN] = true;
-    return false;
-  case CODE_WASD_RIGHT:
-    intendedmove[FLAG_MOVE_RIGHT] = true;
-    return false;
-  }
-  return true;
-}
-
 bool check_input_other(char c) {
-  using namespace Keypress::Code;
+  using namespace Game::Input::Keypress::Code;
   switch (toupper(c)) {
   case CODE_HOTKEY_ACTION_SAVE:
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
@@ -404,14 +287,19 @@ bool check_input_other(char c) {
   return true;
 }
 
-void input() {
-  if (!gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN]) {
+void receive_agent_input(Game::Input::intendedmove_t &intendedmove) {
+  using namespace Game::Input;
+  const bool game_still_in_play =
+      !gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN];
+  if (game_still_in_play) {
     // Game still in play. Take input commands for next turn.
     char c;
-    getInput(c);
-    const auto is_invalid_keypress_code =
-        check_input_ansi(c) && check_input_wasd(c) && check_input_vim(c) &&
-        check_input_other(c);
+    getKeypressDownInput(c);
+    // Update agent's intended move flags per control scheme (if flagged).
+    const auto is_invalid_keypress_code = check_input_ansi(c, intendedmove) &&
+                                          check_input_wasd(c, intendedmove) &&
+                                          check_input_vim(c, intendedmove) &&
+                                          check_input_other(c);
     if (is_invalid_keypress_code) {
       gamestatus[FLAG_INPUT_ERROR] = true;
     }
@@ -574,7 +462,8 @@ void process_gamelogic() {
   }
 }
 
-bool process_intendedMove() {
+bool process_agent_input(Game::Input::intendedmove_t &intendedmove) {
+  using namespace Game::Input;
   if (intendedmove[FLAG_MOVE_LEFT]) {
     decideMove(LEFT);
   }
@@ -593,7 +482,7 @@ bool process_intendedMove() {
 }
 
 bool check_input_check_to_end_game(char c) {
-  using namespace Keypress::Code;
+  using namespace Game::Input::Keypress::Code;
   switch (std::toupper(c)) {
   case CODE_HOTKEY_CHOICE_NO:
     return true;
@@ -633,10 +522,12 @@ bool process_gameStatus() {
 }
 
 bool soloGameLoop() {
+  using namespace Game::Input;
+  intendedmove_t player_intendedmove{};
   process_gamelogic();
   drawGraphics(std::cout);
-  input();
-  process_intendedMove();
+  receive_agent_input(player_intendedmove);
+  process_agent_input(player_intendedmove);
   const auto loop_again = process_gameStatus();
   return loop_again;
 }
