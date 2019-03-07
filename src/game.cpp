@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "game-graphics.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
 #include "point2d.hpp"
@@ -60,11 +61,6 @@ enum {
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
 enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
-enum GameBoardDimensions {
-  MIN_GAME_BOARD_PLAY_SIZE = 3,
-  MAX_GAME_BOARD_PLAY_SIZE = 10
-};
-enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
 enum GameStatusFlag {
   FLAG_WIN,
@@ -93,6 +89,26 @@ ull bestScore;
 double duration;
 GameBoard gamePlayBoard;
 RandInt randInt;
+
+template<typename T>
+void DrawAlways(std::ostream &os, T f) {
+  os << f();
+}
+
+template<typename T>
+void DrawOnlyWhen(std::ostream &os, bool trigger, T f) {
+  if (trigger) {
+    DrawAlways(os, f);
+  }
+}
+
+template<typename T>
+void DrawAsOneTimeFlag(std::ostream &os, bool &trigger, T f) {
+  if (trigger) {
+    DrawAlways(os, f);
+    trigger = !trigger;
+  }
+}
 
 int GetLines(std::string filename) {
   std::ifstream stateFile(filename);
@@ -164,25 +180,6 @@ load_GameBoard_data_from_file(std::string filename) {
                            GameBoard(savedBoardPlaySize, processed_tile_data));
   }
   return std::make_tuple(false, GameBoard{});
-}
-
-void drawMessageScoreSaved(std::ostream &os) {
-  constexpr auto score_saved_text = "Score saved!";
-  constexpr auto sp = "  ";
-  std::ostringstream score_saved_richtext;
-  score_saved_richtext << "\n"
-                       << green << bold_on << sp << score_saved_text << bold_off
-                       << def << "\n";
-  os << score_saved_richtext.str();
-}
-
-void drawPromptForPlayerName(std::ostream &os) {
-  constexpr auto score_prompt_text =
-      "Please enter your name to save this score: ";
-  constexpr auto sp = "  ";
-  std::ostringstream score_prompt_richtext;
-  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
-  os << score_prompt_richtext.str();
 }
 
 std::string receive_input_player_name(std::istream &is) {
@@ -314,42 +311,17 @@ void drawBoard(std::ostream &os) {
   os << gamePlayBoard;
 }
 
-void drawInputError(std::ostream &os) {
-  if (gamestatus[FLAG_INPUT_ERROR]) {
-    constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
-    constexpr auto sp = "  ";
-    std::ostringstream invalid_prompt_richtext;
-    invalid_prompt_richtext << red << sp << invalid_prompt_text << def
-                            << "\n\n";
-    os << invalid_prompt_richtext.str();
-    gamestatus[FLAG_INPUT_ERROR] = false;
-  }
-}
-
 void drawInputControls(std::ostream &os) {
-  constexpr auto sp = "  ";
-  const auto input_commands_list_text = {
-      "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
-      "D or L or → => Right", "Z or P => Save"};
-  const auto endless_mode_list_text = {"X => Quit Endless Mode"};
-  const auto input_commands_list_end_text = {
-      "", "Press the keys to start and continue.", "\n"};
-
-  std::ostringstream str_os;
-  for (const auto txt : input_commands_list_text) {
-    str_os << sp << txt << "\n";
-  }
-  if (gamestatus[FLAG_ENDLESS_MODE]) {
-    for (const auto txt : endless_mode_list_text) {
-      str_os << sp << txt << "\n";
-    }
-  }
-  for (const auto txt : input_commands_list_end_text) {
-    str_os << sp << txt << "\n";
-  }
-  if (!gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
-    os << str_os.str();
-  }
+  const auto InputControlLists = [] {
+    std::ostringstream str_os;
+    DrawAlways(str_os, Game::Graphics::InputCommandListPrompt);
+    DrawOnlyWhen(str_os, gamestatus[FLAG_ENDLESS_MODE],
+                 Game::Graphics::EndlessModeCommandListPrompt);
+    DrawAlways(str_os, Game::Graphics::InputCommandListFooterPrompt);
+    return str_os.str();
+  };
+  // When game is paused to ask a question, hide regular inut prompts..
+  DrawOnlyWhen(os, !gamestatus[FLAG_QUESTION_STAY_OR_QUIT], InputControlLists);
 }
 
 bool check_input_ansi(char c) {
@@ -466,7 +438,7 @@ void decideMove(Directions d) {
   }
 }
 
-void statistics(std::ostream &os) {
+void drawEndGameStatistics(std::ostream &os) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   const auto stats_attributes_text = {
@@ -540,77 +512,29 @@ void saveState() {
   stats.close();
 }
 
-void drawYouWinPrompt(std::ostream &os) {
-  constexpr auto win_game_text = "You win! Congratulations!";
-  constexpr auto sp = "  ";
-  std::ostringstream win_richtext;
-  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
-               << "\n\n\n";
-  os << win_richtext.str();
-}
-
-void drawGameOverPrompt(std::ostream &os) {
-  constexpr auto lose_game_text = "Game over! You lose.";
-  constexpr auto sp = "  ";
-  std::ostringstream lose_richtext;
-  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
-                << "\n\n\n";
-  os << lose_richtext.str();
-}
-
-void drawEndOfEndlessPrompt(std::ostream &os) {
-  constexpr auto endless_mode_text =
-      "End of endless mode! Thank you for playing!";
-  constexpr auto sp = "  ";
-  std::ostringstream endless_mode_richtext;
-  endless_mode_richtext << red << bold_on << sp << endless_mode_text << def
-                        << bold_off << "\n\n\n";
-  os << endless_mode_richtext.str();
-}
-
 void drawEndScreen(std::ostream &os) {
-  if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (gamestatus[FLAG_WIN]) {
-      drawYouWinPrompt(os);
-    } else {
-      drawGameOverPrompt(os);
-    }
-  } else {
-    drawEndOfEndlessPrompt(os);
-  }
-}
-
-void drawGameState(std::ostream &os) {
-  if (gamestatus[FLAG_SAVED_GAME]) {
-    constexpr auto state_saved_text =
-        "The game has been saved. Feel free to take a break.";
-    constexpr auto sp = "  ";
-    std::ostringstream state_saved_richtext;
-    state_saved_richtext << green << bold_on << sp << state_saved_text << def
-                         << bold_off << "\n\n";
-    os << state_saved_richtext.str();
-    gamestatus[FLAG_SAVED_GAME] = false;
-  }
-}
-
-void drawEndOfGamePrompt(std::ostream &os) {
-  if (gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
-    constexpr auto win_but_what_next =
-        "You Won! Continue playing current game? [y/n]";
-    constexpr auto sp = "  ";
-    std::ostringstream win_richtext;
-    win_richtext << green << bold_on << sp << win_but_what_next << def
-                 << bold_off << ": ";
-    os << win_richtext.str();
-  }
+  const auto standardWinLosePrompt = [] {
+    std::ostringstream str_os;
+    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Game::Graphics::YouWinPrompt);
+    // else..
+    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Game::Graphics::GameOverPrompt);
+    return str_os.str();
+  };
+  DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
+  // else..
+  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE],
+               Game::Graphics::EndOfEndlessPrompt);
 }
 
 void drawGraphics(std::ostream &os) {
   drawBoard(os);
-  drawGameState(os);
-  drawEndOfGamePrompt(os);
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
+                    Game::Graphics::GameStateNowSavedPrompt);
+  DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
+               Game::Graphics::QuestionEndOfWinningGamePrompt);
   drawInputControls(os);
-  drawInputError(os);
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
+                    Game::Graphics::InvalidInputGameBoardErrorPrompt);
 }
 
 void process_gamelogic() {
@@ -716,53 +640,13 @@ void playGame(ContinueStatus cont) {
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
       cont == ContinueStatus::STATUS_END_GAME) {
-    statistics(std::cout);
+    drawEndGameStatistics(std::cout);
     saveStats();
     newline(2);
-    drawPromptForPlayerName(std::cout);
+    DrawAlways(std::cout, Game::Graphics::AskForPlayerNamePrompt);
     saveScore();
-    drawMessageScoreSaved(std::cout);
+    DrawAlways(std::cout, Game::Graphics::MessageScoreSavedPrompt);
   }
-}
-
-void DrawBoardSizeError(std::ostream &os, bool wrong_size_flag) {
-  if (wrong_size_flag) {
-    const auto invalid_prompt_text = {
-        "Invalid input. Gameboard size should range from ", " to ", "."};
-    //  constexpr auto num_of_invalid_prompt_text = 3;
-    constexpr auto sp = "  ";
-    std::ostringstream error_prompt_richtext;
-    error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
-                          << MIN_GAME_BOARD_PLAY_SIZE
-                          << std::begin(invalid_prompt_text)[1]
-                          << MAX_GAME_BOARD_PLAY_SIZE
-                          << std::begin(invalid_prompt_text)[2] << def
-                          << "\n\n";
-    os << error_prompt_richtext.str();
-  }
-}
-
-void DrawBoardNoSaveFoundError(std::ostream &os, bool &no_save_flag) {
-  if (no_save_flag) {
-    constexpr auto no_save_found_text =
-        "No saved game found. Starting a new game.";
-    constexpr auto sp = "  ";
-    std::ostringstream no_save_richtext;
-    no_save_richtext << red << bold_on << sp << no_save_found_text << def
-                     << bold_off << "\n\n";
-    os << no_save_richtext.str();
-    no_save_flag = false;
-  }
-} // namespace
-
-void DrawBoardInputPrompt(std::ostream &os) {
-  constexpr auto board_size_prompt_text =
-      "Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
-  constexpr auto sp = "  ";
-  std::ostringstream board_size_prompt_richtext;
-  board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
-                             << bold_off;
-  os << board_size_prompt_richtext.str();
 }
 
 ull Receive_Input_Playsize(std::istream &is) {
@@ -780,20 +664,24 @@ ull askWhatIsBoardSize(std::ostream &os, NewGameFlag ns) {
   bool invalidInputValue = false;
   ull userInput_PlaySize{0};
 
-  const auto DrawGraphics = [&invalidInputValue, &noSave](std::ostream &os) {
+  const auto QuestionAboutBoardSizePrompt = [&invalidInputValue, &noSave]() {
+    std::ostringstream str_os;
     clearScreen();
     drawAscii();
     // Prints only if "invalidInputValue" is true
-    DrawBoardSizeError(os, invalidInputValue);
+    DrawOnlyWhen(str_os, invalidInputValue,
+                 Game::Graphics::BoardSizeErrorPrompt);
     // Prints only if "noSave" is true
     // Consumes "noSave" flag (turns flag to false/off)
-    DrawBoardNoSaveFoundError(os, noSave);
-    DrawBoardInputPrompt(os);
+    DrawAsOneTimeFlag(str_os, noSave,
+                      Game::Graphics::GameBoardNoSaveErrorPrompt);
+    DrawAlways(str_os, Game::Graphics::BoardInputPrompt);
+    return str_os.str();
   };
 
   while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE) ||
          (userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
-    DrawGraphics(os);
+    DrawAlways(os, QuestionAboutBoardSizePrompt);
     userInput_PlaySize = Receive_Input_Playsize(std::cin);
     invalidInputValue = true;
   }
