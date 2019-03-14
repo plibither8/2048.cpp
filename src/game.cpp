@@ -5,6 +5,7 @@
 #include "global.hpp"
 #include "loadresource.hpp"
 #include "point2d.hpp"
+#include "saveresource.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <algorithm>
@@ -294,34 +295,16 @@ void saveScore() {
   Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
 }
 
-bool generateFilefromPreviousGameStatisticsData(std::ostream &os) {
-  os << gamePlayBoard.score << ":" << gamePlayBoard.MoveCount();
-  return true;
-}
-
-void saveToFilePreviousGameStatisticsData(std::string filename) {
-  std::ofstream stats(filename, std::ios_base::app);
-  generateFilefromPreviousGameStatisticsData(stats);
-}
-
-bool generateFilefromPreviousGameStateData(std::ostream &os) {
-  os << gamePlayBoard.printState();
-  return true;
-}
-
-void saveToFilePreviousGameStateData(std::string filename) {
-  std::ofstream stateFile(filename, std::ios_base::app);
-  generateFilefromPreviousGameStateData(stateFile);
-}
-
 void saveGamePlayState() {
+  using namespace Game::Saver;
   // Currently two datafiles for now.
   // Will be merged into one datafile in a future PR.
   std::remove("../data/previousGame");
   std::remove("../data/previousGameStats");
 
-  saveToFilePreviousGameStateData("../data/previousGame");
-  saveToFilePreviousGameStatisticsData("../data/previousGameStats");
+  saveToFilePreviousGameStateData("../data/previousGame", gamePlayBoard);
+  saveToFilePreviousGameStatisticsData("../data/previousGameStats",
+                                       gamePlayBoard);
 }
 
 void drawEndScreen(std::ostream &os) {
