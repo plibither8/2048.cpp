@@ -41,15 +41,17 @@ std::string receive_input_player_name(std::istream &is) {
   return name;
 }
 
-void load_game_best_score() {
+ull load_game_best_score() {
   using namespace Statistics;
   total_game_stats_t stats;
   bool stats_file_loaded{};
+  ull tempscore{0};
   std::tie(stats_file_loaded, stats) =
       loadFromFileStatistics("../data/statistics.txt");
   if (stats_file_loaded) {
-    bestScore = stats.bestScore;
+    tempscore = stats.bestScore;
   }
+  return tempscore;
 }
 
 load_gameboard_status_t initialiseContinueBoardArray() {
@@ -406,7 +408,7 @@ void endlessGameLoop() {
 enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
 
 void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
-  load_game_best_score();
+  bestScore = load_game_best_score();
   if (cont == PlayGameFlag::BrandNewGame) {
     gamePlayBoard = GameBoard(userInput_PlaySize);
     gamePlayBoard.addTile();
