@@ -107,8 +107,7 @@ get_and_process_game_stats_string_data(std::istream &stats_file) {
 
 } // namespace
 
-std::tuple<bool, GameBoard>
-load_GameBoard_data_from_file(std::string filename) {
+load_gameboard_status_t load_GameBoard_data_from_file(std::string filename) {
   std::ifstream stateFile(filename);
   if (stateFile) {
     const ull savedBoardPlaySize = GetLines(filename);

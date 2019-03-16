@@ -18,8 +18,6 @@
 namespace {
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
-enum ContinueStatus { STATUS_END_GAME = 0, STATUS_CONTINUE = 1 };
-
 enum GameStatusFlag {
   FLAG_WIN,
   FLAG_END_GAME,
@@ -75,25 +73,26 @@ void load_game_best_score() {
   }
 }
 
-bool initialiseContinueBoardArray() {
+load_gameboard_status_t initialiseContinueBoardArray() {
   using namespace Game::Loader;
   constexpr auto gameboard_data_filename = "../data/previousGame";
   constexpr auto game_stats_data_filename = "../data/previousGameStats";
   auto loaded_gameboard{false};
   auto loaded_game_stats{false};
+  auto tempGBoard = GameBoard{1};
   // Note: Reserved for gameboard.score and gameboard.moveCount!
   // TODO: Combine data into one resource file.
-  auto score_and_movecount = std::tuple<decltype(gamePlayBoard.score),
-                                        decltype(gamePlayBoard.moveCount)>{};
-  std::tie(loaded_gameboard, gamePlayBoard) =
+  auto score_and_movecount =
+      std::tuple<decltype(tempGBoard.score), decltype(tempGBoard.moveCount)>{};
+  std::tie(loaded_gameboard, tempGBoard) =
       load_GameBoard_data_from_file(gameboard_data_filename);
   std::tie(loaded_game_stats, score_and_movecount) =
       load_game_stats_from_file(game_stats_data_filename);
-  std::tie(gamePlayBoard.score, gamePlayBoard.moveCount) = score_and_movecount;
+  std::tie(tempGBoard.score, tempGBoard.moveCount) = score_and_movecount;
 
   const auto all_files_loaded_ok = (loaded_gameboard && loaded_game_stats);
 
-  return all_files_loaded_ok;
+  return std::make_tuple(all_files_loaded_ok, tempGBoard);
 }
 
 void drawScoreBoard(std::ostream &os) {
@@ -425,8 +424,15 @@ void endlessGameLoop() {
     ;
 }
 
-void playGame(ContinueStatus cont) {
+enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
+
+void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
   load_game_best_score();
+  if (cont == PlayGameFlag::BrandNewGame) {
+    gamePlayBoard = GameBoard(userInput_PlaySize);
+    gamePlayBoard.addTile();
+  }
+
   auto startTime = std::chrono::high_resolution_clock::now();
   endlessGameLoop();
   auto finishTime = std::chrono::high_resolution_clock::now();
@@ -437,7 +443,7 @@ void playGame(ContinueStatus cont) {
   drawEndScreen(std::cout);
 
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
-      cont == ContinueStatus::STATUS_END_GAME) {
+      cont == PlayGameFlag::BrandNewGame) {
     drawEndGameStatistics(std::cout);
     saveEndGameStats();
     newline(2);
@@ -455,24 +461,17 @@ ull Receive_Input_Playsize(std::istream &is) {
   return userInput_PlaySize;
 }
 
-enum class NewGameFlag { NewGameFlagNull, NoPreviousSaveAvailable };
-
-ull askWhatIsBoardSize(std::ostream &os, NewGameFlag ns) {
-  bool noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
+ull askWhatIsBoardSize(std::ostream &os) {
   bool invalidInputValue = false;
   ull userInput_PlaySize{0};
 
-  const auto QuestionAboutBoardSizePrompt = [&invalidInputValue, &noSave]() {
+  const auto QuestionAboutBoardSizePrompt = [&invalidInputValue]() {
     std::ostringstream str_os;
     clearScreen();
     drawAscii();
     // Prints only if "invalidInputValue" is true
     DrawOnlyWhen(str_os, invalidInputValue,
                  Game::Graphics::BoardSizeErrorPrompt);
-    // Prints only if "noSave" is true
-    // Consumes "noSave" flag (turns flag to false/off)
-    DrawAsOneTimeFlag(str_os, noSave,
-                      Game::Graphics::GameBoardNoSaveErrorPrompt);
     DrawAlways(str_os, Game::Graphics::BoardInputPrompt);
     return str_os.str();
   };
@@ -486,11 +485,28 @@ ull askWhatIsBoardSize(std::ostream &os, NewGameFlag ns) {
   return userInput_PlaySize;
 }
 
+enum class NewGameFlag { NewGameFlagNull, NoPreviousSaveAvailable };
+
 void SetUpNewGame(NewGameFlag ns = NewGameFlag::NewGameFlagNull) {
-  ull userInput_PlaySize = askWhatIsBoardSize(std::cout, ns);
-  gamePlayBoard = GameBoard(userInput_PlaySize);
-  gamePlayBoard.addTile();
-  playGame(ContinueStatus::STATUS_END_GAME);
+  auto noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
+  // Prints only if "noSave" is true
+  // Consumes "noSave" flag (turns flag to false/off)
+  DrawAsOneTimeFlag(std::cout, noSave,
+                    Game::Graphics::GameBoardNoSaveErrorPrompt);
+  ull userInput_PlaySize = askWhatIsBoardSize(std::cout);
+  playGame(PlayGameFlag::BrandNewGame, userInput_PlaySize);
+}
+
+void ContinueOldGame() {
+  bool load_old_game_ok;
+  GameBoard oldGameBoard;
+  std::tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray();
+  if (load_old_game_ok) {
+    gamePlayBoard = oldGameBoard;
+    playGame(PlayGameFlag::ContinuePreviousGame);
+  } else {
+    SetUpNewGame(NewGameFlag::NoPreviousSaveAvailable);
+  }
 }
 
 } // namespace
@@ -500,9 +516,5 @@ void Game::startGame() {
 }
 
 void Game::continueGame() {
-  if (initialiseContinueBoardArray()) {
-    playGame(ContinueStatus::STATUS_CONTINUE);
-  } else {
-    SetUpNewGame(NewGameFlag::NoPreviousSaveAvailable);
-  }
+  ContinueOldGame();
 }

@@ -5,9 +5,12 @@
 #include <string>
 #include <tuple>
 
+using load_gameboard_status_t = std::tuple<bool, GameBoard>;
+
 namespace Game {
 namespace Loader {
-std::tuple<bool, GameBoard> load_GameBoard_data_from_file(std::string filename);
+
+load_gameboard_status_t load_GameBoard_data_from_file(std::string filename);
 
 // Output: {[loadfile_ok_status], [decltype(gameboard.score)],
 // [decltype(gameboard.moveCount)]}
