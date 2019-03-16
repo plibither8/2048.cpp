@@ -34,27 +34,6 @@ gamestatus_t gamestatus{};
 ull bestScore;
 double duration;
 GameBoard gamePlayBoard;
-RandInt randInt;
-
-template<typename T>
-void DrawAlways(std::ostream &os, T f) {
-  os << f();
-}
-
-template<typename T>
-void DrawOnlyWhen(std::ostream &os, bool trigger, T f) {
-  if (trigger) {
-    DrawAlways(os, f);
-  }
-}
-
-template<typename T>
-void DrawAsOneTimeFlag(std::ostream &os, bool &trigger, T f) {
-  if (trigger) {
-    DrawAlways(os, f);
-    trigger = !trigger;
-  }
-}
 
 std::string receive_input_player_name(std::istream &is) {
   std::string name;
