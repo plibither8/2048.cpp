@@ -44,12 +44,6 @@ void wait_for_any_letter_input(std::istream &is) {
   is >> c;
 }
 
-void newline(int n) {
-  for (int i = 0; i < n; i++) {
-    std::cout << "\n";
-  }
-};
-
 void clearScreen() {
   system("clear");
 };

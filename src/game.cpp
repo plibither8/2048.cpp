@@ -31,7 +31,6 @@ enum GameStatusFlag {
 using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
 
 ull bestScore;
-double duration;
 GameBoard gamePlayBoard;
 
 std::string receive_input_player_name(std::istream &is) {
@@ -218,7 +217,7 @@ void decideMove(Directions d) {
   }
 }
 
-void drawEndGameStatistics(std::ostream &os) {
+void drawEndGameStatistics(std::ostream &os, Scoreboard::Score finalscore) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   const auto stats_attributes_text = {
@@ -227,10 +226,9 @@ void drawEndGameStatistics(std::ostream &os) {
   constexpr auto sp = "  ";
 
   auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-  data_stats = {std::to_string(gamePlayBoard.score),
-                std::to_string(gamePlayBoard.largestTile),
-                std::to_string(gamePlayBoard.MoveCount()),
-                secondsFormat(duration)};
+  data_stats = {
+      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
+      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration)};
 
   std::ostringstream stats_richtext;
   stats_richtext << yellow << sp << stats_title_text << def << "\n";
@@ -248,37 +246,28 @@ void drawEndGameStatistics(std::ostream &os) {
                 std::end(stats_attributes_text), populate_stats_info);
 
   os << stats_richtext.str();
+  os << "\n\n";
 }
 
-void saveEndGameStats() {
+void saveEndGameStats(Scoreboard::Score finalscore) {
   using namespace Statistics;
   total_game_stats_t stats;
   // Need some sort of stats data values only.
   // No need to care if file loaded successfully or not...
   std::tie(std::ignore, stats) =
       loadFromFileStatistics("../data/statistics.txt");
-  stats.bestScore = stats.bestScore < gamePlayBoard.score ?
-                        gamePlayBoard.score :
-                        stats.bestScore;
+  stats.bestScore =
+      stats.bestScore < finalscore.score ? finalscore.score : stats.bestScore;
   stats.gameCount++;
-  stats.winCount = gamePlayBoard.hasWon() ? stats.winCount + 1 : stats.winCount;
-  stats.totalMoveCount += gamePlayBoard.MoveCount();
-  stats.totalDuration += duration;
+  stats.winCount = finalscore.win ? stats.winCount + 1 : stats.winCount;
+  stats.totalMoveCount += finalscore.moveCount;
+  stats.totalDuration += finalscore.duration;
 
   saveToFileEndGameStatistics("../data/statistics.txt", stats);
 }
 
-void saveScore() {
-  Scoreboard::Score tempscore{};
-  auto name = receive_input_player_name(std::cin);
-
-  tempscore.name = name;
-  tempscore.score = gamePlayBoard.score;
-  tempscore.win = gamePlayBoard.hasWon();
-  tempscore.moveCount = gamePlayBoard.MoveCount();
-  tempscore.largestTile = gamePlayBoard.largestTile;
-  tempscore.duration = duration;
-  Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
+void saveScore(Scoreboard::Score finalscore) {
+  Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
 }
 
 void saveGamePlayState() {
@@ -421,6 +410,27 @@ void endlessGameLoop() {
   drawEndScreen(std::cout, world_gamestatus);
 }
 
+void DoPostGameSaveStuff(double duration) {
+  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+    Scoreboard::Score finalscore{};
+    finalscore.score = gamePlayBoard.score;
+    finalscore.win = gamePlayBoard.hasWon();
+    finalscore.moveCount = gamePlayBoard.MoveCount();
+    finalscore.largestTile = gamePlayBoard.largestTile;
+    finalscore.duration = duration;
+
+    drawEndGameStatistics(std::cout, finalscore);
+    saveEndGameStats(finalscore);
+
+    DrawAlways(std::cout, Game::Graphics::AskForPlayerNamePrompt);
+    const auto name = receive_input_player_name(std::cin);
+    finalscore.name = name;
+
+    saveScore(finalscore);
+    DrawAlways(std::cout, Game::Graphics::MessageScoreSavedPrompt);
+  }
+}
+
 enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
 
 void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
@@ -434,16 +444,10 @@ void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
   endlessGameLoop();
   const auto finishTime = std::chrono::high_resolution_clock::now();
   const std::chrono::duration<double> elapsed = finishTime - startTime;
-  duration = elapsed.count();
+  const auto duration = elapsed.count();
 
-  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
-      cont == PlayGameFlag::BrandNewGame) {
-    drawEndGameStatistics(std::cout);
-    saveEndGameStats();
-    newline(2);
-    DrawAlways(std::cout, Game::Graphics::AskForPlayerNamePrompt);
-    saveScore();
-    DrawAlways(std::cout, Game::Graphics::MessageScoreSavedPrompt);
+  if (cont == PlayGameFlag::BrandNewGame) {
+    DoPostGameSaveStuff(duration);
   }
 }
 
