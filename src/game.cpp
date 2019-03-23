@@ -154,6 +154,37 @@ void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
   DrawOnlyWhen(os, !gamestatus[FLAG_QUESTION_STAY_OR_QUIT], InputControlLists);
 }
 
+gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
+  gamePlayBoard.unblockTiles();
+  if (gamePlayBoard.moved) {
+    gamePlayBoard.addTile();
+    gamePlayBoard.registerMoveByOne();
+  }
+
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
+    if (gamePlayBoard.hasWon()) {
+      gamestatus[FLAG_WIN] = true;
+      gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
+    }
+  }
+  if (!gamePlayBoard.canMove()) {
+    gamestatus[FLAG_END_GAME] = true;
+  }
+  return gamestatus;
+}
+
+gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
+  drawBoard(os);
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
+                    Game::Graphics::GameStateNowSavedPrompt);
+  DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
+               Game::Graphics::QuestionEndOfWinningGamePrompt);
+  drawInputControls(os, gamestatus);
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
+                    Game::Graphics::InvalidInputGameBoardErrorPrompt);
+  return gamestatus;
+}
+
 using wrapper_bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
 wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
   using namespace Game::Input::Keypress::Code;
@@ -217,6 +248,115 @@ void decideMove(Directions d) {
   }
 }
 
+bool process_agent_input(Game::Input::intendedmove_t &intendedmove) {
+  using namespace Game::Input;
+  if (intendedmove[FLAG_MOVE_LEFT]) {
+    decideMove(LEFT);
+  }
+  if (intendedmove[FLAG_MOVE_RIGHT]) {
+    decideMove(RIGHT);
+  }
+  if (intendedmove[FLAG_MOVE_UP]) {
+    decideMove(UP);
+  }
+  if (intendedmove[FLAG_MOVE_DOWN]) {
+    decideMove(DOWN);
+  }
+  // Reset all move flags...
+  intendedmove = intendedmove_t{};
+  return true;
+}
+
+bool check_input_check_to_end_game(char c) {
+  using namespace Game::Input::Keypress::Code;
+  switch (std::toupper(c)) {
+  case CODE_HOTKEY_CHOICE_NO:
+    return true;
+  }
+  return false;
+}
+
+bool continue_playing_game(std::istream &in_os) {
+  char letter_choice;
+  in_os >> letter_choice;
+  if (check_input_check_to_end_game(letter_choice)) {
+    return false;
+  }
+  return true;
+}
+
+void saveGamePlayState() {
+  using namespace Game::Saver;
+  // Currently two datafiles for now.
+  // Will be merged into one datafile in a future PR.
+  std::remove("../data/previousGame");
+  std::remove("../data/previousGameStats");
+
+  saveToFilePreviousGameStateData("../data/previousGame", gamePlayBoard);
+  saveToFilePreviousGameStatisticsData("../data/previousGameStats",
+                                       gamePlayBoard);
+}
+
+wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
+  auto loop_again{true};
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
+    if (gamestatus[FLAG_WIN]) {
+      if (continue_playing_game(std::cin)) {
+        gamestatus[FLAG_ENDLESS_MODE] = true;
+        gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = false;
+        gamestatus[FLAG_WIN] = false;
+      } else {
+        loop_again = false;
+      }
+    }
+  }
+  if (gamestatus[FLAG_END_GAME]) {
+    // End endless_mode;
+    loop_again = false;
+  }
+  if (gamestatus[FLAG_SAVED_GAME]) {
+    saveGamePlayState();
+  }
+  return std::make_tuple(loop_again, gamestatus);
+}
+
+wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
+  using namespace Game::Input;
+  intendedmove_t player_intendedmove{};
+  gamestatus = process_gamelogic(gamestatus);
+  gamestatus = drawGraphics(std::cout, gamestatus);
+  gamestatus = receive_agent_input(player_intendedmove, gamestatus);
+  process_agent_input(player_intendedmove);
+  const auto loop_again = process_gameStatus(gamestatus);
+  return loop_again;
+}
+
+void drawEndScreen(std::ostream &os, gamestatus_t gamestatus) {
+  const auto standardWinLosePrompt = [&gamestatus] {
+    std::ostringstream str_os;
+    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Game::Graphics::YouWinPrompt);
+    // else..
+    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Game::Graphics::GameOverPrompt);
+    return str_os.str();
+  };
+  DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
+  // else..
+  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE],
+               Game::Graphics::EndOfEndlessPrompt);
+}
+
+void endlessGameLoop() {
+  auto loop_again{true};
+  gamestatus_t world_gamestatus{};
+
+  while (loop_again) {
+    std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
+  }
+
+  drawBoard(std::cout);
+  drawEndScreen(std::cout, world_gamestatus);
+}
+
 void drawEndGameStatistics(std::ostream &os, Scoreboard::Score finalscore) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
@@ -268,146 +408,6 @@ void saveEndGameStats(Scoreboard::Score finalscore) {
 
 void saveScore(Scoreboard::Score finalscore) {
   Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
-}
-
-void saveGamePlayState() {
-  using namespace Game::Saver;
-  // Currently two datafiles for now.
-  // Will be merged into one datafile in a future PR.
-  std::remove("../data/previousGame");
-  std::remove("../data/previousGameStats");
-
-  saveToFilePreviousGameStateData("../data/previousGame", gamePlayBoard);
-  saveToFilePreviousGameStatisticsData("../data/previousGameStats",
-                                       gamePlayBoard);
-}
-
-void drawEndScreen(std::ostream &os, gamestatus_t gamestatus) {
-  const auto standardWinLosePrompt = [&gamestatus] {
-    std::ostringstream str_os;
-    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Game::Graphics::YouWinPrompt);
-    // else..
-    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Game::Graphics::GameOverPrompt);
-    return str_os.str();
-  };
-  DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
-  // else..
-  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE],
-               Game::Graphics::EndOfEndlessPrompt);
-}
-
-gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
-  drawBoard(os);
-  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
-                    Game::Graphics::GameStateNowSavedPrompt);
-  DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
-               Game::Graphics::QuestionEndOfWinningGamePrompt);
-  drawInputControls(os, gamestatus);
-  DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
-                    Game::Graphics::InvalidInputGameBoardErrorPrompt);
-  return gamestatus;
-}
-
-gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
-  gamePlayBoard.unblockTiles();
-  if (gamePlayBoard.moved) {
-    gamePlayBoard.addTile();
-    gamePlayBoard.registerMoveByOne();
-  }
-
-  if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (gamePlayBoard.hasWon()) {
-      gamestatus[FLAG_WIN] = true;
-      gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
-    }
-  }
-  if (!gamePlayBoard.canMove()) {
-    gamestatus[FLAG_END_GAME] = true;
-  }
-  return gamestatus;
-}
-
-bool process_agent_input(Game::Input::intendedmove_t &intendedmove) {
-  using namespace Game::Input;
-  if (intendedmove[FLAG_MOVE_LEFT]) {
-    decideMove(LEFT);
-  }
-  if (intendedmove[FLAG_MOVE_RIGHT]) {
-    decideMove(RIGHT);
-  }
-  if (intendedmove[FLAG_MOVE_UP]) {
-    decideMove(UP);
-  }
-  if (intendedmove[FLAG_MOVE_DOWN]) {
-    decideMove(DOWN);
-  }
-  // Reset all move flags...
-  intendedmove = intendedmove_t{};
-  return true;
-}
-
-bool check_input_check_to_end_game(char c) {
-  using namespace Game::Input::Keypress::Code;
-  switch (std::toupper(c)) {
-  case CODE_HOTKEY_CHOICE_NO:
-    return true;
-  }
-  return false;
-}
-
-bool continue_playing_game(std::istream &in_os) {
-  char letter_choice;
-  in_os >> letter_choice;
-  if (check_input_check_to_end_game(letter_choice)) {
-    return false;
-  }
-  return true;
-}
-
-wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
-  auto loop_again{true};
-  if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (gamestatus[FLAG_WIN]) {
-      if (continue_playing_game(std::cin)) {
-        gamestatus[FLAG_ENDLESS_MODE] = true;
-        gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = false;
-        gamestatus[FLAG_WIN] = false;
-      } else {
-        loop_again = false;
-      }
-    }
-  }
-  if (gamestatus[FLAG_END_GAME]) {
-    // End endless_mode;
-    loop_again = false;
-  }
-  if (gamestatus[FLAG_SAVED_GAME]) {
-    saveGamePlayState();
-  }
-  return std::make_tuple(loop_again, gamestatus);
-}
-
-wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
-  using namespace Game::Input;
-  intendedmove_t player_intendedmove{};
-  gamestatus = process_gamelogic(gamestatus);
-  gamestatus = drawGraphics(std::cout, gamestatus);
-  gamestatus = receive_agent_input(player_intendedmove, gamestatus);
-  process_agent_input(player_intendedmove);
-  const auto loop_again = process_gameStatus(gamestatus);
-  return loop_again;
-}
-
-void endlessGameLoop() {
-  auto loop_again{true};
-  gamestatus_t world_gamestatus{};
-
-  while (loop_again) {
-    std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
-  }
-
-  drawBoard(std::cout);
-  drawEndScreen(std::cout, world_gamestatus);
 }
 
 void DoPostGameSaveStuff(double duration) {
