@@ -15,6 +15,7 @@
 #include <iostream>
 #include <sstream>
 
+namespace Game {
 namespace {
 enum Directions { UP, DOWN, RIGHT, LEFT };
 
@@ -53,7 +54,7 @@ ull load_game_best_score() {
 }
 
 load_gameboard_status_t initialiseContinueBoardArray() {
-  using namespace Game::Loader;
+  using namespace Loader;
   constexpr auto gameboard_data_filename = "../data/previousGame";
   constexpr auto game_stats_data_filename = "../data/previousGameStats";
   auto loaded_gameboard{false};
@@ -144,10 +145,10 @@ void drawBoard(std::ostream &os) {
 void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
   const auto InputControlLists = [&gamestatus] {
     std::ostringstream str_os;
-    DrawAlways(str_os, Game::Graphics::InputCommandListPrompt);
+    DrawAlways(str_os, Graphics::InputCommandListPrompt);
     DrawOnlyWhen(str_os, gamestatus[FLAG_ENDLESS_MODE],
-                 Game::Graphics::EndlessModeCommandListPrompt);
-    DrawAlways(str_os, Game::Graphics::InputCommandListFooterPrompt);
+                 Graphics::EndlessModeCommandListPrompt);
+    DrawAlways(str_os, Graphics::InputCommandListFooterPrompt);
     return str_os.str();
   };
   // When game is paused to ask a question, hide regular inut prompts..
@@ -176,18 +177,18 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
 gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
   drawBoard(os);
   DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
-                    Game::Graphics::GameStateNowSavedPrompt);
+                    Graphics::GameStateNowSavedPrompt);
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
-               Game::Graphics::QuestionEndOfWinningGamePrompt);
+               Graphics::QuestionEndOfWinningGamePrompt);
   drawInputControls(os, gamestatus);
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
-                    Game::Graphics::InvalidInputGameBoardErrorPrompt);
+                    Graphics::InvalidInputGameBoardErrorPrompt);
   return gamestatus;
 }
 
 using wrapper_bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
 wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
-  using namespace Game::Input::Keypress::Code;
+  using namespace Input::Keypress::Code;
   auto is_invalid_keycode{true};
   switch (toupper(c)) {
   case CODE_HOTKEY_ACTION_SAVE:
@@ -205,9 +206,9 @@ wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
   return std::make_tuple(is_invalid_keycode, gamestatus);
 }
 
-gamestatus_t receive_agent_input(Game::Input::intendedmove_t &intendedmove,
+gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
                                  gamestatus_t gamestatus) {
-  using namespace Game::Input;
+  using namespace Input;
   const bool game_still_in_play =
       !gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN];
   if (game_still_in_play) {
@@ -248,8 +249,8 @@ void decideMove(Directions d) {
   }
 }
 
-bool process_agent_input(Game::Input::intendedmove_t &intendedmove) {
-  using namespace Game::Input;
+bool process_agent_input(Input::intendedmove_t &intendedmove) {
+  using namespace Input;
   if (intendedmove[FLAG_MOVE_LEFT]) {
     decideMove(LEFT);
   }
@@ -268,7 +269,7 @@ bool process_agent_input(Game::Input::intendedmove_t &intendedmove) {
 }
 
 bool check_input_check_to_end_game(char c) {
-  using namespace Game::Input::Keypress::Code;
+  using namespace Input::Keypress::Code;
   switch (std::toupper(c)) {
   case CODE_HOTKEY_CHOICE_NO:
     return true;
@@ -286,7 +287,7 @@ bool continue_playing_game(std::istream &in_os) {
 }
 
 void saveGamePlayState() {
-  using namespace Game::Saver;
+  using namespace Saver;
   // Currently two datafiles for now.
   // Will be merged into one datafile in a future PR.
   std::remove("../data/previousGame");
@@ -321,7 +322,7 @@ wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
 }
 
 wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
-  using namespace Game::Input;
+  using namespace Input;
   intendedmove_t player_intendedmove{};
   gamestatus = process_gamelogic(gamestatus);
   gamestatus = drawGraphics(std::cout, gamestatus);
@@ -334,15 +335,14 @@ wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
 void drawEndScreen(std::ostream &os, gamestatus_t gamestatus) {
   const auto standardWinLosePrompt = [&gamestatus] {
     std::ostringstream str_os;
-    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Game::Graphics::YouWinPrompt);
+    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Graphics::YouWinPrompt);
     // else..
-    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Game::Graphics::GameOverPrompt);
+    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Graphics::GameOverPrompt);
     return str_os.str();
   };
   DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
   // else..
-  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE],
-               Game::Graphics::EndOfEndlessPrompt);
+  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE], Graphics::EndOfEndlessPrompt);
 }
 
 void endlessGameLoop() {
@@ -422,12 +422,12 @@ void DoPostGameSaveStuff(double duration) {
     drawEndGameStatistics(std::cout, finalscore);
     saveEndGameStats(finalscore);
 
-    DrawAlways(std::cout, Game::Graphics::AskForPlayerNamePrompt);
+    DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);
     const auto name = receive_input_player_name(std::cin);
     finalscore.name = name;
 
     saveScore(finalscore);
-    DrawAlways(std::cout, Game::Graphics::MessageScoreSavedPrompt);
+    DrawAlways(std::cout, Graphics::MessageScoreSavedPrompt);
   }
 }
 
@@ -468,9 +468,8 @@ ull askWhatIsBoardSize(std::ostream &os) {
     clearScreen();
     drawAscii();
     // Prints only if "invalidInputValue" is true
-    DrawOnlyWhen(str_os, invalidInputValue,
-                 Game::Graphics::BoardSizeErrorPrompt);
-    DrawAlways(str_os, Game::Graphics::BoardInputPrompt);
+    DrawOnlyWhen(str_os, invalidInputValue, Graphics::BoardSizeErrorPrompt);
+    DrawAlways(str_os, Graphics::BoardInputPrompt);
     return str_os.str();
   };
 
@@ -489,8 +488,7 @@ void SetUpNewGame(NewGameFlag ns = NewGameFlag::NewGameFlagNull) {
   auto noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
   // Prints only if "noSave" is true
   // Consumes "noSave" flag (turns flag to false/off)
-  DrawAsOneTimeFlag(std::cout, noSave,
-                    Game::Graphics::GameBoardNoSaveErrorPrompt);
+  DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
   ull userInput_PlaySize = askWhatIsBoardSize(std::cout);
   playGame(PlayGameFlag::BrandNewGame, userInput_PlaySize);
 }
@@ -509,10 +507,12 @@ void ContinueOldGame() {
 
 } // namespace
 
-void Game::startGame() {
+void startGame() {
   SetUpNewGame();
 }
 
-void Game::continueGame() {
+void continueGame() {
   ContinueOldGame();
 }
+
+} // namespace Game
