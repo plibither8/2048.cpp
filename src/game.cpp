@@ -1,5 +1,11 @@
 #include "game.hpp"
-#include "menu.hpp"
+#include "game-graphics.hpp"
+#include "game-input.hpp"
+#include "gameboard.hpp"
+#include "global.hpp"
+#include "loadresource.hpp"
+#include "point2d.hpp"
+#include "saveresource.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <algorithm>
@@ -9,144 +15,24 @@
 #include <iostream>
 #include <sstream>
 
+namespace Game {
 namespace {
-namespace Keypress {
-namespace Code {
+enum Directions { UP, DOWN, RIGHT, LEFT };
 
-enum { CODE_ESC = 27, CODE_LSQUAREBRACKET = '[' };
-
-// Hotkey bindings:
-// Style: ANSI (Arrow Keys)
-enum {
-  CODE_ANSI_TRIGGER_1 = CODE_ESC,
-  CODE_ANSI_TRIGGER_2 = CODE_LSQUAREBRACKET
-};
-enum {
-  CODE_ANSI_UP = 'A',
-  CODE_ANSI_DOWN = 'B',
-  CODE_ANSI_LEFT = 'D',
-  CODE_ANSI_RIGHT = 'C'
+enum GameStatusFlag {
+  FLAG_WIN,
+  FLAG_END_GAME,
+  FLAG_SAVED_GAME,
+  FLAG_INPUT_ERROR,
+  FLAG_ENDLESS_MODE,
+  FLAG_QUESTION_STAY_OR_QUIT,
+  MAX_NO_GAME_STATUS_FLAGS
 };
 
-// Style: WASD
-enum {
-  CODE_WASD_UP = 'W',
-  CODE_WASD_DOWN = 'S',
-  CODE_WASD_LEFT = 'A',
-  CODE_WASD_RIGHT = 'D'
-};
+using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
 
-// Style: Vim
-enum {
-  CODE_VIM_UP = 'K',
-  CODE_VIM_DOWN = 'J',
-  CODE_VIM_LEFT = 'H',
-  CODE_VIM_RIGHT = 'L'
-};
-
-enum {
-  CODE_HOTKEY_ACTION_SAVE = 'Z',
-  CODE_HOTKEY_ALTERNATE_ACTION_SAVE = 'P',
-  CODE_HOTKEY_QUIT_ENDLESS_MODE = 'X',
-  CODE_HOTKEY_CHOICE_NO = 'N',
-  CODE_HOTKEY_CHOICE_YES = 'Y'
-};
-
-} // namespace Code
-} // namespace Keypress
-
-int GetLines(std::string filename) {
-  std::ifstream stateFile(filename);
-  using iter = std::istreambuf_iterator<char>;
-  const auto noOfLines = std::count(iter{stateFile}, iter{}, '\n');
-  return noOfLines;
-}
-
-std::vector<std::string> get_file_tile_data(std::istream &buf) {
-  std::vector<std::string> tempbuffer;
-  enum { MAX_WIDTH = 10, MAX_HEIGHT = 10 };
-  auto i{0};
-  for (std::string tempLine; std::getline(buf, tempLine) && i < MAX_WIDTH;
-       i++) {
-    std::istringstream temp_filestream(tempLine);
-    auto j{0};
-    for (std::string a_word;
-         std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
-      tempbuffer.push_back(a_word);
-    }
-  }
-  return tempbuffer;
-}
-
-std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
-  std::vector<Tile> result_buf;
-  auto tile_processed_counter{0};
-  const auto prime_tile_data =
-      [&tile_processed_counter](const std::string tile_data) {
-        enum FieldIndex { IDX_TILE_VALUE, IDX_TILE_BLOCKED, MAX_NO_TILE_IDXS };
-        std::array<int, MAX_NO_TILE_IDXS> tile_internal;
-        std::istringstream blocks(tile_data);
-        auto idx_id{0};
-        for (std::string temptiledata; std::getline(
-                 blocks, temptiledata, ':') /*&& idx_id < MAX_NO_TILE_IDXS*/;
-             idx_id++) {
-          switch (idx_id) {
-          case IDX_TILE_VALUE:
-            std::get<IDX_TILE_VALUE>(tile_internal) = std::stoi(temptiledata);
-            break;
-          case IDX_TILE_BLOCKED:
-            std::get<IDX_TILE_BLOCKED>(tile_internal) = std::stoi(temptiledata);
-            break;
-          default:
-            std::cout << "ERROR: [tile_processed_counter: "
-                      << tile_processed_counter
-                      << "]: Read past MAX_NO_TILE_IDXS! (idx no:"
-                      << MAX_NO_TILE_IDXS << ")\n";
-          }
-        }
-        tile_processed_counter++;
-        return Tile(std::get<IDX_TILE_VALUE>(tile_internal),
-                    std::get<IDX_TILE_BLOCKED>(tile_internal));
-      };
-  std::transform(std::begin(buf), std::end(buf), std::back_inserter(result_buf),
-                 prime_tile_data);
-  return result_buf;
-}
-
-std::tuple<bool, GameBoard>
-load_GameBoard_data_from_file(std::string filename) {
-  std::ifstream stateFile(filename);
-  if (stateFile) {
-    const ull savedBoardPlaySize = GetLines(filename);
-    const auto file_tile_data = get_file_tile_data(stateFile);
-    const auto processed_tile_data =
-        process_file_tile_string_data(file_tile_data);
-    return std::make_tuple(true,
-                           GameBoard(savedBoardPlaySize, processed_tile_data));
-  }
-  return std::make_tuple(false, GameBoard{});
-}
-
-void drawMessageScoreSaved(std::ostream &os) {
-  constexpr auto score_saved_text = "Score saved!";
-  constexpr auto sp = "  ";
-  std::ostringstream score_saved_richtext;
-  score_saved_richtext << "\n"
-                       << green << bold_on << sp << score_saved_text << bold_off
-                       << def << "\n";
-  os << score_saved_richtext.str();
-}
-
-void drawPromptForPlayerName(std::ostream &os) {
-  constexpr auto score_prompt_text =
-      "Please enter your name to save this score: ";
-  constexpr auto sp = "  ";
-
-  std::ostringstream score_prompt_richtext;
-  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
-
-  os << score_prompt_richtext.str();
-}
+ull bestScore;
+GameBoard gamePlayBoard;
 
 std::string receive_input_player_name(std::istream &is) {
   std::string name;
@@ -154,71 +40,42 @@ std::string receive_input_player_name(std::istream &is) {
   return name;
 }
 
-} // namespace
-
-Color::Modifier Tile::tileColor(ull value) {
-  std::vector<Color::Modifier> colors{red, yellow, magenta, blue, cyan, yellow,
-                                      red, yellow, magenta, blue, green};
-  int log = log2(value);
-  int index = log < 12 ? log - 1 : 10;
-
-  return colors[index];
-}
-
-bool Game::get_and_process_game_stats_string_data(std::istream &stats_file) {
-  if (stats_file) {
-    for (std::string tempLine; std::getline(stats_file, tempLine);) {
-      enum GameStatsFieldIndex {
-        IDX_GAME_SCORE_VALUE,
-        IDX_GAME_MOVECOUNT,
-        MAX_NO_GAME_STATS_IDXS
-      };
-      std::istringstream line(tempLine);
-      auto idx_id{0};
-      for (std::string temp; std::getline(line, temp, ':'); idx_id++) {
-        switch (idx_id) {
-        case IDX_GAME_SCORE_VALUE:
-          gamePlayBoard.score = std::stoi(temp);
-          break;
-        case IDX_GAME_MOVECOUNT:
-          gamePlayBoard.moveCount = std::stoi(temp) - 1;
-          break;
-        default:
-          // Error: No fields to process!
-          break;
-        }
-      }
-    }
-    return true;
+ull load_game_best_score() {
+  using namespace Statistics;
+  total_game_stats_t stats;
+  bool stats_file_loaded{};
+  ull tempscore{0};
+  std::tie(stats_file_loaded, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
+  if (stats_file_loaded) {
+    tempscore = stats.bestScore;
   }
-  return false;
+  return tempscore;
 }
 
-bool Game::load_game_stats_from_file(std::string filename) {
-  std::ifstream stats(filename);
-  return get_and_process_game_stats_string_data(stats);
-}
-
-bool Game::initialiseContinueBoardArray() {
+load_gameboard_status_t initialiseContinueBoardArray() {
+  using namespace Loader;
   constexpr auto gameboard_data_filename = "../data/previousGame";
   constexpr auto game_stats_data_filename = "../data/previousGameStats";
   auto loaded_gameboard{false};
-  std::tie(loaded_gameboard, gamePlayBoard) =
+  auto loaded_game_stats{false};
+  auto tempGBoard = GameBoard{1};
+  // Note: Reserved for gameboard.score and gameboard.moveCount!
+  // TODO: Combine data into one resource file.
+  auto score_and_movecount =
+      std::tuple<decltype(tempGBoard.score), decltype(tempGBoard.moveCount)>{};
+  std::tie(loaded_gameboard, tempGBoard) =
       load_GameBoard_data_from_file(gameboard_data_filename);
+  std::tie(loaded_game_stats, score_and_movecount) =
+      load_game_stats_from_file(game_stats_data_filename);
+  std::tie(tempGBoard.score, tempGBoard.moveCount) = score_and_movecount;
 
-  return (loaded_gameboard &&
-          load_game_stats_from_file(game_stats_data_filename));
+  const auto all_files_loaded_ok = (loaded_gameboard && loaded_game_stats);
+
+  return std::make_tuple(all_files_loaded_ok, tempGBoard);
 }
 
-void Game::drawBoard() const {
-
-  clearScreen();
-  drawAscii();
-  drawScoreBoard(std::cout);
-  std::cout << gamePlayBoard;
-}
-
-void Game::drawScoreBoard(std::ostream &out_stream) const {
+void drawScoreBoard(std::ostream &os) {
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
   constexpr auto moves_text_label = "MOVES:";
@@ -246,176 +103,133 @@ void Game::drawScoreBoard(std::ostream &out_stream) const {
       std::string(UI_BORDER_INNER_PADDING, border_padding_char);
   const auto inner_padding_length =
       UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
-  out_stream << outer_border_padding << top_board << "\n";
-  out_stream << outer_border_padding << vertical_border_pattern
-             << inner_border_padding << bold_on << score_text_label << bold_off
-             << std::string(inner_padding_length -
-                                std::string{score_text_label}.length() -
-                                std::to_string(gamePlayBoard.score).length(),
-                            border_padding_char)
-             << gamePlayBoard.score << inner_border_padding
-             << vertical_border_pattern << "\n";
+  os << outer_border_padding << top_board << "\n";
+  os << outer_border_padding << vertical_border_pattern << inner_border_padding
+     << bold_on << score_text_label << bold_off
+     << std::string(inner_padding_length -
+                        std::string{score_text_label}.length() -
+                        std::to_string(gamePlayBoard.score).length(),
+                    border_padding_char)
+     << gamePlayBoard.score << inner_border_padding << vertical_border_pattern
+     << "\n";
   if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     const auto tempBestScore =
         (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
-    out_stream << outer_border_padding << vertical_border_pattern
-               << inner_border_padding << bold_on << bestscore_text_label
-               << bold_off
-               << std::string(inner_padding_length -
-                                  std::string{bestscore_text_label}.length() -
-                                  std::to_string(tempBestScore).length(),
-                              border_padding_char)
-               << tempBestScore << inner_border_padding
-               << vertical_border_pattern << "\n";
+    os << outer_border_padding << vertical_border_pattern
+       << inner_border_padding << bold_on << bestscore_text_label << bold_off
+       << std::string(inner_padding_length -
+                          std::string{bestscore_text_label}.length() -
+                          std::to_string(tempBestScore).length(),
+                      border_padding_char)
+       << tempBestScore << inner_border_padding << vertical_border_pattern
+       << "\n";
   }
-  out_stream << outer_border_padding << vertical_border_pattern
-             << inner_border_padding << bold_on << moves_text_label << bold_off
-             << std::string(
-                    inner_padding_length -
+  os << outer_border_padding << vertical_border_pattern << inner_border_padding
+     << bold_on << moves_text_label << bold_off
+     << std::string(inner_padding_length -
                         std::string{moves_text_label}.length() -
                         std::to_string(gamePlayBoard.MoveCount()).length(),
                     border_padding_char)
-             << gamePlayBoard.MoveCount() << inner_border_padding
-             << vertical_border_pattern << "\n";
-  out_stream << outer_border_padding << bottom_board << "\n \n";
+     << gamePlayBoard.MoveCount() << inner_border_padding
+     << vertical_border_pattern << "\n";
+  os << outer_border_padding << bottom_board << "\n \n";
 }
 
-void Game::drawInputError() {
-  constexpr auto invalid_prompt_text = "Invalid input. Please try again.";
-  constexpr auto sp = "  ";
-  std::ostringstream str_os;
-  std::ostringstream invalid_prompt_richtext;
-  invalid_prompt_richtext << red << sp << invalid_prompt_text << def << "\n\n";
-
-  if (gamestatus[FLAG_INPUT_ERROR]) {
-    str_os << invalid_prompt_richtext.str();
-    gamestatus[FLAG_INPUT_ERROR] = false;
-  }
-  std::cout << str_os.str();
+void drawBoard(std::ostream &os) {
+  clearScreen();
+  drawAscii();
+  drawScoreBoard(os);
+  os << gamePlayBoard;
 }
 
-void Game::drawInputControls() {
-  constexpr auto sp = "  ";
-  const auto input_commands_list_text = {
-      "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
-      "D or L or → => Right", "Z or P => Save"};
-  const auto endless_mode_list_text = {"X => Quit Endless Mode"};
-  const auto input_commands_list_end_text = {
-      "", "Press the keys to start and continue.", "\n"};
+void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
+  const auto InputControlLists = [&gamestatus] {
+    std::ostringstream str_os;
+    DrawAlways(str_os, Graphics::InputCommandListPrompt);
+    DrawOnlyWhen(str_os, gamestatus[FLAG_ENDLESS_MODE],
+                 Graphics::EndlessModeCommandListPrompt);
+    DrawAlways(str_os, Graphics::InputCommandListFooterPrompt);
+    return str_os.str();
+  };
+  // When game is paused to ask a question, hide regular inut prompts..
+  DrawOnlyWhen(os, !gamestatus[FLAG_QUESTION_STAY_OR_QUIT], InputControlLists);
+}
 
-  std::ostringstream str_os;
-  for (const auto txt : input_commands_list_text) {
-    str_os << sp << txt << "\n";
+gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
+  gamePlayBoard.unblockTiles();
+  if (gamePlayBoard.moved) {
+    gamePlayBoard.addTile();
+    gamePlayBoard.registerMoveByOne();
   }
-  if (gamestatus[FLAG_ENDLESS_MODE]) {
-    for (const auto txt : endless_mode_list_text) {
-      str_os << sp << txt << "\n";
+
+  if (!gamestatus[FLAG_ENDLESS_MODE]) {
+    if (gamePlayBoard.hasWon()) {
+      gamestatus[FLAG_WIN] = true;
+      gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
     }
   }
-  for (const auto txt : input_commands_list_end_text) {
-    str_os << sp << txt << "\n";
+  if (!gamePlayBoard.canMove()) {
+    gamestatus[FLAG_END_GAME] = true;
   }
-  if (!gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
-    std::cout << str_os.str();
-  }
+  return gamestatus;
 }
 
-bool Game::check_input_ansi(char c) {
-  using namespace Keypress::Code;
-  if (c == CODE_ANSI_TRIGGER_1) {
-    getInput(c);
-    if (c == CODE_ANSI_TRIGGER_2) {
-      getInput(c);
-      switch (c) {
-      case CODE_ANSI_UP:
-        intendedmove[FLAG_MOVE_UP] = true;
-        return false;
-      case CODE_ANSI_DOWN:
-        intendedmove[FLAG_MOVE_DOWN] = true;
-        return false;
-      case CODE_ANSI_RIGHT:
-        intendedmove[FLAG_MOVE_RIGHT] = true;
-        return false;
-      case CODE_ANSI_LEFT:
-        intendedmove[FLAG_MOVE_LEFT] = true;
-        return false;
-      }
-    }
-  }
-  return true;
+gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
+  drawBoard(os);
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
+                    Graphics::GameStateNowSavedPrompt);
+  DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
+               Graphics::QuestionEndOfWinningGamePrompt);
+  drawInputControls(os, gamestatus);
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
+                    Graphics::InvalidInputGameBoardErrorPrompt);
+  return gamestatus;
 }
 
-bool Game::check_input_vim(char c) {
-  using namespace Keypress::Code;
-  switch (toupper(c)) {
-  case CODE_VIM_UP:
-    intendedmove[FLAG_MOVE_UP] = true;
-    return false;
-  case CODE_VIM_LEFT:
-    intendedmove[FLAG_MOVE_LEFT] = true;
-    return false;
-  case CODE_VIM_DOWN:
-    intendedmove[FLAG_MOVE_DOWN] = true;
-    return false;
-  case CODE_VIM_RIGHT:
-    intendedmove[FLAG_MOVE_RIGHT] = true;
-    return false;
-  }
-  return true;
-}
-
-bool Game::check_input_wasd(char c) {
-  using namespace Keypress::Code;
-  switch (toupper(c)) {
-  case CODE_WASD_UP:
-    intendedmove[FLAG_MOVE_UP] = true;
-    return false;
-  case CODE_WASD_LEFT:
-    intendedmove[FLAG_MOVE_LEFT] = true;
-    return false;
-  case CODE_WASD_DOWN:
-    intendedmove[FLAG_MOVE_DOWN] = true;
-    return false;
-  case CODE_WASD_RIGHT:
-    intendedmove[FLAG_MOVE_RIGHT] = true;
-    return false;
-  }
-  return true;
-}
-
-bool Game::check_input_other(char c) {
-  using namespace Keypress::Code;
+using wrapper_bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
+wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
+  using namespace Input::Keypress::Code;
+  auto is_invalid_keycode{true};
   switch (toupper(c)) {
   case CODE_HOTKEY_ACTION_SAVE:
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
     gamestatus[FLAG_SAVED_GAME] = true;
-    return false;
+    is_invalid_keycode = false;
+    break;
   case CODE_HOTKEY_QUIT_ENDLESS_MODE:
     if (gamestatus[FLAG_ENDLESS_MODE]) {
       gamestatus[FLAG_END_GAME] = true;
-      return false;
+      is_invalid_keycode = false;
     }
     break;
   }
-  return true;
+  return std::make_tuple(is_invalid_keycode, gamestatus);
 }
 
-void Game::input() {
-  if (!gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN]) {
+gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
+                                 gamestatus_t gamestatus) {
+  using namespace Input;
+  const bool game_still_in_play =
+      !gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN];
+  if (game_still_in_play) {
     // Game still in play. Take input commands for next turn.
     char c;
-    getInput(c);
-    const auto is_invalid_keypress_code =
-        check_input_ansi(c) && check_input_wasd(c) && check_input_vim(c) &&
-        check_input_other(c);
-    if (is_invalid_keypress_code) {
+    getKeypressDownInput(c);
+    // Update agent's intended move flags per control scheme (if flagged).
+    const auto is_invalid_keypress_code = check_input_ansi(c, intendedmove) &&
+                                          check_input_wasd(c, intendedmove) &&
+                                          check_input_vim(c, intendedmove);
+    bool is_invalid_special_keypress_code;
+    std::tie(is_invalid_special_keypress_code, gamestatus) =
+        check_input_other(c, gamestatus);
+    if (is_invalid_keypress_code && is_invalid_special_keypress_code) {
       gamestatus[FLAG_INPUT_ERROR] = true;
     }
   }
+  return gamestatus;
 }
 
-void Game::decideMove(Directions d) {
-
+void decideMove(Directions d) {
   switch (d) {
   case UP:
     gamePlayBoard.tumbleTilesUp();
@@ -435,174 +249,8 @@ void Game::decideMove(Directions d) {
   }
 }
 
-void Game::statistics() const {
-  constexpr auto stats_title_text = "STATISTICS";
-  constexpr auto divider_text = "──────────";
-  const auto stats_attributes_text = {
-      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
-  constexpr auto num_of_stats_attributes_text = 4;
-  constexpr auto sp = "  ";
-
-  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-  data_stats = {std::to_string(gamePlayBoard.score),
-                std::to_string(gamePlayBoard.largestTile),
-                std::to_string(gamePlayBoard.MoveCount()),
-                secondsFormat(duration)};
-
-  std::ostringstream stats_richtext;
-  stats_richtext << yellow << sp << stats_title_text << def << "\n";
-  stats_richtext << yellow << sp << divider_text << def << "\n";
-
-  auto counter{0};
-  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
-                                    &stats_richtext](const std::string) {
-    stats_richtext << sp << std::left << std::setw(19)
-                   << std::begin(stats_attributes_text)[counter] << bold_on
-                   << std::begin(data_stats)[counter] << bold_off << "\n";
-    counter++;
-  };
-  std::for_each(std::begin(stats_attributes_text),
-                std::end(stats_attributes_text), populate_stats_info);
-
-  std::cout << stats_richtext.str();
-}
-
-void Game::saveStats() const {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  // Need some sort of stats data values only.
-  // No need to care if file loaded successfully or not...
-  std::tie(std::ignore, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  stats.bestScore = stats.bestScore < gamePlayBoard.score ?
-                        gamePlayBoard.score :
-                        stats.bestScore;
-  stats.gameCount++;
-  stats.winCount = gamePlayBoard.hasWon() ? stats.winCount + 1 : stats.winCount;
-  stats.totalMoveCount += gamePlayBoard.MoveCount();
-  stats.totalDuration += duration;
-
-  saveToFileStatistics("../data/statistics.txt", stats);
-}
-
-void Game::saveScore() const {
-  Scoreboard::Score tempscore{};
-  drawPromptForPlayerName(std::cout);
-  auto name = receive_input_player_name(std::cin);
-
-  tempscore.name = name;
-  tempscore.score = gamePlayBoard.score;
-  tempscore.win = gamePlayBoard.hasWon();
-  tempscore.moveCount = gamePlayBoard.MoveCount();
-  tempscore.largestTile = gamePlayBoard.largestTile;
-  tempscore.duration = duration;
-  Scoreboard::saveToFileScore("../data/scores.txt", tempscore);
-  drawMessageScoreSaved(std::cout);
-}
-
-void Game::saveState() const {
-  std::remove("../data/previousGame");
-  std::remove("../data/previousGameStats");
-  std::fstream stats("../data/previousGameStats", std::ios_base::app);
-  std::fstream stateFile("../data/previousGame", std::ios_base::app);
-  stateFile << gamePlayBoard.printState();
-  stateFile.close();
-  stats << gamePlayBoard.score << ":" << gamePlayBoard.MoveCount();
-  stats.close();
-}
-
-void Game::drawEndScreen() {
-  constexpr auto win_game_text = "You win! Congratulations!";
-  constexpr auto lose_game_text = "Game over! You lose.";
-  constexpr auto endless_mode_text =
-      "End of endless mode! Thank you for playing!";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream win_richtext;
-  win_richtext << green << bold_on << sp << win_game_text << def << bold_off
-               << "\n\n\n";
-
-  std::ostringstream lose_richtext;
-  lose_richtext << red << bold_on << sp << lose_game_text << def << bold_off
-                << "\n\n\n";
-
-  std::ostringstream endless_mode_richtext;
-  endless_mode_richtext << red << bold_on << sp << endless_mode_text << def
-                        << bold_off << "\n\n\n";
-
-  if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (gamestatus[FLAG_WIN]) {
-      str_os << win_richtext.str();
-    } else {
-      str_os << lose_richtext.str();
-    }
-  } else {
-    str_os << endless_mode_richtext.str();
-  }
-  std::cout << str_os.str();
-}
-
-void Game::drawGameState() {
-  constexpr auto state_saved_text =
-      "The game has been saved. Feel free to take a break.";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream state_saved_richtext;
-  state_saved_richtext << green << bold_on << sp << state_saved_text << def
-                       << bold_off << "\n\n";
-
-  if (gamestatus[FLAG_SAVED_GAME]) {
-    str_os << state_saved_richtext.str();
-    gamestatus[FLAG_SAVED_GAME] = false;
-  }
-  std::cout << str_os.str();
-}
-
-void Game::drawEndOfGamePrompt() {
-  constexpr auto win_but_what_next =
-      "You Won! Continue playing current game? [y/n]";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream win_richtext;
-  win_richtext << green << bold_on << sp << win_but_what_next << def << bold_off
-               << ": ";
-
-  if (gamestatus[FLAG_QUESTION_STAY_OR_QUIT]) {
-    str_os << win_richtext.str();
-    std::cout << str_os.str();
-  }
-}
-
-void Game::drawGraphics() {
-  drawBoard();
-  drawGameState();
-  drawEndOfGamePrompt();
-  drawInputControls();
-  drawInputError();
-}
-
-void Game::process_gamelogic() {
-  gamePlayBoard.unblockTiles();
-  if (gamePlayBoard.moved) {
-    gamePlayBoard.addTile();
-    gamePlayBoard.registerMoveByOne();
-  }
-
-  if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (gamePlayBoard.hasWon()) {
-      gamestatus[FLAG_WIN] = true;
-      gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
-    }
-  }
-  if (!gamePlayBoard.canMove()) {
-    gamestatus[FLAG_END_GAME] = true;
-  }
-}
-
-bool Game::process_intendedMove() {
+bool process_agent_input(Input::intendedmove_t &intendedmove) {
+  using namespace Input;
   if (intendedmove[FLAG_MOVE_LEFT]) {
     decideMove(LEFT);
   }
@@ -621,7 +269,7 @@ bool Game::process_intendedMove() {
 }
 
 bool check_input_check_to_end_game(char c) {
-  using namespace Keypress::Code;
+  using namespace Input::Keypress::Code;
   switch (std::toupper(c)) {
   case CODE_HOTKEY_CHOICE_NO:
     return true;
@@ -638,7 +286,20 @@ bool continue_playing_game(std::istream &in_os) {
   return true;
 }
 
-bool Game::process_gameStatus() {
+void saveGamePlayState() {
+  using namespace Saver;
+  // Currently two datafiles for now.
+  // Will be merged into one datafile in a future PR.
+  std::remove("../data/previousGame");
+  std::remove("../data/previousGameStats");
+
+  saveToFilePreviousGameStateData("../data/previousGame", gamePlayBoard);
+  saveToFilePreviousGameStatisticsData("../data/previousGameStats",
+                                       gamePlayBoard);
+}
+
+wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
+  auto loop_again{true};
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (gamestatus[FLAG_WIN]) {
       if (continue_playing_game(std::cin)) {
@@ -646,137 +307,212 @@ bool Game::process_gameStatus() {
         gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = false;
         gamestatus[FLAG_WIN] = false;
       } else {
-        return false;
+        loop_again = false;
       }
     }
   }
   if (gamestatus[FLAG_END_GAME]) {
     // End endless_mode;
-    return false;
+    loop_again = false;
   }
   if (gamestatus[FLAG_SAVED_GAME]) {
-    saveState();
+    saveGamePlayState();
   }
-  return true;
+  return std::make_tuple(loop_again, gamestatus);
 }
 
-bool Game::soloGameLoop() {
-  process_gamelogic();
-  drawGraphics();
-  input();
-  process_intendedMove();
-  const auto loop_again = process_gameStatus();
+wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
+  using namespace Input;
+  intendedmove_t player_intendedmove{};
+  gamestatus = process_gamelogic(gamestatus);
+  gamestatus = drawGraphics(std::cout, gamestatus);
+  gamestatus = receive_agent_input(player_intendedmove, gamestatus);
+  process_agent_input(player_intendedmove);
+  const auto loop_again = process_gameStatus(gamestatus);
   return loop_again;
 }
 
-void Game::endlessGameLoop() {
-  while (soloGameLoop())
-    ;
+void drawEndScreen(std::ostream &os, gamestatus_t gamestatus) {
+  const auto standardWinLosePrompt = [&gamestatus] {
+    std::ostringstream str_os;
+    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Graphics::YouWinPrompt);
+    // else..
+    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Graphics::GameOverPrompt);
+    return str_os.str();
+  };
+  DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
+  // else..
+  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE], Graphics::EndOfEndlessPrompt);
 }
 
-void Game::playGame(ContinueStatus cont) {
-  auto startTime = std::chrono::high_resolution_clock::now();
-  endlessGameLoop();
-  auto finishTime = std::chrono::high_resolution_clock::now();
-  std::chrono::duration<double> elapsed = finishTime - startTime;
-  duration = elapsed.count();
+void endlessGameLoop() {
+  auto loop_again{true};
+  gamestatus_t world_gamestatus{};
 
-  drawBoard();
-  drawEndScreen();
+  while (loop_again) {
+    std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
+  }
 
-  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE &&
-      cont == ContinueStatus::STATUS_END_GAME) {
-    statistics();
-    saveStats();
-    newline(2);
-    saveScore();
+  drawBoard(std::cout);
+  drawEndScreen(std::cout, world_gamestatus);
+}
+
+void drawEndGameStatistics(std::ostream &os, Scoreboard::Score finalscore) {
+  constexpr auto stats_title_text = "STATISTICS";
+  constexpr auto divider_text = "──────────";
+  const auto stats_attributes_text = {
+      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+  constexpr auto num_of_stats_attributes_text = 4;
+  constexpr auto sp = "  ";
+
+  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
+  data_stats = {
+      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
+      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration)};
+
+  std::ostringstream stats_richtext;
+  stats_richtext << yellow << sp << stats_title_text << def << "\n";
+  stats_richtext << yellow << sp << divider_text << def << "\n";
+
+  auto counter{0};
+  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
+                                    &stats_richtext](const std::string) {
+    stats_richtext << sp << std::left << std::setw(19)
+                   << std::begin(stats_attributes_text)[counter] << bold_on
+                   << std::begin(data_stats)[counter] << bold_off << "\n";
+    counter++;
+  };
+  std::for_each(std::begin(stats_attributes_text),
+                std::end(stats_attributes_text), populate_stats_info);
+
+  os << stats_richtext.str();
+  os << "\n\n";
+}
+
+void saveEndGameStats(Scoreboard::Score finalscore) {
+  using namespace Statistics;
+  total_game_stats_t stats;
+  // Need some sort of stats data values only.
+  // No need to care if file loaded successfully or not...
+  std::tie(std::ignore, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
+  stats.bestScore =
+      stats.bestScore < finalscore.score ? finalscore.score : stats.bestScore;
+  stats.gameCount++;
+  stats.winCount = finalscore.win ? stats.winCount + 1 : stats.winCount;
+  stats.totalMoveCount += finalscore.moveCount;
+  stats.totalDuration += finalscore.duration;
+
+  saveToFileEndGameStatistics("../data/statistics.txt", stats);
+}
+
+void saveScore(Scoreboard::Score finalscore) {
+  Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
+}
+
+void DoPostGameSaveStuff(double duration) {
+  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+    Scoreboard::Score finalscore{};
+    finalscore.score = gamePlayBoard.score;
+    finalscore.win = gamePlayBoard.hasWon();
+    finalscore.moveCount = gamePlayBoard.MoveCount();
+    finalscore.largestTile = gamePlayBoard.largestTile;
+    finalscore.duration = duration;
+
+    drawEndGameStatistics(std::cout, finalscore);
+    saveEndGameStats(finalscore);
+
+    DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);
+    const auto name = receive_input_player_name(std::cin);
+    finalscore.name = name;
+
+    saveScore(finalscore);
+    DrawAlways(std::cout, Graphics::MessageScoreSavedPrompt);
   }
 }
 
-ull Game::setBoardSize() {
-  const auto invalid_prompt_text = {
-      "Invalid input. Gameboard size should range from ", " to ", "."};
-  //  constexpr auto num_of_invalid_prompt_text = 3;
-  constexpr auto no_save_found_text =
-      "No saved game found. Starting a new game.";
-  constexpr auto board_size_prompt_text =
-      "Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
-  constexpr auto sp = "  ";
+enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
 
-  enum { MIN_GAME_BOARD_PLAY_SIZE = 3, MAX_GAME_BOARD_PLAY_SIZE = 10 };
+void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
+  bestScore = load_game_best_score();
+  if (cont == PlayGameFlag::BrandNewGame) {
+    gamePlayBoard = GameBoard(userInput_PlaySize);
+    gamePlayBoard.addTile();
+  }
 
-  std::ostringstream error_prompt_richtext;
-  error_prompt_richtext << red << sp << std::begin(invalid_prompt_text)[0]
-                        << MIN_GAME_BOARD_PLAY_SIZE
-                        << std::begin(invalid_prompt_text)[1]
-                        << MAX_GAME_BOARD_PLAY_SIZE
-                        << std::begin(invalid_prompt_text)[2] << def << "\n\n";
-  std::ostringstream no_save_richtext;
-  no_save_richtext << red << bold_on << sp << no_save_found_text << def
-                   << bold_off << "\n\n";
-  std::ostringstream board_size_prompt_richtext;
-  board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
-                             << bold_off;
+  const auto startTime = std::chrono::high_resolution_clock::now();
+  endlessGameLoop();
+  const auto finishTime = std::chrono::high_resolution_clock::now();
+  const std::chrono::duration<double> elapsed = finishTime - startTime;
+  const auto duration = elapsed.count();
 
-  bool err = false;
+  if (cont == PlayGameFlag::BrandNewGame) {
+    DoPostGameSaveStuff(duration);
+  }
+}
+
+ull Receive_Input_Playsize(std::istream &is) {
+  ull userInput_PlaySize{0};
+  is >> userInput_PlaySize;
+  is.clear();
+  is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  return userInput_PlaySize;
+}
+
+ull askWhatIsBoardSize(std::ostream &os) {
+  bool invalidInputValue = false;
   ull userInput_PlaySize{0};
 
-  while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE ||
-          userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+  const auto QuestionAboutBoardSizePrompt = [&invalidInputValue]() {
     std::ostringstream str_os;
     clearScreen();
     drawAscii();
+    // Prints only if "invalidInputValue" is true
+    DrawOnlyWhen(str_os, invalidInputValue, Graphics::BoardSizeErrorPrompt);
+    DrawAlways(str_os, Graphics::BoardInputPrompt);
+    return str_os.str();
+  };
 
-    if (err) {
-      str_os << error_prompt_richtext.str();
-    } else if (noSave) {
-      str_os << no_save_richtext.str();
-      noSave = false;
-    }
-
-    str_os << board_size_prompt_richtext.str();
-    std::cout << str_os.str();
-
-    std::cin >> userInput_PlaySize;
-    std::cin.clear();
-    std::cin.ignore(std::numeric_limits<std::int32_t>::max(), '\n');
-    err = true;
+  while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE) ||
+         (userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
+    DrawAlways(os, QuestionAboutBoardSizePrompt);
+    userInput_PlaySize = Receive_Input_Playsize(std::cin);
+    invalidInputValue = true;
   }
   return userInput_PlaySize;
 }
 
-void Game::startGame() {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  if (stats_file_loaded) {
-    bestScore = stats.bestScore;
-  }
+enum class NewGameFlag { NewGameFlagNull, NoPreviousSaveAvailable };
 
-  ull userInput_PlaySize = setBoardSize();
-
-  gamePlayBoard = GameBoard(userInput_PlaySize);
-  gamePlayBoard.addTile();
-
-  playGame(ContinueStatus::STATUS_END_GAME);
+void SetUpNewGame(NewGameFlag ns = NewGameFlag::NewGameFlagNull) {
+  auto noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
+  // Prints only if "noSave" is true
+  // Consumes "noSave" flag (turns flag to false/off)
+  DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
+  ull userInput_PlaySize = askWhatIsBoardSize(std::cout);
+  playGame(PlayGameFlag::BrandNewGame, userInput_PlaySize);
 }
 
-void Game::continueGame() {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  if (stats_file_loaded) {
-    bestScore = stats.bestScore;
-  }
-
-  if (initialiseContinueBoardArray()) {
-    playGame(ContinueStatus::STATUS_CONTINUE);
+void ContinueOldGame() {
+  bool load_old_game_ok;
+  GameBoard oldGameBoard;
+  std::tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray();
+  if (load_old_game_ok) {
+    gamePlayBoard = oldGameBoard;
+    playGame(PlayGameFlag::ContinuePreviousGame);
   } else {
-    noSave = true;
-    startGame();
+    SetUpNewGame(NewGameFlag::NoPreviousSaveAvailable);
   }
 }
+
+} // namespace
+
+void startGame() {
+  SetUpNewGame();
+}
+
+void continueGame() {
+  ContinueOldGame();
+}
+
+} // namespace Game

@@ -5,7 +5,7 @@
 
 #ifdef _WIN32
 
-void getInput(char &c) {
+void getKeypressDownInput(char &c) {
   std::cin >> c;
 }
 
@@ -33,7 +33,7 @@ char getch() {
   return (buf);
 }
 
-void getInput(char &c) {
+void getKeypressDownInput(char &c) {
   c = getch();
 }
 
@@ -43,12 +43,6 @@ void wait_for_any_letter_input(std::istream &is) {
   char c;
   is >> c;
 }
-
-void newline(int n) {
-  for (int i = 0; i < n; i++) {
-    std::cout << "\n";
-  }
-};
 
 void clearScreen() {
   system("clear");
