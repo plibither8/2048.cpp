@@ -37,8 +37,9 @@ void showScores() {
   drawAscii();
   Scoreboard::prettyPrintScoreboard(std::cout);
   Statistics::prettyPrintStats(std::cout);
-  wait_for_any_letter_input(std::cin);
-  exit(EXIT_SUCCESS);
+  std::cout << std::flush;
+  pause_for_keypress();
+  Menu::startMenu();
 }
 
 void drawMainMenuTitle(std::ostream &out_os) {
