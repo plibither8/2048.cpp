@@ -39,6 +39,11 @@ void getKeypressDownInput(char &c) {
 
 #endif
 
+void pause_for_keypress() {
+  char c{};
+  getKeypressDownInput(c);
+}
+
 void wait_for_any_letter_input(std::istream &is) {
   char c;
   is >> c;

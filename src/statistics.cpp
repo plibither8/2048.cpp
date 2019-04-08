@@ -46,7 +46,8 @@ void prettyPrintStats(std::ostream &os) {
                                       "Number of Wins", "Total Moves Played",
                                       "Total Duration"};
   constexpr auto no_save_text = "No saved statistics.";
-  constexpr auto any_key_exit_text = "Press any key to exit: ";
+  constexpr auto any_key_exit_text =
+      "Press any key to return to the main menu... ";
   constexpr auto sp = "  ";
 
   std::ostringstream stats_richtext;
