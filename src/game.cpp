@@ -4,6 +4,7 @@
 #include "gameboard.hpp"
 #include "global.hpp"
 #include "loadresource.hpp"
+#include "menu.hpp"
 #include "point2d.hpp"
 #include "saveresource.hpp"
 #include "scores.hpp"
@@ -433,8 +434,9 @@ void DoPostGameSaveStuff(double duration) {
 
 enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
 
-void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
+void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize = 1) {
   bestScore = load_game_best_score();
+  gamePlayBoard = gb;
   if (cont == PlayGameFlag::BrandNewGame) {
     gamePlayBoard = GameBoard(userInput_PlaySize);
     gamePlayBoard.addTile();
@@ -451,46 +453,113 @@ void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
   }
 }
 
-ull Receive_Input_Playsize(std::istream &is) {
-  ull userInput_PlaySize{0};
-  is >> userInput_PlaySize;
-  is.clear();
-  is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+namespace PreGameSetup {
+
+enum PreGameSetupStatusFlag {
+  FLAG_NULL,
+  FLAG_START_GAME,
+  FLAG_RETURN_TO_MAIN_MENU,
+  MAX_NO_PREGAME_SETUP_STATUS_FLAGS
+};
+
+using pregamesetup_status_t =
+    std::array<bool, MAX_NO_PREGAME_SETUP_STATUS_FLAGS>;
+
+pregamesetup_status_t pregamesetup_status{};
+
+ull stored_game_size{1};
+bool FlagInputErrornousChoice{};
+bool noSave{};
+
+void process_PreGameMenu() {
+  if (pregamesetup_status[FLAG_START_GAME]) {
+    playGame(PlayGameFlag::BrandNewGame, GameBoard{stored_game_size},
+             stored_game_size);
+  }
+  if (pregamesetup_status[FLAG_RETURN_TO_MAIN_MENU]) {
+    Menu::startMenu();
+  }
+}
+
+int Receive_Input_Playsize(std::istream &is) {
+  int userInput_PlaySize{};
+  constexpr auto INVALID_INPUT_VALUE_FLAG = -1;
+
+  if (!(is >> userInput_PlaySize)) {
+    userInput_PlaySize = INVALID_INPUT_VALUE_FLAG;
+    is.clear();
+    is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+  }
   return userInput_PlaySize;
 }
 
-ull askWhatIsBoardSize(std::ostream &os) {
-  bool invalidInputValue = false;
-  ull userInput_PlaySize{0};
+void receive_input_flags(std::istream &is) {
+  // Reset ErrornousChoice flag...
+  FlagInputErrornousChoice = bool{};
 
+  // If not number, emits -1.
+  // it should emit bool (valid / invalid value) and a valid number if ok input.
+  // WARN:: "0-3" breaks this code!
+  const auto c = Receive_Input_Playsize(is);
+
+  const auto is_valid_game_size =
+      (c >= MIN_GAME_BOARD_PLAY_SIZE) && (c <= MAX_GAME_BOARD_PLAY_SIZE);
+
+  // Regular case;
+  if (is_valid_game_size) {
+    stored_game_size = c;
+    pregamesetup_status[FLAG_START_GAME] = true;
+  }
+
+  // Special Case;
+  bool is_not_special_case{};
+
+  switch (c) {
+  case 0:
+    pregamesetup_status[FLAG_RETURN_TO_MAIN_MENU] = true;
+    break;
+  default:
+    is_not_special_case = true;
+    break;
+  }
+
+  if (!is_valid_game_size && is_not_special_case) {
+    FlagInputErrornousChoice = true;
+  }
+}
+
+bool soloLoop() {
+  bool invalidInputValue = FlagInputErrornousChoice;
   const auto QuestionAboutBoardSizePrompt = [&invalidInputValue]() {
     std::ostringstream str_os;
-    clearScreen();
-    drawAscii();
     // Prints only if "invalidInputValue" is true
     DrawOnlyWhen(str_os, invalidInputValue, Graphics::BoardSizeErrorPrompt);
     DrawAlways(str_os, Graphics::BoardInputPrompt);
     return str_os.str();
   };
 
-  while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE) ||
-         (userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
-    DrawAlways(os, QuestionAboutBoardSizePrompt);
-    userInput_PlaySize = Receive_Input_Playsize(std::cin);
-    invalidInputValue = true;
-  }
-  return userInput_PlaySize;
+  pregamesetup_status = pregamesetup_status_t{};
+
+  clearScreen();
+  drawAscii();
+  DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
+  DrawAlways(std::cout, QuestionAboutBoardSizePrompt);
+
+  receive_input_flags(std::cin);
+  process_PreGameMenu();
+  return FlagInputErrornousChoice;
+}
+
+void endlessLoop() {
+  while (soloLoop())
+    ;
 }
 
 enum class NewGameFlag { NewGameFlagNull, NoPreviousSaveAvailable };
 
 void SetUpNewGame(NewGameFlag ns = NewGameFlag::NewGameFlagNull) {
-  auto noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
-  // Prints only if "noSave" is true
-  // Consumes "noSave" flag (turns flag to false/off)
-  DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
-  ull userInput_PlaySize = askWhatIsBoardSize(std::cout);
-  playGame(PlayGameFlag::BrandNewGame, userInput_PlaySize);
+  noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
+  endlessLoop();
 }
 
 void ContinueOldGame() {
@@ -498,21 +567,22 @@ void ContinueOldGame() {
   GameBoard oldGameBoard;
   std::tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray();
   if (load_old_game_ok) {
-    gamePlayBoard = oldGameBoard;
-    playGame(PlayGameFlag::ContinuePreviousGame);
+    playGame(PlayGameFlag::ContinuePreviousGame, oldGameBoard);
   } else {
     SetUpNewGame(NewGameFlag::NoPreviousSaveAvailable);
   }
 }
 
+} // namespace PreGameSetup
+
 } // namespace
 
 void startGame() {
-  SetUpNewGame();
+  PreGameSetup::SetUpNewGame();
 }
 
 void continueGame() {
-  ContinueOldGame();
+  PreGameSetup::ContinueOldGame();
 }
 
 } // namespace Game
