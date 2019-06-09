@@ -24,12 +24,14 @@ std::string AskForPlayerNamePrompt() {
 }
 
 std::string BoardInputPrompt() {
-  constexpr auto board_size_prompt_text =
-      "Enter gameboard size (NOTE: Scores and statistics will be saved only for the 4x4 gameboard): ";
+  const auto board_size_prompt_text = {
+      "(NOTE: Scores and statistics will be saved only for the 4x4 gameboard)\n",
+      "Enter gameboard size - (Enter '0' to go back): "};
   constexpr auto sp = "  ";
   std::ostringstream board_size_prompt_richtext;
-  board_size_prompt_richtext << bold_on << sp << board_size_prompt_text
-                             << bold_off;
+  board_size_prompt_richtext
+      << bold_on << sp << std::begin(board_size_prompt_text)[0] << sp
+      << std::begin(board_size_prompt_text)[1] << bold_off;
   return board_size_prompt_richtext.str();
 }
 
