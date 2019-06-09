@@ -1,5 +1,6 @@
 #include "game-pregamemenu.hpp"
 #include "game-graphics.hpp"
+#include "game-input.hpp"
 #include "game.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
@@ -53,6 +54,8 @@ int Receive_Input_Playsize(std::istream &is) {
 }
 
 void receive_input_flags(std::istream &is) {
+  using namespace Input::Keypress::Code;
+
   // Reset ErrornousChoice flag...
   FlagInputErrornousChoice = bool{};
 
@@ -74,7 +77,7 @@ void receive_input_flags(std::istream &is) {
   bool is_not_special_case{};
 
   switch (c) {
-  case 0:
+  case CODE_HOTKEY_PREGAMEMENU_BACK_TO_MAINMENU:
     pregamesetup_status[FLAG_RETURN_TO_MAIN_MENU] = true;
     break;
   default:
