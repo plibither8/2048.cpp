@@ -32,24 +32,24 @@ class GameBoard {
   std::vector<Tile> board;
   bool win{};
 
-  Tile getTile(point2D_t pt) const;
-  void setTile(point2D_t pt, Tile tile);
-  ull getTileValue(point2D_t pt) const;
-  bool getTileBlocked(point2D_t pt) const;
+  Tile getTileOnGameboard(point2D_t pt) const;
+  void setTileOnGameboard(point2D_t pt, Tile tile);
+  ull getTileValueOnGameboard(point2D_t pt) const;
+  bool getTileBlockedOnGameboard(point2D_t pt) const;
 
   int point2D_to_1D_index(point2D_t pt) const;
-  std::vector<point2D_t> collectFreeTiles() const;
+  std::vector<point2D_t> collectFreeTilesOnGameboard() const;
 
-  bool collaspeTiles(point2D_t pt, point2D_t pt_offset);
+  bool collaspeTilesOnGameboard(point2D_t pt, point2D_t pt_offset);
 
-  bool shiftTiles(point2D_t pt, point2D_t pt_offset);
+  bool shiftTilesOnGameboard(point2D_t pt, point2D_t pt_offset);
 
-  bool collasped_or_shifted_tiles(point2D_t pt, point2D_t pt_offset);
+  bool collasped_or_shifted_tilesOnGameboard(point2D_t pt, point2D_t pt_offset);
 
-  void discoverLargestTileValue(Tile targetTile);
-  void discoverWinningTileValue(Tile targetTile);
+  void discoverLargestTileValueOnGameboard(Tile targetTile);
+  void discoverWinningTileValueOnGameboard(Tile targetTile);
 
-  void move(point2D_t pt, point2D_t pt_offset);
+  void moveOnGameboard(point2D_t pt, point2D_t pt_offset);
 
 public:
   bool moved{true};
