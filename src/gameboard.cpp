@@ -209,6 +209,20 @@ std::string GameBoard::drawSelf() const {
   return str_os.str();
 }
 
+void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
+  gb.largestTile =
+      gb.largestTile < targetTile.value ? targetTile.value : gb.largestTile;
+}
+
+void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
+  if (!gb.hasWon()) {
+    constexpr auto GAME_TILE_WINNING_SCORE = 2048;
+    if (targetTile.value == GAME_TILE_WINNING_SCORE) {
+      gb.win = true;
+    }
+  }
+}
+
 bool collaspeTilesOnGameboard(GameBoard &gb, point2D_t pt,
                               point2D_t pt_offset) {
   Tile currentTile = getTileOnGameboard(gb, pt);
@@ -258,20 +272,6 @@ bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
     return shiftTilesOnGameboard(gb, pt, pt_offset);
   }
   return false;
-}
-
-void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
-  gb.largestTile =
-      gb.largestTile < targetTile.value ? targetTile.value : gb.largestTile;
-}
-
-void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
-  if (!gb.hasWon()) {
-    constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-    if (targetTile.value == GAME_TILE_WINNING_SCORE) {
-      gb.win = true;
-    }
-  }
 }
 
 void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {

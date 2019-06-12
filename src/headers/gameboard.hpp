@@ -29,36 +29,10 @@ using load_gameboard_status_t = std::tuple<bool, GameBoard>;
 
 class GameBoard {
   ull playsize{0};
-  std::vector<Tile> board;
-  bool win{};
-
-  friend Tile getTileOnGameboard(GameBoard gb, point2D_t pt);
-  friend void setTileOnGameboard(GameBoard &gb, point2D_t pt, Tile tile);
-  friend ull getTileValueOnGameboard(GameBoard gb, point2D_t pt);
-  friend void setTileValueOnGameboard(GameBoard &gb, point2D_t pt, ull value);
-  friend bool getTileBlockedOnGameboard(GameBoard gb, point2D_t pt);
-  friend void setTileBlockedOnGameboard(GameBoard &gb, point2D_t pt,
-                                        bool blocked);
-
-  friend std::vector<point2D_t> collectFreeTilesOnGameboard(GameBoard gb);
-
-  friend bool collaspeTilesOnGameboard(GameBoard &gb, point2D_t pt,
-                                       point2D_t pt_offset);
-
-  friend bool shiftTilesOnGameboard(GameBoard &gb, point2D_t pt,
-                                    point2D_t pt_offset);
-
-  friend bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
-                                                    point2D_t pt_offset);
-
-  friend void discoverLargestTileValueOnGameboard(GameBoard gb,
-                                                  Tile targetTile);
-  friend void discoverWinningTileValueOnGameboard(GameBoard gb,
-                                                  Tile targetTile);
-
-  friend void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset);
 
 public:
+  std::vector<Tile> board;
+  bool win{};
   bool moved{true};
   ull score{};
   ull largestTile{2};
