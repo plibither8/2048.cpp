@@ -1,9 +1,11 @@
 #include "game.hpp"
 #include "game-graphics.hpp"
 #include "game-input.hpp"
+#include "game-pregamemenu.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
 #include "loadresource.hpp"
+#include "menu.hpp"
 #include "point2d.hpp"
 #include "saveresource.hpp"
 #include "scores.hpp"
@@ -51,28 +53,6 @@ ull load_game_best_score() {
     tempscore = stats.bestScore;
   }
   return tempscore;
-}
-
-load_gameboard_status_t initialiseContinueBoardArray() {
-  using namespace Loader;
-  constexpr auto gameboard_data_filename = "../data/previousGame";
-  constexpr auto game_stats_data_filename = "../data/previousGameStats";
-  auto loaded_gameboard{false};
-  auto loaded_game_stats{false};
-  auto tempGBoard = GameBoard{1};
-  // Note: Reserved for gameboard.score and gameboard.moveCount!
-  // TODO: Combine data into one resource file.
-  auto score_and_movecount =
-      std::tuple<decltype(tempGBoard.score), decltype(tempGBoard.moveCount)>{};
-  std::tie(loaded_gameboard, tempGBoard) =
-      load_GameBoard_data_from_file(gameboard_data_filename);
-  std::tie(loaded_game_stats, score_and_movecount) =
-      load_game_stats_from_file(game_stats_data_filename);
-  std::tie(tempGBoard.score, tempGBoard.moveCount) = score_and_movecount;
-
-  const auto all_files_loaded_ok = (loaded_gameboard && loaded_game_stats);
-
-  return std::make_tuple(all_files_loaded_ok, tempGBoard);
 }
 
 void drawScoreBoard(std::ostream &os) {
@@ -431,10 +411,11 @@ void DoPostGameSaveStuff(double duration) {
   }
 }
 
-enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
+} // namespace
 
-void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
+void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   bestScore = load_game_best_score();
+  gamePlayBoard = gb;
   if (cont == PlayGameFlag::BrandNewGame) {
     gamePlayBoard = GameBoard(userInput_PlaySize);
     gamePlayBoard.addTile();
@@ -451,68 +432,12 @@ void playGame(PlayGameFlag cont, ull userInput_PlaySize = 1) {
   }
 }
 
-ull Receive_Input_Playsize(std::istream &is) {
-  ull userInput_PlaySize{0};
-  is >> userInput_PlaySize;
-  is.clear();
-  is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-  return userInput_PlaySize;
-}
-
-ull askWhatIsBoardSize(std::ostream &os) {
-  bool invalidInputValue = false;
-  ull userInput_PlaySize{0};
-
-  const auto QuestionAboutBoardSizePrompt = [&invalidInputValue]() {
-    std::ostringstream str_os;
-    clearScreen();
-    drawAscii();
-    // Prints only if "invalidInputValue" is true
-    DrawOnlyWhen(str_os, invalidInputValue, Graphics::BoardSizeErrorPrompt);
-    DrawAlways(str_os, Graphics::BoardInputPrompt);
-    return str_os.str();
-  };
-
-  while ((userInput_PlaySize < MIN_GAME_BOARD_PLAY_SIZE) ||
-         (userInput_PlaySize > MAX_GAME_BOARD_PLAY_SIZE)) {
-    DrawAlways(os, QuestionAboutBoardSizePrompt);
-    userInput_PlaySize = Receive_Input_Playsize(std::cin);
-    invalidInputValue = true;
-  }
-  return userInput_PlaySize;
-}
-
-enum class NewGameFlag { NewGameFlagNull, NoPreviousSaveAvailable };
-
-void SetUpNewGame(NewGameFlag ns = NewGameFlag::NewGameFlagNull) {
-  auto noSave = (ns == NewGameFlag::NoPreviousSaveAvailable) ? true : false;
-  // Prints only if "noSave" is true
-  // Consumes "noSave" flag (turns flag to false/off)
-  DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
-  ull userInput_PlaySize = askWhatIsBoardSize(std::cout);
-  playGame(PlayGameFlag::BrandNewGame, userInput_PlaySize);
-}
-
-void ContinueOldGame() {
-  bool load_old_game_ok;
-  GameBoard oldGameBoard;
-  std::tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray();
-  if (load_old_game_ok) {
-    gamePlayBoard = oldGameBoard;
-    playGame(PlayGameFlag::ContinuePreviousGame);
-  } else {
-    SetUpNewGame(NewGameFlag::NoPreviousSaveAvailable);
-  }
-}
-
-} // namespace
-
 void startGame() {
-  SetUpNewGame();
+  PreGameSetup::SetUpNewGame();
 }
 
 void continueGame() {
-  ContinueOldGame();
+  PreGameSetup::ContinueOldGame();
 }
 
 } // namespace Game

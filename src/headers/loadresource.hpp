@@ -5,8 +5,6 @@
 #include <string>
 #include <tuple>
 
-using load_gameboard_status_t = std::tuple<bool, GameBoard>;
-
 namespace Game {
 namespace Loader {
 

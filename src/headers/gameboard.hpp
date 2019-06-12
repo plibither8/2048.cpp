@@ -5,6 +5,7 @@
 #include "tile.hpp"
 #include <chrono>
 #include <random>
+#include <tuple>
 
 class RandInt {
 public:
@@ -22,6 +23,9 @@ private:
   std::minstd_rand re;
   std::uniform_int_distribution<> dist;
 };
+
+class GameBoard;
+using load_gameboard_status_t = std::tuple<bool, GameBoard>;
 
 class GameBoard {
   ull playsize{0};
