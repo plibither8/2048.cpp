@@ -32,24 +32,28 @@ class GameBoard {
   std::vector<Tile> board;
   bool win{};
 
-  Tile getTileOnGameboard(point2D_t pt) const;
-  void setTileOnGameboard(point2D_t pt, Tile tile);
-  ull getTileValueOnGameboard(point2D_t pt) const;
-  bool getTileBlockedOnGameboard(point2D_t pt) const;
+  friend Tile getTileOnGameboard(GameBoard gb, point2D_t pt);
+  friend void setTileOnGameboard(GameBoard &gb, point2D_t pt, Tile tile);
+  friend ull getTileValueOnGameboard(GameBoard gb, point2D_t pt);
+  friend bool getTileBlockedOnGameboard(GameBoard gb, point2D_t pt);
 
-  int point2D_to_1D_index(point2D_t pt) const;
-  std::vector<point2D_t> collectFreeTilesOnGameboard() const;
+  friend std::vector<point2D_t> collectFreeTilesOnGameboard(GameBoard gb);
 
-  bool collaspeTilesOnGameboard(point2D_t pt, point2D_t pt_offset);
+  friend bool collaspeTilesOnGameboard(GameBoard &gb, point2D_t pt,
+                                       point2D_t pt_offset);
 
-  bool shiftTilesOnGameboard(point2D_t pt, point2D_t pt_offset);
+  friend bool shiftTilesOnGameboard(GameBoard &gb, point2D_t pt,
+                                    point2D_t pt_offset);
 
-  bool collasped_or_shifted_tilesOnGameboard(point2D_t pt, point2D_t pt_offset);
+  friend bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
+                                                    point2D_t pt_offset);
 
-  void discoverLargestTileValueOnGameboard(Tile targetTile);
-  void discoverWinningTileValueOnGameboard(Tile targetTile);
+  friend void discoverLargestTileValueOnGameboard(GameBoard gb,
+                                                  Tile targetTile);
+  friend void discoverWinningTileValueOnGameboard(GameBoard gb,
+                                                  Tile targetTile);
 
-  void moveOnGameboard(point2D_t pt, point2D_t pt_offset);
+  friend void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset);
 
 public:
   bool moved{true};
