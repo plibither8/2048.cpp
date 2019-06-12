@@ -35,7 +35,10 @@ class GameBoard {
   friend Tile getTileOnGameboard(GameBoard gb, point2D_t pt);
   friend void setTileOnGameboard(GameBoard &gb, point2D_t pt, Tile tile);
   friend ull getTileValueOnGameboard(GameBoard gb, point2D_t pt);
+  friend void setTileValueOnGameboard(GameBoard &gb, point2D_t pt, ull value);
   friend bool getTileBlockedOnGameboard(GameBoard gb, point2D_t pt);
+  friend void setTileBlockedOnGameboard(GameBoard &gb, point2D_t pt,
+                                        bool blocked);
 
   friend std::vector<point2D_t> collectFreeTilesOnGameboard(GameBoard gb);
 
@@ -67,8 +70,6 @@ public:
   explicit GameBoard(ull playsize, const std::vector<Tile> &prempt_board)
       : playsize{playsize}, board{prempt_board} {}
 
-  void setTileValue(point2D_t pt, ull value);
-  void setTileBlocked(point2D_t pt, bool blocked);
   int getPlaySize() const;
   bool hasWon() const;
   long long MoveCount() const;

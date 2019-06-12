@@ -104,16 +104,16 @@ ull getTileValueOnGameboard(GameBoard gb, point2D_t pt) {
   return gb.board[point2D_to_1D_index(gb, pt)].value;
 }
 
-void GameBoard::setTileValue(point2D_t pt, ull value) {
-  board[point2D_to_1D_index(*this, pt)].value = value;
+void setTileValueOnGameboard(GameBoard &gb, point2D_t pt, ull value) {
+  gb.board[point2D_to_1D_index(gb, pt)].value = value;
 }
 
 bool getTileBlockedOnGameboard(GameBoard gb, point2D_t pt) {
   return gb.board[point2D_to_1D_index(gb, pt)].blocked;
 }
 
-void GameBoard::setTileBlocked(point2D_t pt, bool blocked) {
-  board[point2D_to_1D_index(*this, pt)].blocked = blocked;
+void setTileBlockedOnGameboard(GameBoard &gb, point2D_t pt, bool blocked) {
+  gb.board[point2D_to_1D_index(gb, pt)].blocked = blocked;
 }
 
 int GameBoard::getPlaySize() const {
@@ -181,7 +181,7 @@ bool GameBoard::addTile() {
   const auto randomFreeTile = freeTiles.at(RandInt{}() % freeTiles.size());
   const auto value_four_or_two =
       RandInt{}() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  setTileValue(randomFreeTile, value_four_or_two);
+  setTileValueOnGameboard(*this, randomFreeTile, value_four_or_two);
 
   return false;
 }
