@@ -47,6 +47,8 @@ public:
   friend int getPlaySizeOfGameboard(GameBoard gb);
   friend bool hasWonOnGameboard(GameBoard gb);
   friend long long MoveCountOnGameBoard(GameBoard gb);
+  friend std::string printStateOfGameBoard(GameBoard gb);
+
   void unblockTiles();
   bool canMove();
   void registerMoveByOne();
@@ -57,10 +59,8 @@ public:
   void tumbleTilesDown();
   void tumbleTilesLeft();
   void tumbleTilesRight();
-
-  friend std::string printStateOfGameBoard(GameBoard gb);
-  friend std::string drawSelf(GameBoard gb);
-  friend std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 };
+
+std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 
 #endif

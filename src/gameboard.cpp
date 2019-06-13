@@ -5,6 +5,10 @@
 #include <sstream>
 
 namespace {
+
+// Pre-declare function signature for organisational reasons.
+Tile getTileOnGameboard(GameBoard gb, point2D_t pt);
+
 std::string drawTileString(Tile currentTile) {
   std::ostringstream tile_richtext;
   if (!currentTile.value) {
@@ -44,6 +48,30 @@ std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
   std::transform(std::begin(bar_pattern_list), std::end(bar_pattern_list),
                  std::begin(temp_bars), generate_x_bar_pattern);
   return temp_bars;
+}
+
+std::string drawSelf(GameBoard gb) {
+  enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
+  const auto vertibar =
+      make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySizeOfGameboard(gb));
+  std::ostringstream str_os;
+  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
+    const auto is_first_row = (y == 0);
+    str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
+                              std::get<XN_BAR>(vertibar));
+    for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
+      const auto is_first_col = (x == 0);
+      const auto sp = (is_first_col ? "  " : " ");
+      str_os << sp;
+      str_os << "│ ";
+      str_os << drawTileString(getTileOnGameboard(gb, point2D_t{x, y}));
+    }
+    str_os << " │";
+    str_os << "\n";
+  }
+  str_os << std::get<BASE_BAR>(vertibar);
+  str_os << "\n";
+  return str_os.str();
 }
 
 bool is_point_in_board_play_area(point2D_t pt, int playsize) {
@@ -258,30 +286,6 @@ bool GameBoard::addTile() {
   setTileValueOnGameboard(*this, randomFreeTile, value_four_or_two);
 
   return false;
-}
-
-std::string drawSelf(GameBoard gb) {
-  enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
-  const auto vertibar =
-      make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySizeOfGameboard(gb));
-  std::ostringstream str_os;
-  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
-    const auto is_first_row = (y == 0);
-    str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
-                              std::get<XN_BAR>(vertibar));
-    for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
-      const auto is_first_col = (x == 0);
-      const auto sp = (is_first_col ? "  " : " ");
-      str_os << sp;
-      str_os << "│ ";
-      str_os << drawTileString(getTileOnGameboard(gb, point2D_t{x, y}));
-    }
-    str_os << " │";
-    str_os << "\n";
-  }
-  str_os << std::get<BASE_BAR>(vertibar);
-  str_os << "\n";
-  return str_os.str();
 }
 
 void GameBoard::tumbleTilesUp() {
