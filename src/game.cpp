@@ -137,10 +137,10 @@ void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
 }
 
 gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
-  gamePlayBoard.unblockTiles();
+  unblockTilesOnGameboard(gamePlayBoard);
   if (gamePlayBoard.moved) {
-    gamePlayBoard.addTile();
-    gamePlayBoard.registerMoveByOne();
+    addTileOnGameboard(gamePlayBoard);
+    registerMoveByOneOnGameboard(gamePlayBoard);
   }
 
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
@@ -149,7 +149,7 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
       gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
     }
   }
-  if (!gamePlayBoard.canMove()) {
+  if (!canMoveOnGameboard(gamePlayBoard)) {
     gamestatus[FLAG_END_GAME] = true;
   }
   return gamestatus;
@@ -213,19 +213,19 @@ gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
 void decideMove(Directions d) {
   switch (d) {
   case UP:
-    gamePlayBoard.tumbleTilesUp();
+    tumbleTilesUpOnGameboard(gamePlayBoard);
     break;
 
   case DOWN:
-    gamePlayBoard.tumbleTilesDown();
+    tumbleTilesDownOnGameboard(gamePlayBoard);
     break;
 
   case LEFT:
-    gamePlayBoard.tumbleTilesLeft();
+    tumbleTilesLeftOnGameboard(gamePlayBoard);
     break;
 
   case RIGHT:
-    gamePlayBoard.tumbleTilesRight();
+    tumbleTilesRightOnGameboard(gamePlayBoard);
     break;
   }
 }
@@ -420,7 +420,7 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   gamePlayBoard = gb;
   if (cont == PlayGameFlag::BrandNewGame) {
     gamePlayBoard = GameBoard(userInput_PlaySize);
-    gamePlayBoard.addTile();
+    addTileOnGameboard(gamePlayBoard);
   }
 
   const auto startTime = std::chrono::high_resolution_clock::now();

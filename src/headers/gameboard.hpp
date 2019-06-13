@@ -49,16 +49,16 @@ public:
   friend long long MoveCountOnGameBoard(GameBoard gb);
   friend std::string printStateOfGameBoard(GameBoard gb);
 
-  void unblockTiles();
-  bool canMove();
-  void registerMoveByOne();
+  friend void unblockTilesOnGameboard(GameBoard &gb);
+  friend bool canMoveOnGameboard(GameBoard &gb);
+  friend void registerMoveByOneOnGameboard(GameBoard &gb);
 
-  bool addTile();
+  friend bool addTileOnGameboard(GameBoard &gb);
 
-  void tumbleTilesUp();
-  void tumbleTilesDown();
-  void tumbleTilesLeft();
-  void tumbleTilesRight();
+  friend void tumbleTilesUpOnGameboard(GameBoard &gb);
+  friend void tumbleTilesDownOnGameboard(GameBoard &gb);
+  friend void tumbleTilesLeftOnGameboard(GameBoard &gb);
+  friend void tumbleTilesRightOnGameboard(GameBoard &gb);
 };
 
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
