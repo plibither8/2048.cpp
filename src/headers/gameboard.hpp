@@ -44,9 +44,9 @@ public:
   explicit GameBoard(ull playsize, const std::vector<Tile> &prempt_board)
       : playsize{playsize}, board{prempt_board} {}
 
-  int getPlaySize() const;
-  bool hasWon() const;
-  long long MoveCount() const;
+  friend int getPlaySizeOfGameboard(GameBoard gb);
+  friend bool hasWonOnGameboard(GameBoard gb);
+  friend long long MoveCountOnGameBoard(GameBoard gb);
   void unblockTiles();
   bool canMove();
   void registerMoveByOne();
@@ -58,8 +58,8 @@ public:
   void tumbleTilesLeft();
   void tumbleTilesRight();
 
-  std::string printState() const;
-  std::string drawSelf() const;
+  friend std::string printStateOfGameBoard(GameBoard gb);
+  friend std::string drawSelf(GameBoard gb);
   friend std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 };
 

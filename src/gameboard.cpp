@@ -72,15 +72,16 @@ bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset,
 int point2D_to_1D_index(GameBoard gb, point2D_t pt) {
   int x, y;
   std::tie(x, y) = pt.get();
-  return x + gb.getPlaySize() * y;
+  return x + getPlaySizeOfGameboard(gb) * y;
 }
 
 std::vector<point2D_t> collectFreeTilesOnGameboard(GameBoard gb) {
   std::vector<point2D_t> freeTiles;
   auto index_counter{0};
   const auto gatherFreePoint = [gb, &freeTiles, &index_counter](const Tile t) {
-    const auto current_point = point2D_t{index_counter % gb.getPlaySize(),
-                                         index_counter / gb.getPlaySize()};
+    const auto current_point =
+        point2D_t{index_counter % getPlaySizeOfGameboard(gb),
+                  index_counter / getPlaySizeOfGameboard(gb)};
     if (!t.value) {
       freeTiles.push_back(current_point);
     }
@@ -116,7 +117,7 @@ void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
 }
 
 void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
-  if (!gb.hasWon()) {
+  if (!hasWonOnGameboard(gb)) {
     constexpr auto GAME_TILE_WINNING_SCORE = 2048;
     if (targetTile.value == GAME_TILE_WINNING_SCORE) {
       gb.win = true;
@@ -179,23 +180,24 @@ void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {
   if (collasped_or_shifted_tilesOnGameboard(gb, pt, pt_offset)) {
     gb.moved = true;
   }
-  if (check_recursive_offset_in_game_bounds(pt, pt_offset, gb.getPlaySize())) {
+  if (check_recursive_offset_in_game_bounds(pt, pt_offset,
+                                            getPlaySizeOfGameboard(gb))) {
     moveOnGameboard(gb, pt + pt_offset, pt_offset);
   }
 }
 
 } // namespace
 
-int GameBoard::getPlaySize() const {
-  return playsize;
+int getPlaySizeOfGameboard(GameBoard gb) {
+  return gb.playsize;
 }
 
-bool GameBoard::hasWon() const {
-  return win;
+bool hasWonOnGameboard(GameBoard gb) {
+  return gb.win;
 }
 
-long long GameBoard::MoveCount() const {
-  return moveCount;
+long long MoveCountOnGameBoard(GameBoard gb) {
+  return gb.moveCount;
 }
 
 void GameBoard::unblockTiles() {
@@ -210,7 +212,8 @@ bool GameBoard::canMove() {
 
   const auto can_move_to_offset = [this, &index_counter](const Tile t) {
     const auto current_point =
-        point2D_t{index_counter % getPlaySize(), index_counter / getPlaySize()};
+        point2D_t{index_counter % getPlaySizeOfGameboard(*this),
+                  index_counter / getPlaySizeOfGameboard(*this)};
     index_counter++;
     const auto list_of_offsets = {point2D_t{1, 0}, point2D_t{0, 1}};
     const auto current_point_value = t.value;
@@ -220,7 +223,8 @@ bool GameBoard::canMove() {
           current_point + offset, // Positive adjacent check
           current_point - offset}; // Negative adjacent Check
       for (const auto current_offset : offset_check) {
-        if (is_point_in_board_play_area(current_offset, getPlaySize())) {
+        if (is_point_in_board_play_area(current_offset,
+                                        getPlaySizeOfGameboard(*this))) {
           return getTileValueOnGameboard(*this, current_offset) ==
                  current_point_value;
         }
@@ -256,20 +260,21 @@ bool GameBoard::addTile() {
   return false;
 }
 
-std::string GameBoard::drawSelf() const {
+std::string drawSelf(GameBoard gb) {
   enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
-  const auto vertibar = make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySize());
+  const auto vertibar =
+      make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySizeOfGameboard(gb));
   std::ostringstream str_os;
-  for (int y = 0; y < getPlaySize(); y++) {
+  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
     const auto is_first_row = (y == 0);
     str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
                               std::get<XN_BAR>(vertibar));
-    for (int x = 0; x < getPlaySize(); x++) {
+    for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
       const auto is_first_col = (x == 0);
       const auto sp = (is_first_col ? "  " : " ");
       str_os << sp;
       str_os << "│ ";
-      str_os << drawTileString(getTileOnGameboard(*this, point2D_t{x, y}));
+      str_os << drawTileString(getTileOnGameboard(gb, point2D_t{x, y}));
     }
     str_os << " │";
     str_os << "\n";
@@ -280,9 +285,9 @@ std::string GameBoard::drawSelf() const {
 }
 
 void GameBoard::tumbleTilesUp() {
-  for (int x = 0; x < getPlaySize(); x++) {
+  for (int x = 0; x < getPlaySizeOfGameboard(*this); x++) {
     int y = 1;
-    while (y < getPlaySize()) {
+    while (y < getPlaySizeOfGameboard(*this)) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(*this, current_point)) {
         moveOnGameboard(*this, current_point, point2D_t{0, -1});
@@ -293,8 +298,8 @@ void GameBoard::tumbleTilesUp() {
 }
 
 void GameBoard::tumbleTilesDown() {
-  for (int x = 0; x < getPlaySize(); x++) {
-    int y = getPlaySize() - 2;
+  for (int x = 0; x < getPlaySizeOfGameboard(*this); x++) {
+    int y = getPlaySizeOfGameboard(*this) - 2;
     while (y >= 0) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(*this, current_point)) {
@@ -306,9 +311,9 @@ void GameBoard::tumbleTilesDown() {
 }
 
 void GameBoard::tumbleTilesLeft() {
-  for (int y = 0; y < getPlaySize(); y++) {
+  for (int y = 0; y < getPlaySizeOfGameboard(*this); y++) {
     int x = 1;
-    while (x < getPlaySize()) {
+    while (x < getPlaySizeOfGameboard(*this)) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(*this, current_point)) {
         moveOnGameboard(*this, current_point, {-1, 0});
@@ -319,8 +324,8 @@ void GameBoard::tumbleTilesLeft() {
 }
 
 void GameBoard::tumbleTilesRight() {
-  for (int y = 0; y < getPlaySize(); y++) {
-    int x = getPlaySize() - 2;
+  for (int y = 0; y < getPlaySizeOfGameboard(*this); y++) {
+    int x = getPlaySizeOfGameboard(*this) - 2;
     while (x >= 0) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(*this, current_point)) {
@@ -331,13 +336,13 @@ void GameBoard::tumbleTilesRight() {
   }
 }
 
-std::string GameBoard::printState() const {
+std::string printStateOfGameBoard(GameBoard gb) {
   std::stringstream out_stream;
-  for (int y = 0; y < getPlaySize(); y++) {
-    for (int x = 0; x < getPlaySize(); x++) {
+  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
+    for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
       const auto current_point = point2D_t{x, y};
-      out_stream << getTileValueOnGameboard(*this, current_point) << ":"
-                 << getTileBlockedOnGameboard(*this, current_point) << ",";
+      out_stream << getTileValueOnGameboard(gb, current_point) << ":"
+                 << getTileBlockedOnGameboard(gb, current_point) << ",";
     }
     out_stream << "\n";
   }
@@ -345,5 +350,5 @@ std::string GameBoard::printState() const {
 }
 
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
-  return os << gb.drawSelf();
+  return os << drawSelf(gb);
 }
