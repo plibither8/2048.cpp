@@ -7,7 +7,11 @@
 namespace {
 
 // Pre-declare function signature for organisational reasons.
-Tile getTileOnGameboard(GameBoard gb, point2D_t pt);
+Tile getTileOnGameboard(gameboard_data_array_t gbda, point2D_t pt);
+
+int getPlaySizeOfGameboard(gameboard_data_array_t gbda) {
+  return gbda.playsize;
+}
 
 std::string drawTileString(Tile currentTile) {
   std::ostringstream tile_richtext;
@@ -50,21 +54,21 @@ std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
   return temp_bars;
 }
 
-std::string drawSelf(GameBoard gb) {
+std::string drawSelf(gameboard_data_array_t gbda) {
   enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
   const auto vertibar =
-      make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySizeOfGameboard(gb));
+      make_patterned_bars<MAX_TYPES_OF_BARS>(getPlaySizeOfGameboard(gbda));
   std::ostringstream str_os;
-  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
+  for (int y = 0; y < getPlaySizeOfGameboard(gbda); y++) {
     const auto is_first_row = (y == 0);
     str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
                               std::get<XN_BAR>(vertibar));
-    for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
+    for (int x = 0; x < getPlaySizeOfGameboard(gbda); x++) {
       const auto is_first_col = (x == 0);
       const auto sp = (is_first_col ? "  " : " ");
       str_os << sp;
       str_os << "│ ";
-      str_os << drawTileString(getTileOnGameboard(gb, point2D_t{x, y}));
+      str_os << drawTileString(getTileOnGameboard(gbda, point2D_t{x, y}));
     }
     str_os << " │";
     str_os << "\n";
@@ -97,47 +101,49 @@ bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset,
   return (is_inside_outer_bounds || is_inside_inner_bounds);
 }
 
-int point2D_to_1D_index(GameBoard gb, point2D_t pt) {
+int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
   int x, y;
   std::tie(x, y) = pt.get();
-  return x + getPlaySizeOfGameboard(gb) * y;
+  return x + getPlaySizeOfGameboard(gbda) * y;
 }
 
-std::vector<point2D_t> collectFreeTilesOnGameboard(GameBoard gb) {
+std::vector<point2D_t>
+collectFreeTilesOnGameboard(gameboard_data_array_t gbda) {
   std::vector<point2D_t> freeTiles;
   auto index_counter{0};
-  const auto gatherFreePoint = [gb, &freeTiles, &index_counter](const Tile t) {
+  const auto gatherFreePoint = [gbda, &freeTiles,
+                                &index_counter](const Tile t) {
     const auto current_point =
-        point2D_t{index_counter % getPlaySizeOfGameboard(gb),
-                  index_counter / getPlaySizeOfGameboard(gb)};
+        point2D_t{index_counter % getPlaySizeOfGameboard(gbda),
+                  index_counter / getPlaySizeOfGameboard(gbda)};
     if (!t.value) {
       freeTiles.push_back(current_point);
     }
     index_counter++;
   };
-  std::for_each(std::begin(gb.gbda.board), std::end(gb.gbda.board),
-                gatherFreePoint);
+  std::for_each(std::begin(gbda.board), std::end(gbda.board), gatherFreePoint);
   return freeTiles;
 }
 
-Tile getTileOnGameboard(GameBoard gb, point2D_t pt) {
-  return gb.gbda.board[point2D_to_1D_index(gb, pt)];
+Tile getTileOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
+  return gbda.board[point2D_to_1D_index(gbda, pt)];
 }
 
-void setTileOnGameboard(GameBoard &gb, point2D_t pt, Tile tile) {
-  gb.gbda.board[point2D_to_1D_index(gb, pt)] = tile;
+void setTileOnGameboard(gameboard_data_array_t &gbda, point2D_t pt, Tile tile) {
+  gbda.board[point2D_to_1D_index(gbda, pt)] = tile;
 }
 
-ull getTileValueOnGameboard(GameBoard gb, point2D_t pt) {
-  return gb.gbda.board[point2D_to_1D_index(gb, pt)].value;
+ull getTileValueOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
+  return gbda.board[point2D_to_1D_index(gbda, pt)].value;
 }
 
-void setTileValueOnGameboard(GameBoard &gb, point2D_t pt, ull value) {
-  gb.gbda.board[point2D_to_1D_index(gb, pt)].value = value;
+void setTileValueOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
+                             ull value) {
+  gbda.board[point2D_to_1D_index(gbda, pt)].value = value;
 }
 
-bool getTileBlockedOnGameboard(GameBoard gb, point2D_t pt) {
-  return gb.gbda.board[point2D_to_1D_index(gb, pt)].blocked;
+bool getTileBlockedOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
+  return gbda.board[point2D_to_1D_index(gbda, pt)].blocked;
 }
 
 void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
@@ -156,8 +162,8 @@ void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
 
 bool collaspeTilesOnGameboard(GameBoard &gb, point2D_t pt,
                               point2D_t pt_offset) {
-  Tile currentTile = getTileOnGameboard(gb, pt);
-  Tile targetTile = getTileOnGameboard(gb, pt + pt_offset);
+  Tile currentTile = getTileOnGameboard(gb.gbda, pt);
+  Tile targetTile = getTileOnGameboard(gb.gbda, pt + pt_offset);
 
   currentTile.value = 0;
   targetTile.value *= 2;
@@ -167,27 +173,28 @@ bool collaspeTilesOnGameboard(GameBoard &gb, point2D_t pt,
   discoverLargestTileValueOnGameboard(gb, targetTile);
   discoverWinningTileValueOnGameboard(gb, targetTile);
 
-  setTileOnGameboard(gb, pt, currentTile);
-  setTileOnGameboard(gb, pt + pt_offset, targetTile);
+  setTileOnGameboard(gb.gbda, pt, currentTile);
+  setTileOnGameboard(gb.gbda, pt + pt_offset, targetTile);
   return true;
 }
 
-bool shiftTilesOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {
-  Tile currentTile = getTileOnGameboard(gb, pt);
-  Tile targetTile = getTileOnGameboard(gb, pt + pt_offset);
+bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
+                           point2D_t pt_offset) {
+  Tile currentTile = getTileOnGameboard(gbda, pt);
+  Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
 
   targetTile.value = currentTile.value;
   currentTile.value = 0;
 
-  setTileOnGameboard(gb, pt, currentTile);
-  setTileOnGameboard(gb, pt + pt_offset, targetTile);
+  setTileOnGameboard(gbda, pt, currentTile);
+  setTileOnGameboard(gbda, pt + pt_offset, targetTile);
   return true;
 }
 
 bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
                                            point2D_t pt_offset) {
-  const auto currentTile = getTileOnGameboard(gb, pt);
-  const auto targetTile = getTileOnGameboard(gb, pt + pt_offset);
+  const auto currentTile = getTileOnGameboard(gb.gbda, pt);
+  const auto targetTile = getTileOnGameboard(gb.gbda, pt + pt_offset);
   const auto does_value_exist_in_target_point = targetTile.value;
   const auto is_value_same_as_target_value =
       (currentTile.value == targetTile.value);
@@ -200,7 +207,7 @@ bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
       no_tiles_are_blocked) {
     return collaspeTilesOnGameboard(gb, pt, pt_offset);
   } else if (is_there_a_current_value_but_no_target_value) {
-    return shiftTilesOnGameboard(gb, pt, pt_offset);
+    return shiftTilesOnGameboard(gb.gbda, pt, pt_offset);
   }
   return false;
 }
@@ -210,16 +217,12 @@ void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {
     gb.moved = true;
   }
   if (check_recursive_offset_in_game_bounds(pt, pt_offset,
-                                            getPlaySizeOfGameboard(gb))) {
+                                            getPlaySizeOfGameboard(gb.gbda))) {
     moveOnGameboard(gb, pt + pt_offset, pt_offset);
   }
 }
 
 } // namespace
-
-int getPlaySizeOfGameboard(GameBoard gb) {
-  return gb.gbda.playsize;
-}
 
 bool hasWonOnGameboard(GameBoard gb) {
   return gb.win;
@@ -241,8 +244,8 @@ bool canMoveOnGameboard(GameBoard &gb) {
 
   const auto can_move_to_offset = [=, &index_counter](const Tile t) {
     const auto current_point =
-        point2D_t{index_counter % getPlaySizeOfGameboard(gb),
-                  index_counter / getPlaySizeOfGameboard(gb)};
+        point2D_t{index_counter % getPlaySizeOfGameboard(gb.gbda),
+                  index_counter / getPlaySizeOfGameboard(gb.gbda)};
     index_counter++;
     const auto list_of_offsets = {point2D_t{1, 0}, point2D_t{0, 1}};
     const auto current_point_value = t.value;
@@ -253,8 +256,8 @@ bool canMoveOnGameboard(GameBoard &gb) {
           current_point - offset}; // Negative adjacent Check
       for (const auto current_offset : offset_check) {
         if (is_point_in_board_play_area(current_offset,
-                                        getPlaySizeOfGameboard(gb))) {
-          return getTileValueOnGameboard(gb, current_offset) ==
+                                        getPlaySizeOfGameboard(gb.gbda))) {
+          return getTileValueOnGameboard(gb.gbda, current_offset) ==
                  current_point_value;
         }
       }
@@ -276,7 +279,7 @@ void registerMoveByOneOnGameboard(GameBoard &gb) {
 
 bool addTileOnGameboard(GameBoard &gb) {
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  const auto freeTiles = collectFreeTilesOnGameboard(gb);
+  const auto freeTiles = collectFreeTilesOnGameboard(gb.gbda);
 
   if (!freeTiles.size()) {
     return true;
@@ -285,17 +288,17 @@ bool addTileOnGameboard(GameBoard &gb) {
   const auto randomFreeTile = freeTiles.at(RandInt{}() % freeTiles.size());
   const auto value_four_or_two =
       RandInt{}() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  setTileValueOnGameboard(gb, randomFreeTile, value_four_or_two);
+  setTileValueOnGameboard(gb.gbda, randomFreeTile, value_four_or_two);
 
   return false;
 }
 
 void tumbleTilesUpOnGameboard(GameBoard &gb) {
-  for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
+  for (int x = 0; x < getPlaySizeOfGameboard(gb.gbda); x++) {
     int y = 1;
-    while (y < getPlaySizeOfGameboard(gb)) {
+    while (y < getPlaySizeOfGameboard(gb.gbda)) {
       const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboard(gb, current_point)) {
+      if (getTileValueOnGameboard(gb.gbda, current_point)) {
         moveOnGameboard(gb, current_point, point2D_t{0, -1});
       }
       y++;
@@ -304,11 +307,11 @@ void tumbleTilesUpOnGameboard(GameBoard &gb) {
 }
 
 void tumbleTilesDownOnGameboard(GameBoard &gb) {
-  for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
-    int y = getPlaySizeOfGameboard(gb) - 2;
+  for (int x = 0; x < getPlaySizeOfGameboard(gb.gbda); x++) {
+    int y = getPlaySizeOfGameboard(gb.gbda) - 2;
     while (y >= 0) {
       const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboard(gb, current_point)) {
+      if (getTileValueOnGameboard(gb.gbda, current_point)) {
         moveOnGameboard(gb, current_point, point2D_t{0, 1});
       }
       y--;
@@ -317,11 +320,11 @@ void tumbleTilesDownOnGameboard(GameBoard &gb) {
 }
 
 void tumbleTilesLeftOnGameboard(GameBoard &gb) {
-  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
+  for (int y = 0; y < getPlaySizeOfGameboard(gb.gbda); y++) {
     int x = 1;
-    while (x < getPlaySizeOfGameboard(gb)) {
+    while (x < getPlaySizeOfGameboard(gb.gbda)) {
       const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboard(gb, current_point)) {
+      if (getTileValueOnGameboard(gb.gbda, current_point)) {
         moveOnGameboard(gb, current_point, {-1, 0});
       }
       x++;
@@ -330,11 +333,11 @@ void tumbleTilesLeftOnGameboard(GameBoard &gb) {
 }
 
 void tumbleTilesRightOnGameboard(GameBoard &gb) {
-  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
-    int x = getPlaySizeOfGameboard(gb) - 2;
+  for (int y = 0; y < getPlaySizeOfGameboard(gb.gbda); y++) {
+    int x = getPlaySizeOfGameboard(gb.gbda) - 2;
     while (x >= 0) {
       const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboard(gb, current_point)) {
+      if (getTileValueOnGameboard(gb.gbda, current_point)) {
         moveOnGameboard(gb, current_point, point2D_t{1, 0});
       }
       x--;
@@ -344,11 +347,11 @@ void tumbleTilesRightOnGameboard(GameBoard &gb) {
 
 std::string printStateOfGameBoard(GameBoard gb) {
   std::stringstream out_stream;
-  for (int y = 0; y < getPlaySizeOfGameboard(gb); y++) {
-    for (int x = 0; x < getPlaySizeOfGameboard(gb); x++) {
+  for (int y = 0; y < getPlaySizeOfGameboard(gb.gbda); y++) {
+    for (int x = 0; x < getPlaySizeOfGameboard(gb.gbda); x++) {
       const auto current_point = point2D_t{x, y};
-      out_stream << getTileValueOnGameboard(gb, current_point) << ":"
-                 << getTileBlockedOnGameboard(gb, current_point) << ",";
+      out_stream << getTileValueOnGameboard(gb.gbda, current_point) << ":"
+                 << getTileBlockedOnGameboard(gb.gbda, current_point) << ",";
     }
     out_stream << "\n";
   }
@@ -356,5 +359,5 @@ std::string printStateOfGameBoard(GameBoard gb) {
 }
 
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
-  return os << drawSelf(gb);
+  return os << drawSelf(gb.gbda);
 }

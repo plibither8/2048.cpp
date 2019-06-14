@@ -35,8 +35,10 @@ struct gameboard_data_array_t {
 };
 
 class GameBoard {
+
 public:
   gameboard_data_array_t gbda;
+
   bool win{};
   bool moved{true};
   ull score{};
@@ -49,7 +51,6 @@ public:
   explicit GameBoard(ull playsize, const tile_data_array_t &prempt_board)
       : gbda{playsize, prempt_board} {}
 
-  friend int getPlaySizeOfGameboard(GameBoard gb);
   friend bool hasWonOnGameboard(GameBoard gb);
   friend long long MoveCountOnGameBoard(GameBoard gb);
   friend std::string printStateOfGameBoard(GameBoard gb);
