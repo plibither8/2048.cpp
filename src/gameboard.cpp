@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <sstream>
 
+namespace Game {
+
 namespace {
 
 std::string drawTileString(Tile currentTile) {
@@ -378,6 +380,10 @@ void tumbleTilesRightOnGameboard(GameBoard &gb) {
 std::string printStateOfGameBoard(GameBoard gb) {
   return printStateOfGameBoardDataArray(gb.gbda);
 }
+
+} // namespace Game
+
+using namespace Game;
 
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
   return os << drawSelf(gb.gbda);

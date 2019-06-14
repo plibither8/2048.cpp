@@ -7,6 +7,8 @@
 #include <random>
 #include <tuple>
 
+namespace Game {
+
 class RandInt {
 public:
   using clock = std::chrono::system_clock;
@@ -63,6 +65,8 @@ void tumbleTilesRightOnGameboard(GameBoard &gb);
 
 std::string printStateOfGameBoard(GameBoard gb);
 
-std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
+} // namespace Game
+
+std::ostream &operator<<(std::ostream &os, const Game::GameBoard &gb);
 
 #endif
