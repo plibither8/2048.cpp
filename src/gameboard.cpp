@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
-#include <iomanip>
 #include <random>
 #include <sstream>
 
@@ -26,17 +25,6 @@ private:
   std::minstd_rand re;
   std::uniform_int_distribution<> dist;
 };
-
-std::string drawTileString(Tile currentTile) {
-  std::ostringstream tile_richtext;
-  if (!currentTile.value) {
-    tile_richtext << "    ";
-  } else {
-    tile_richtext << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
-  }
-  return tile_richtext.str();
-}
 
 int getPlaySizeOfGameboard(gameboard_data_array_t gbda) {
   return gbda.playsize;
