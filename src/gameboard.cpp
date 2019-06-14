@@ -143,6 +143,35 @@ collectFreeTilesOnGameboard(gameboard_data_array_t gbda) {
   return freeTiles;
 }
 
+using return_bool_tile_t = std::tuple<bool, Tile>;
+
+return_bool_tile_t collaspeTilesOnGameboard(gameboard_data_array_t &gbda,
+                                            point2D_t pt, point2D_t pt_offset) {
+  Tile currentTile = getTileOnGameboard(gbda, pt);
+  Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
+
+  currentTile.value = 0;
+  targetTile.value *= 2;
+  targetTile.blocked = true;
+
+  setTileOnGameboard(gbda, pt, currentTile);
+  setTileOnGameboard(gbda, pt + pt_offset, targetTile);
+  return std::make_tuple(true, targetTile);
+}
+
+bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
+                           point2D_t pt_offset) {
+  Tile currentTile = getTileOnGameboard(gbda, pt);
+  Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
+
+  targetTile.value = currentTile.value;
+  currentTile.value = 0;
+
+  setTileOnGameboard(gbda, pt, currentTile);
+  setTileOnGameboard(gbda, pt + pt_offset, targetTile);
+  return true;
+}
+
 void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
   gb.largestTile =
       gb.largestTile < targetTile.value ? targetTile.value : gb.largestTile;
@@ -157,34 +186,10 @@ void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
   }
 }
 
-bool collaspeTilesOnGameboard(GameBoard &gb, point2D_t pt,
-                              point2D_t pt_offset) {
-  Tile currentTile = getTileOnGameboard(gb.gbda, pt);
-  Tile targetTile = getTileOnGameboard(gb.gbda, pt + pt_offset);
-
-  currentTile.value = 0;
-  targetTile.value *= 2;
+bool updateGameBoardStats(GameBoard &gb, Tile targetTile) {
   gb.score += targetTile.value;
-  targetTile.blocked = true;
-
   discoverLargestTileValueOnGameboard(gb, targetTile);
   discoverWinningTileValueOnGameboard(gb, targetTile);
-
-  setTileOnGameboard(gb.gbda, pt, currentTile);
-  setTileOnGameboard(gb.gbda, pt + pt_offset, targetTile);
-  return true;
-}
-
-bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
-                           point2D_t pt_offset) {
-  Tile currentTile = getTileOnGameboard(gbda, pt);
-  Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
-
-  targetTile.value = currentTile.value;
-  currentTile.value = 0;
-
-  setTileOnGameboard(gbda, pt, currentTile);
-  setTileOnGameboard(gbda, pt + pt_offset, targetTile);
   return true;
 }
 
@@ -202,7 +207,10 @@ bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
 
   if (does_value_exist_in_target_point && is_value_same_as_target_value &&
       no_tiles_are_blocked) {
-    return collaspeTilesOnGameboard(gb, pt, pt_offset);
+    Tile newTargetTile;
+    std::tie(std::ignore, newTargetTile) =
+        collaspeTilesOnGameboard(gb.gbda, pt, pt_offset);
+    return updateGameBoardStats(gb, newTargetTile);
   } else if (is_there_a_current_value_but_no_target_value) {
     return shiftTilesOnGameboard(gb.gbda, pt, pt_offset);
   }
