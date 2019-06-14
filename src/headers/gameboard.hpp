@@ -24,9 +24,6 @@ private:
   std::uniform_int_distribution<> dist;
 };
 
-class GameBoard;
-using load_gameboard_status_t = std::tuple<bool, GameBoard>;
-
 using tile_data_array_t = std::vector<Tile>;
 
 struct gameboard_data_array_t {
@@ -34,11 +31,8 @@ struct gameboard_data_array_t {
   tile_data_array_t board{};
 };
 
-class GameBoard {
-
-public:
+struct GameBoard {
   gameboard_data_array_t gbda;
-
   bool win{};
   bool moved{true};
   ull score{};
@@ -66,6 +60,8 @@ public:
   friend void tumbleTilesLeftOnGameboard(GameBoard &gb);
   friend void tumbleTilesRightOnGameboard(GameBoard &gb);
 };
+
+using load_gameboard_status_t = std::tuple<bool, GameBoard>;
 
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 
