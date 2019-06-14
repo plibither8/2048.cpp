@@ -29,11 +29,14 @@ using load_gameboard_status_t = std::tuple<bool, GameBoard>;
 
 using tile_data_array_t = std::vector<Tile>;
 
-class GameBoard {
+struct gameboard_data_array_t {
   ull playsize{0};
+  tile_data_array_t board{};
+};
 
+class GameBoard {
 public:
-  tile_data_array_t board;
+  gameboard_data_array_t gbda;
   bool win{};
   bool moved{true};
   ull score{};
@@ -42,9 +45,9 @@ public:
 
   GameBoard() = default;
   explicit GameBoard(ull playsize)
-      : playsize{playsize}, board{tile_data_array_t(playsize * playsize)} {}
+      : gbda{playsize, tile_data_array_t(playsize * playsize)} {}
   explicit GameBoard(ull playsize, const tile_data_array_t &prempt_board)
-      : playsize{playsize}, board{prempt_board} {}
+      : gbda{playsize, prempt_board} {}
 
   friend int getPlaySizeOfGameboard(GameBoard gb);
   friend bool hasWonOnGameboard(GameBoard gb);

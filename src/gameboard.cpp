@@ -115,28 +115,29 @@ std::vector<point2D_t> collectFreeTilesOnGameboard(GameBoard gb) {
     }
     index_counter++;
   };
-  std::for_each(std::begin(gb.board), std::end(gb.board), gatherFreePoint);
+  std::for_each(std::begin(gb.gbda.board), std::end(gb.gbda.board),
+                gatherFreePoint);
   return freeTiles;
 }
 
 Tile getTileOnGameboard(GameBoard gb, point2D_t pt) {
-  return gb.board[point2D_to_1D_index(gb, pt)];
+  return gb.gbda.board[point2D_to_1D_index(gb, pt)];
 }
 
 void setTileOnGameboard(GameBoard &gb, point2D_t pt, Tile tile) {
-  gb.board[point2D_to_1D_index(gb, pt)] = tile;
+  gb.gbda.board[point2D_to_1D_index(gb, pt)] = tile;
 }
 
 ull getTileValueOnGameboard(GameBoard gb, point2D_t pt) {
-  return gb.board[point2D_to_1D_index(gb, pt)].value;
+  return gb.gbda.board[point2D_to_1D_index(gb, pt)].value;
 }
 
 void setTileValueOnGameboard(GameBoard &gb, point2D_t pt, ull value) {
-  gb.board[point2D_to_1D_index(gb, pt)].value = value;
+  gb.gbda.board[point2D_to_1D_index(gb, pt)].value = value;
 }
 
 bool getTileBlockedOnGameboard(GameBoard gb, point2D_t pt) {
-  return gb.board[point2D_to_1D_index(gb, pt)].blocked;
+  return gb.gbda.board[point2D_to_1D_index(gb, pt)].blocked;
 }
 
 void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
@@ -217,7 +218,7 @@ void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {
 } // namespace
 
 int getPlaySizeOfGameboard(GameBoard gb) {
-  return gb.playsize;
+  return gb.gbda.playsize;
 }
 
 bool hasWonOnGameboard(GameBoard gb) {
@@ -229,8 +230,8 @@ long long MoveCountOnGameBoard(GameBoard gb) {
 }
 
 void unblockTilesOnGameboard(GameBoard &gb) {
-  std::transform(std::begin(gb.board), std::end(gb.board), std::begin(gb.board),
-                 [](const Tile t) {
+  std::transform(std::begin(gb.gbda.board), std::end(gb.gbda.board),
+                 std::begin(gb.gbda.board), [](const Tile t) {
                    return Tile{t.value, false};
                  });
 }
@@ -264,7 +265,7 @@ bool canMoveOnGameboard(GameBoard &gb) {
             std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
                         offset_in_range_with_same_value));
   };
-  return std::any_of(std::begin(gb.board), std::end(gb.board),
+  return std::any_of(std::begin(gb.gbda.board), std::end(gb.gbda.board),
                      can_move_to_offset);
 }
 
