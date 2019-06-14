@@ -44,24 +44,24 @@ struct GameBoard {
       : gbda{playsize, tile_data_array_t(playsize * playsize)} {}
   explicit GameBoard(ull playsize, const tile_data_array_t &prempt_board)
       : gbda{playsize, prempt_board} {}
-
-  friend bool hasWonOnGameboard(GameBoard gb);
-  friend long long MoveCountOnGameBoard(GameBoard gb);
-  friend std::string printStateOfGameBoard(GameBoard gb);
-
-  friend void unblockTilesOnGameboard(GameBoard &gb);
-  friend bool canMoveOnGameboard(GameBoard &gb);
-  friend void registerMoveByOneOnGameboard(GameBoard &gb);
-
-  friend bool addTileOnGameboard(GameBoard &gb);
-
-  friend void tumbleTilesUpOnGameboard(GameBoard &gb);
-  friend void tumbleTilesDownOnGameboard(GameBoard &gb);
-  friend void tumbleTilesLeftOnGameboard(GameBoard &gb);
-  friend void tumbleTilesRightOnGameboard(GameBoard &gb);
 };
 
 using load_gameboard_status_t = std::tuple<bool, GameBoard>;
+
+bool hasWonOnGameboard(GameBoard gb);
+long long MoveCountOnGameBoard(GameBoard gb);
+
+void unblockTilesOnGameboard(GameBoard &gb);
+bool canMoveOnGameboard(GameBoard &gb);
+bool addTileOnGameboard(GameBoard &gb);
+void registerMoveByOneOnGameboard(GameBoard &gb);
+
+void tumbleTilesUpOnGameboard(GameBoard &gb);
+void tumbleTilesDownOnGameboard(GameBoard &gb);
+void tumbleTilesLeftOnGameboard(GameBoard &gb);
+void tumbleTilesRightOnGameboard(GameBoard &gb);
+
+std::string printStateOfGameBoard(GameBoard gb);
 
 std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 
