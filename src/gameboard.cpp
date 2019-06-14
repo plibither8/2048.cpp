@@ -6,13 +6,6 @@
 
 namespace {
 
-// Pre-declare function signature for organisational reasons.
-Tile getTileOnGameboard(gameboard_data_array_t gbda, point2D_t pt);
-
-int getPlaySizeOfGameboard(gameboard_data_array_t gbda) {
-  return gbda.playsize;
-}
-
 std::string drawTileString(Tile currentTile) {
   std::ostringstream tile_richtext;
   if (!currentTile.value) {
@@ -22,6 +15,37 @@ std::string drawTileString(Tile currentTile) {
                   << std::setw(4) << currentTile.value << bold_off << def;
   }
   return tile_richtext.str();
+}
+
+int getPlaySizeOfGameboard(gameboard_data_array_t gbda) {
+  return gbda.playsize;
+}
+
+int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
+  int x, y;
+  std::tie(x, y) = pt.get();
+  return x + getPlaySizeOfGameboard(gbda) * y;
+}
+
+Tile getTileOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
+  return gbda.board[point2D_to_1D_index(gbda, pt)];
+}
+
+void setTileOnGameboard(gameboard_data_array_t &gbda, point2D_t pt, Tile tile) {
+  gbda.board[point2D_to_1D_index(gbda, pt)] = tile;
+}
+
+ull getTileValueOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
+  return gbda.board[point2D_to_1D_index(gbda, pt)].value;
+}
+
+void setTileValueOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
+                             ull value) {
+  gbda.board[point2D_to_1D_index(gbda, pt)].value = value;
+}
+
+bool getTileBlockedOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
+  return gbda.board[point2D_to_1D_index(gbda, pt)].blocked;
 }
 
 template<int num_of_bars>
@@ -101,12 +125,6 @@ bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset,
   return (is_inside_outer_bounds || is_inside_inner_bounds);
 }
 
-int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
-  int x, y;
-  std::tie(x, y) = pt.get();
-  return x + getPlaySizeOfGameboard(gbda) * y;
-}
-
 std::vector<point2D_t>
 collectFreeTilesOnGameboard(gameboard_data_array_t gbda) {
   std::vector<point2D_t> freeTiles;
@@ -123,27 +141,6 @@ collectFreeTilesOnGameboard(gameboard_data_array_t gbda) {
   };
   std::for_each(std::begin(gbda.board), std::end(gbda.board), gatherFreePoint);
   return freeTiles;
-}
-
-Tile getTileOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
-  return gbda.board[point2D_to_1D_index(gbda, pt)];
-}
-
-void setTileOnGameboard(gameboard_data_array_t &gbda, point2D_t pt, Tile tile) {
-  gbda.board[point2D_to_1D_index(gbda, pt)] = tile;
-}
-
-ull getTileValueOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
-  return gbda.board[point2D_to_1D_index(gbda, pt)].value;
-}
-
-void setTileValueOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
-                             ull value) {
-  gbda.board[point2D_to_1D_index(gbda, pt)].value = value;
-}
-
-bool getTileBlockedOnGameboard(gameboard_data_array_t gbda, point2D_t pt) {
-  return gbda.board[point2D_to_1D_index(gbda, pt)].blocked;
 }
 
 void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
