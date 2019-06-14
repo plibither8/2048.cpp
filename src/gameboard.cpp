@@ -1,12 +1,31 @@
 #include "gameboard.hpp"
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <iomanip>
+#include <random>
 #include <sstream>
 
 namespace Game {
 
 namespace {
+
+class RandInt {
+public:
+  using clock = std::chrono::system_clock;
+  RandInt() : dist{0, std::numeric_limits<int>::max()} {
+    seed(clock::now().time_since_epoch().count());
+  }
+  RandInt(const int low, const int high) : dist{low, high} {
+    seed(clock::now().time_since_epoch().count());
+  }
+  int operator()() { return dist(re); }
+  void seed(const unsigned int s) { re.seed(s); }
+
+private:
+  std::minstd_rand re;
+  std::uniform_int_distribution<> dist;
+};
 
 std::string drawTileString(Tile currentTile) {
   std::ostringstream tile_richtext;

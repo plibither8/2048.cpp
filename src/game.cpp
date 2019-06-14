@@ -12,6 +12,7 @@
 #include "statistics.hpp"
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>

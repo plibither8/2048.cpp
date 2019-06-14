@@ -8,6 +8,7 @@
 #include "menu.hpp"
 #include <array>
 #include <iostream>
+#include <limits>
 #include <sstream>
 
 namespace Game {
