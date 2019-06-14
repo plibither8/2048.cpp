@@ -27,11 +27,13 @@ private:
 class GameBoard;
 using load_gameboard_status_t = std::tuple<bool, GameBoard>;
 
+using tile_data_array_t = std::vector<Tile>;
+
 class GameBoard {
   ull playsize{0};
 
 public:
-  std::vector<Tile> board;
+  tile_data_array_t board;
   bool win{};
   bool moved{true};
   ull score{};
@@ -40,8 +42,8 @@ public:
 
   GameBoard() = default;
   explicit GameBoard(ull playsize)
-      : playsize{playsize}, board{std::vector<Tile>(playsize * playsize)} {}
-  explicit GameBoard(ull playsize, const std::vector<Tile> &prempt_board)
+      : playsize{playsize}, board{tile_data_array_t(playsize * playsize)} {}
+  explicit GameBoard(ull playsize, const tile_data_array_t &prempt_board)
       : playsize{playsize}, board{prempt_board} {}
 
   friend int getPlaySizeOfGameboard(GameBoard gb);
