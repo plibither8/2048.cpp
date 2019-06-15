@@ -221,10 +221,8 @@ bool addTileOnGameboardDataArray(gameboard_data_array_t &gbda) {
   return false;
 }
 
-using return_bool_tile_t = std::tuple<bool, Tile>;
-
-return_bool_tile_t collaspeTilesOnGameboard(gameboard_data_array_t &gbda,
-                                            point2D_t pt, point2D_t pt_offset) {
+bool collaspeTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
+                              point2D_t pt_offset) {
   Tile currentTile = getTileOnGameboard(gbda, pt);
   Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
 
@@ -234,7 +232,7 @@ return_bool_tile_t collaspeTilesOnGameboard(gameboard_data_array_t &gbda,
 
   setTileOnGameboard(gbda, pt, currentTile);
   setTileOnGameboard(gbda, pt + pt_offset, targetTile);
-  return std::make_tuple(true, targetTile);
+  return true;
 }
 
 bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
@@ -248,6 +246,40 @@ bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
   setTileOnGameboard(gbda, pt, currentTile);
   setTileOnGameboard(gbda, pt + pt_offset, targetTile);
   return true;
+}
+
+enum class COLLASPE_OR_SHIFT_T {
+  ACTION_NONE,
+  ACTION_COLLASPE,
+  ACTION_SHIFT,
+  MAX_NUM_OF_ACTIONS
+};
+
+using bool_collaspe_shift_t = std::tuple<bool, COLLASPE_OR_SHIFT_T>;
+
+bool_collaspe_shift_t
+collasped_or_shifted_tilesOnGameboard(gameboard_data_array_t &gbda,
+                                      point2D_t pt, point2D_t pt_offset) {
+  const auto currentTile = getTileOnGameboard(gbda, pt);
+  const auto targetTile = getTileOnGameboard(gbda, pt + pt_offset);
+  const auto does_value_exist_in_target_point = targetTile.value;
+  const auto is_value_same_as_target_value =
+      (currentTile.value == targetTile.value);
+  const auto no_tiles_are_blocked =
+      (!currentTile.blocked && !targetTile.blocked);
+  const auto is_there_a_current_value_but_no_target_value =
+      (currentTile.value && !targetTile.value);
+  auto action_taken = bool{};
+
+  if (does_value_exist_in_target_point && is_value_same_as_target_value &&
+      no_tiles_are_blocked) {
+    action_taken = collaspeTilesOnGameboard(gbda, pt, pt_offset);
+    return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_COLLASPE);
+  } else if (is_there_a_current_value_but_no_target_value) {
+    action_taken = shiftTilesOnGameboard(gbda, pt, pt_offset);
+    return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_SHIFT);
+  }
+  return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_NONE);
 }
 
 void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
@@ -271,33 +303,16 @@ bool updateGameBoardStats(GameBoard &gb, Tile targetTile) {
   return true;
 }
 
-bool collasped_or_shifted_tilesOnGameboard(GameBoard &gb, point2D_t pt,
-                                           point2D_t pt_offset) {
-  const auto currentTile = getTileOnGameboard(gb.gbda, pt);
-  const auto targetTile = getTileOnGameboard(gb.gbda, pt + pt_offset);
-  const auto does_value_exist_in_target_point = targetTile.value;
-  const auto is_value_same_as_target_value =
-      (currentTile.value == targetTile.value);
-  const auto no_tiles_are_blocked =
-      (!currentTile.blocked && !targetTile.blocked);
-  const auto is_there_a_current_value_but_no_target_value =
-      (currentTile.value && !targetTile.value);
-
-  if (does_value_exist_in_target_point && is_value_same_as_target_value &&
-      no_tiles_are_blocked) {
-    Tile newTargetTile;
-    std::tie(std::ignore, newTargetTile) =
-        collaspeTilesOnGameboard(gb.gbda, pt, pt_offset);
-    return updateGameBoardStats(gb, newTargetTile);
-  } else if (is_there_a_current_value_but_no_target_value) {
-    return shiftTilesOnGameboard(gb.gbda, pt, pt_offset);
-  }
-  return false;
-}
-
 void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {
-  if (collasped_or_shifted_tilesOnGameboard(gb, pt, pt_offset)) {
+  auto did_gameboard_collaspe_or_shift_anything = bool{};
+  auto action_was_taken = COLLASPE_OR_SHIFT_T::ACTION_NONE;
+  std::tie(did_gameboard_collaspe_or_shift_anything, action_was_taken) =
+      collasped_or_shifted_tilesOnGameboard(gb.gbda, pt, pt_offset);
+  if (did_gameboard_collaspe_or_shift_anything) {
     gb.moved = true;
+    if (action_was_taken == COLLASPE_OR_SHIFT_T::ACTION_COLLASPE) {
+      updateGameBoardStats(gb, getTileOnGameboard(gb.gbda, pt + pt_offset));
+    }
   }
   if (check_recursive_offset_in_game_bounds(pt, pt_offset,
                                             getPlaySizeOfGameboard(gb.gbda))) {
