@@ -285,8 +285,7 @@ collasped_or_shifted_tilesOnGameboard(gameboard_data_array_t &gbda,
 }
 
 void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
-  gb.largestTile =
-      gb.largestTile < targetTile.value ? targetTile.value : gb.largestTile;
+  gb.largestTile = std::max(gb.largestTile, targetTile.value);
 }
 
 void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
