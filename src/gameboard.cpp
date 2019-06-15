@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <sstream>
+#include <utility>
 
 namespace Game {
 
@@ -130,11 +131,13 @@ bool is_point_in_board_play_area(point2D_t pt, int playsize) {
   return !(y < 0 || y > playsize - 1 || x < 0 || x > playsize - 1);
 }
 
-bool check_recursive_offset_in_game_bounds(point2D_t pt, point2D_t pt_offset,
-                                           int playsize) {
+using delta_t = std::pair<point2D_t, point2D_t>;
+// NOTE: delta_t.first = focal point, delta_t.second = offset distance
+
+bool check_recursive_offset_in_game_bounds(delta_t dt_point, int playsize) {
   int x, y, x2, y2;
-  std::tie(x, y) = pt.get();
-  std::tie(x2, y2) = pt_offset.get();
+  std::tie(x, y) = dt_point.first.get();
+  std::tie(x2, y2) = dt_point.second.get();
   const auto positive_direction = (y2 + x2 == 1);
   const auto negative_direction = (y2 + x2 == -1);
   const auto is_positive_y_direction_flagged = (y2 == 1);
@@ -221,30 +224,28 @@ bool addTileOnGameboardDataArray(gameboard_data_array_t &gbda) {
   return false;
 }
 
-bool collaspeTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
-                              point2D_t pt_offset) {
-  Tile currentTile = getTileOnGameboard(gbda, pt);
-  Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
+bool collaspeTilesOnGameboard(gameboard_data_array_t &gbda, delta_t dt_point) {
+  Tile currentTile = getTileOnGameboard(gbda, dt_point.first);
+  Tile targetTile = getTileOnGameboard(gbda, dt_point.first + dt_point.second);
 
   currentTile.value = 0;
   targetTile.value *= 2;
   targetTile.blocked = true;
 
-  setTileOnGameboard(gbda, pt, currentTile);
-  setTileOnGameboard(gbda, pt + pt_offset, targetTile);
+  setTileOnGameboard(gbda, dt_point.first, currentTile);
+  setTileOnGameboard(gbda, dt_point.first + dt_point.second, targetTile);
   return true;
 }
 
-bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, point2D_t pt,
-                           point2D_t pt_offset) {
-  Tile currentTile = getTileOnGameboard(gbda, pt);
-  Tile targetTile = getTileOnGameboard(gbda, pt + pt_offset);
+bool shiftTilesOnGameboard(gameboard_data_array_t &gbda, delta_t dt_point) {
+  Tile currentTile = getTileOnGameboard(gbda, dt_point.first);
+  Tile targetTile = getTileOnGameboard(gbda, dt_point.first + dt_point.second);
 
   targetTile.value = currentTile.value;
   currentTile.value = 0;
 
-  setTileOnGameboard(gbda, pt, currentTile);
-  setTileOnGameboard(gbda, pt + pt_offset, targetTile);
+  setTileOnGameboard(gbda, dt_point.first, currentTile);
+  setTileOnGameboard(gbda, dt_point.first + dt_point.second, targetTile);
   return true;
 }
 
@@ -259,9 +260,10 @@ using bool_collaspe_shift_t = std::tuple<bool, COLLASPE_OR_SHIFT_T>;
 
 bool_collaspe_shift_t
 collasped_or_shifted_tilesOnGameboard(gameboard_data_array_t &gbda,
-                                      point2D_t pt, point2D_t pt_offset) {
-  const auto currentTile = getTileOnGameboard(gbda, pt);
-  const auto targetTile = getTileOnGameboard(gbda, pt + pt_offset);
+                                      delta_t dt_point) {
+  const auto currentTile = getTileOnGameboard(gbda, dt_point.first);
+  const auto targetTile =
+      getTileOnGameboard(gbda, dt_point.first + dt_point.second);
   const auto does_value_exist_in_target_point = targetTile.value;
   const auto is_value_same_as_target_value =
       (currentTile.value == targetTile.value);
@@ -273,10 +275,10 @@ collasped_or_shifted_tilesOnGameboard(gameboard_data_array_t &gbda,
 
   if (does_value_exist_in_target_point && is_value_same_as_target_value &&
       no_tiles_are_blocked) {
-    action_taken = collaspeTilesOnGameboard(gbda, pt, pt_offset);
+    action_taken = collaspeTilesOnGameboard(gbda, dt_point);
     return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_COLLASPE);
   } else if (is_there_a_current_value_but_no_target_value) {
-    action_taken = shiftTilesOnGameboard(gbda, pt, pt_offset);
+    action_taken = shiftTilesOnGameboard(gbda, dt_point);
     return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_SHIFT);
   }
   return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_NONE);
@@ -303,20 +305,22 @@ bool updateGameBoardStats(GameBoard &gb, Tile targetTile) {
   return true;
 }
 
-void moveOnGameboard(GameBoard &gb, point2D_t pt, point2D_t pt_offset) {
+void moveOnGameboard(GameBoard &gb, delta_t dt_point) {
   auto did_gameboard_collaspe_or_shift_anything = bool{};
   auto action_was_taken = COLLASPE_OR_SHIFT_T::ACTION_NONE;
   std::tie(did_gameboard_collaspe_or_shift_anything, action_was_taken) =
-      collasped_or_shifted_tilesOnGameboard(gb.gbda, pt, pt_offset);
+      collasped_or_shifted_tilesOnGameboard(gb.gbda, dt_point);
   if (did_gameboard_collaspe_or_shift_anything) {
     gb.moved = true;
     if (action_was_taken == COLLASPE_OR_SHIFT_T::ACTION_COLLASPE) {
-      updateGameBoardStats(gb, getTileOnGameboard(gb.gbda, pt + pt_offset));
+      updateGameBoardStats(
+          gb, getTileOnGameboard(gb.gbda, dt_point.first + dt_point.second));
     }
   }
-  if (check_recursive_offset_in_game_bounds(pt, pt_offset,
+  if (check_recursive_offset_in_game_bounds(dt_point,
                                             getPlaySizeOfGameboard(gb.gbda))) {
-    moveOnGameboard(gb, pt + pt_offset, pt_offset);
+    moveOnGameboard(
+        gb, std::make_pair(dt_point.first + dt_point.second, dt_point.second));
   }
 }
 
@@ -353,7 +357,7 @@ void tumbleTilesUpOnGameboard(GameBoard &gb) {
     while (y < getPlaySizeOfGameboard(gb.gbda)) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(gb.gbda, current_point)) {
-        moveOnGameboard(gb, current_point, point2D_t{0, -1});
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, -1}));
       }
       y++;
     }
@@ -366,7 +370,7 @@ void tumbleTilesDownOnGameboard(GameBoard &gb) {
     while (y >= 0) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(gb.gbda, current_point)) {
-        moveOnGameboard(gb, current_point, point2D_t{0, 1});
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, 1}));
       }
       y--;
     }
@@ -379,7 +383,7 @@ void tumbleTilesLeftOnGameboard(GameBoard &gb) {
     while (x < getPlaySizeOfGameboard(gb.gbda)) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(gb.gbda, current_point)) {
-        moveOnGameboard(gb, current_point, {-1, 0});
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{-1, 0}));
       }
       x++;
     }
@@ -392,7 +396,7 @@ void tumbleTilesRightOnGameboard(GameBoard &gb) {
     while (x >= 0) {
       const auto current_point = point2D_t{x, y};
       if (getTileValueOnGameboard(gb.gbda, current_point)) {
-        moveOnGameboard(gb, current_point, point2D_t{1, 0});
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{1, 0}));
       }
       x--;
     }
