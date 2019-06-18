@@ -285,11 +285,11 @@ collasped_or_shifted_tilesOnGameboard(gameboard_data_array_t gbda,
   return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_NONE);
 }
 
-void discoverLargestTileValueOnGameboard(GameBoard gb, Tile targetTile) {
+void discoverLargestTileValueOnGameboard(GameBoard &gb, Tile targetTile) {
   gb.largestTile = std::max(gb.largestTile, targetTile.value);
 }
 
-void discoverWinningTileValueOnGameboard(GameBoard gb, Tile targetTile) {
+void discoverWinningTileValueOnGameboard(GameBoard &gb, Tile targetTile) {
   if (!hasWonOnGameboard(gb)) {
     constexpr auto GAME_TILE_WINNING_SCORE = 2048;
     if (targetTile.value == GAME_TILE_WINNING_SCORE) {
