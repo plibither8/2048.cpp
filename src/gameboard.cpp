@@ -1,4 +1,5 @@
 #include "gameboard.hpp"
+#include "point2d.hpp"
 #include <algorithm>
 #include <array>
 #include <chrono>
