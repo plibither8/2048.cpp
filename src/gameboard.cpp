@@ -340,6 +340,58 @@ void moveOnGameboard(GameBoard &gb, delta_t dt_point) {
   }
 }
 
+void doTumbleTilesUpOnGameboard(GameBoard &gb) {
+  for (int x = 0; x < getPlaySizeOfGameboardDataArray(gb.gbda); x++) {
+    int y = 1;
+    while (y < getPlaySizeOfGameboardDataArray(gb.gbda)) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, -1}));
+      }
+      y++;
+    }
+  }
+}
+
+void doTumbleTilesDownOnGameboard(GameBoard &gb) {
+  for (int x = 0; x < getPlaySizeOfGameboardDataArray(gb.gbda); x++) {
+    int y = getPlaySizeOfGameboardDataArray(gb.gbda) - 2;
+    while (y >= 0) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, 1}));
+      }
+      y--;
+    }
+  }
+}
+
+void doTumbleTilesLeftOnGameboard(GameBoard &gb) {
+  for (int y = 0; y < getPlaySizeOfGameboardDataArray(gb.gbda); y++) {
+    int x = 1;
+    while (x < getPlaySizeOfGameboardDataArray(gb.gbda)) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{-1, 0}));
+      }
+      x++;
+    }
+  }
+}
+
+void doTumbleTilesRightOnGameboard(GameBoard &gb) {
+  for (int y = 0; y < getPlaySizeOfGameboardDataArray(gb.gbda); y++) {
+    int x = getPlaySizeOfGameboardDataArray(gb.gbda) - 2;
+    while (x >= 0) {
+      const auto current_point = point2D_t{x, y};
+      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
+        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{1, 0}));
+      }
+      x--;
+    }
+  }
+}
+
 } // namespace
 
 bool hasWonOnGameboard(GameBoard gb) {
@@ -368,55 +420,19 @@ bool addTileOnGameboard(GameBoard &gb) {
 }
 
 void tumbleTilesUpOnGameboard(GameBoard &gb) {
-  for (int x = 0; x < getPlaySizeOfGameboardDataArray(gb.gbda); x++) {
-    int y = 1;
-    while (y < getPlaySizeOfGameboardDataArray(gb.gbda)) {
-      const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, -1}));
-      }
-      y++;
-    }
-  }
+  doTumbleTilesUpOnGameboard(gb);
 }
 
 void tumbleTilesDownOnGameboard(GameBoard &gb) {
-  for (int x = 0; x < getPlaySizeOfGameboardDataArray(gb.gbda); x++) {
-    int y = getPlaySizeOfGameboardDataArray(gb.gbda) - 2;
-    while (y >= 0) {
-      const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{0, 1}));
-      }
-      y--;
-    }
-  }
+  doTumbleTilesDownOnGameboard(gb);
 }
 
 void tumbleTilesLeftOnGameboard(GameBoard &gb) {
-  for (int y = 0; y < getPlaySizeOfGameboardDataArray(gb.gbda); y++) {
-    int x = 1;
-    while (x < getPlaySizeOfGameboardDataArray(gb.gbda)) {
-      const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{-1, 0}));
-      }
-      x++;
-    }
-  }
+  doTumbleTilesLeftOnGameboard(gb);
 }
 
 void tumbleTilesRightOnGameboard(GameBoard &gb) {
-  for (int y = 0; y < getPlaySizeOfGameboardDataArray(gb.gbda); y++) {
-    int x = getPlaySizeOfGameboardDataArray(gb.gbda) - 2;
-    while (x >= 0) {
-      const auto current_point = point2D_t{x, y};
-      if (getTileValueOnGameboardDataArray(gb.gbda, current_point)) {
-        moveOnGameboard(gb, std::make_pair(current_point, point2D_t{1, 0}));
-      }
-      x--;
-    }
-  }
+  doTumbleTilesRightOnGameboard(gb);
 }
 
 std::string printStateOfGameBoard(GameBoard gb) {
