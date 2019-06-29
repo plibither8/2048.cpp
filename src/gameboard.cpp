@@ -163,7 +163,7 @@ void unblockTilesOnGameboardDataArray(gameboard_data_array_t &gbda) {
                  });
 }
 
-bool canMoveOnGameboardDataArray(gameboard_data_array_t &gbda) {
+bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
   auto index_counter{0};
 
   const auto can_move_to_offset = [=, &index_counter](const Tile t) {
