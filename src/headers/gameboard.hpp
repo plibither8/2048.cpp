@@ -10,7 +10,7 @@ namespace Game {
 using tile_data_array_t = std::vector<Tile>;
 
 struct gameboard_data_array_t {
-  ull playsize{0};
+  size_t playsize{};
   tile_data_array_t board{};
 };
 
