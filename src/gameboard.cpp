@@ -195,36 +195,37 @@ bool canMoveOnGameboardDataArray(gameboard_data_array_t &gbda) {
                      can_move_to_offset);
 }
 
-std::vector<point2D_t>
+std::vector<int>
 collectFreeTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
-  std::vector<point2D_t> freeTiles;
+  std::vector<int> freeTiles;
   auto index_counter{0};
-  const auto gatherFreePoint = [gbda, &freeTiles,
-                                &index_counter](const Tile t) {
-    const auto current_point =
-        point2D_t{index_counter % getPlaySizeOfGameboardDataArray(gbda),
-                  index_counter / getPlaySizeOfGameboardDataArray(gbda)};
+  for (const auto t : gbda.board) {
     if (!t.value) {
-      freeTiles.push_back(current_point);
+      freeTiles.push_back(index_counter);
     }
     index_counter++;
-  };
-  std::for_each(std::begin(gbda.board), std::end(gbda.board), gatherFreePoint);
+  }
   return freeTiles;
 }
 
 bool addTileOnGameboardDataArray(gameboard_data_array_t &gbda) {
   constexpr auto CHANCE_OF_VALUE_FOUR_OVER_TWO = 89; // Percentage
-  const auto freeTiles = collectFreeTilesOnGameboardDataArray(gbda);
+  const auto index_list_of_free_tiles =
+      collectFreeTilesOnGameboardDataArray(gbda);
 
-  if (!freeTiles.size()) {
+  if (!index_list_of_free_tiles.size()) {
     return true;
   }
 
-  const auto randomFreeTile = freeTiles.at(RandInt{}() % freeTiles.size());
+  const auto rand_selected_index = index_list_of_free_tiles.at(
+      RandInt{}() % index_list_of_free_tiles.size());
+  const auto rand_index_as_point_t =
+      point2D_t{rand_selected_index % getPlaySizeOfGameboardDataArray(gbda),
+                rand_selected_index / getPlaySizeOfGameboardDataArray(gbda)};
   const auto value_four_or_two =
       RandInt{}() % 100 > CHANCE_OF_VALUE_FOUR_OVER_TWO ? 4 : 2;
-  setTileValueOnGameboardDataArray(gbda, randomFreeTile, value_four_or_two);
+  setTileValueOnGameboardDataArray(gbda, rand_index_as_point_t,
+                                   value_four_or_two);
 
   return false;
 }
