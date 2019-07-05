@@ -1,5 +1,4 @@
-#ifndef GLOBAL_H
-#define GLOBAL_H
+#pragma once
 
 #include <iosfwd>
 #include <string>
@@ -32,5 +31,3 @@ void wait_for_any_letter_input(std::istream &is);
 void clearScreen();
 void drawAscii();
 std::string secondsFormat(double);
-
-#endif

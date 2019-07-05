@@ -1,5 +1,4 @@
-#ifndef POINT_2D_H
-#define POINT_2D_H
+#pragma once
 
 #include <tuple>
 
@@ -52,5 +51,3 @@ inline point2D_t operator-(point2D_t l, const point2D_t &r) {
   l -= r;
   return l;
 }
-
-#endif

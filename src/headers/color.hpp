@@ -1,5 +1,4 @@
-#ifndef COLOR_H
-#define COLOR_H
+#pragma once
 
 #include <ostream>
 
@@ -60,5 +59,3 @@ static Color::Modifier lightYellow(Color::Code::FG_LIGHT_YELLOW);
 static Color::Modifier lightBlue(Color::Code::FG_LIGHT_BLUE);
 static Color::Modifier lightMagenta(Color::Code::FG_LIGHT_MAGENTA);
 static Color::Modifier lightCyan(Color::Code::FG_LIGHT_CYAN);
-
-#endif

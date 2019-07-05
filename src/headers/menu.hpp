@@ -1,8 +1,5 @@
-#ifndef MENU_H
-#define MENU_H
+#pragma once
 
 namespace Menu {
 void startMenu();
 } // namespace Menu
-
-#endif

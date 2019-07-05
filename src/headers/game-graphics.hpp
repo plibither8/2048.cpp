@@ -1,5 +1,4 @@
-#ifndef GAMEGRAPHICS_H
-#define GAMEGRAPHICS_H
+#pragma once
 
 #include <string>
 
@@ -27,5 +26,3 @@ std::string EndlessModeCommandListPrompt();
 std::string InputCommandListFooterPrompt();
 } // namespace Graphics
 } // namespace Game
-
-#endif

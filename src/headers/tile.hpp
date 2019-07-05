@@ -1,5 +1,4 @@
-#ifndef TILE_H
-#define TILE_H
+#pragma once
 
 #include "color.hpp"
 #include "global.hpp"
@@ -12,5 +11,3 @@ public:
   bool blocked{false};
   Color::Modifier tileColor(ull);
 };
-
-#endif

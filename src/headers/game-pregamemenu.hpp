@@ -1,5 +1,4 @@
-#ifndef GAMEPREGAMEMENU_H
-#define GAMEPREGAMEMENU_H
+#pragma once
 
 namespace Game {
 namespace PreGameSetup {
@@ -7,5 +6,3 @@ void SetUpNewGame();
 void ContinueOldGame();
 } // namespace PreGameSetup
 } // namespace Game
-
-#endif

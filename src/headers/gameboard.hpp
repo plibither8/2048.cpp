@@ -1,5 +1,4 @@
-#ifndef GAMEBOARD_H
-#define GAMEBOARD_H
+#pragma once
 
 #include "point2d.hpp"
 #include "tile.hpp"
@@ -83,5 +82,3 @@ public:
   std::string drawSelf() const;
   friend std::ostream &operator<<(std::ostream &os, const GameBoard &gb);
 };
-
-#endif

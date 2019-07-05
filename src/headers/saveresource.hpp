@@ -1,5 +1,4 @@
-#ifndef SAVERESOURCE_H
-#define SAVERESOURCE_H
+#pragma once
 
 #include "gameboard.hpp"
 #include <string>
@@ -12,5 +11,3 @@ void saveToFilePreviousGameStatisticsData(std::string filename,
                                           const GameBoard &gb);
 } // namespace Saver
 } // namespace Game
-
-#endif

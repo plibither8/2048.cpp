@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include "gameboard.hpp"
 
@@ -12,5 +11,3 @@ void playGame(PlayGameFlag cont, GameBoard gb,
 void startGame();
 void continueGame();
 }; // namespace Game
-
-#endif

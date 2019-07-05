@@ -1,5 +1,4 @@
-#ifndef LOADRESOURCE_H
-#define LOADRESOURCE_H
+#pragma once
 
 #include "gameboard.hpp"
 #include <string>
@@ -17,5 +16,3 @@ load_game_stats_from_file(std::string filename);
 
 } // namespace Loader
 } // namespace Game
-
-#endif
