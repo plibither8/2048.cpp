@@ -93,7 +93,7 @@ void drawScoreBoard(std::ostream &os) {
                     border_padding_char)
      << gamePlayBoard.score << inner_border_padding << vertical_border_pattern
      << "\n";
-  if (gamePlayBoard.gbda.playsize == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+  if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     const auto tempBestScore =
         (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
     os << outer_border_padding << vertical_border_pattern
@@ -392,7 +392,7 @@ void saveScore(Scoreboard::Score finalscore) {
 }
 
 void DoPostGameSaveStuff(double duration) {
-  if (gamePlayBoard.gbda.playsize == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+  if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     Scoreboard::Score finalscore{};
     finalscore.score = gamePlayBoard.score;
     finalscore.win = hasWonOnGameboard(gamePlayBoard);

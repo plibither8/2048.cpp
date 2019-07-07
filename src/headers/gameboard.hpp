@@ -9,10 +9,7 @@ namespace Game {
 
 using tile_data_array_t = std::vector<Tile>;
 
-struct gameboard_data_array_t {
-  size_t playsize{};
-  tile_data_array_t board{};
-};
+using gameboard_data_array_t = std::tuple<size_t, tile_data_array_t>;
 
 struct GameBoard {
   gameboard_data_array_t gbda;

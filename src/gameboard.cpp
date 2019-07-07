@@ -28,8 +28,10 @@ private:
   std::uniform_int_distribution<> dist;
 };
 
+enum gameboard_data_array_fields { IDX_PLAYSIZE, IDX_BOARD, MAX_NO_INDEXES };
+
 size_t getPlaySizeOfGameboardDataArray(gameboard_data_array_t gbda) {
-  return gbda.playsize;
+  return std::get<IDX_PLAYSIZE>(gbda);
 }
 
 int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
@@ -39,27 +41,27 @@ int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
 }
 
 Tile getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
-  return gbda.board[point2D_to_1D_index(gbda, pt)];
+  return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
 }
 
 void setTileOnGameboardDataArray(gameboard_data_array_t &gbda, point2D_t pt,
                                  Tile tile) {
-  gbda.board[point2D_to_1D_index(gbda, pt)] = tile;
+  std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)] = tile;
 }
 
 ull getTileValueOnGameboardDataArray(gameboard_data_array_t gbda,
                                      point2D_t pt) {
-  return gbda.board[point2D_to_1D_index(gbda, pt)].value;
+  return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)].value;
 }
 
 void setTileValueOnGameboardDataArray(gameboard_data_array_t &gbda,
                                       point2D_t pt, ull value) {
-  gbda.board[point2D_to_1D_index(gbda, pt)].value = value;
+  std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)].value = value;
 }
 
 bool getTileBlockedOnGameboardDataArray(gameboard_data_array_t gbda,
                                         point2D_t pt) {
-  return gbda.board[point2D_to_1D_index(gbda, pt)].blocked;
+  return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)].blocked;
 }
 
 template<size_t num_of_bars>
@@ -156,11 +158,17 @@ bool check_recursive_offset_in_game_bounds(delta_t dt_point, int playsize) {
   return (is_inside_outer_bounds || is_inside_inner_bounds);
 }
 
-void unblockTilesOnGameboardDataArray(gameboard_data_array_t &gbda) {
-  std::transform(std::begin(gbda.board), std::end(gbda.board),
-                 std::begin(gbda.board), [](const Tile t) {
+gameboard_data_array_t
+unblockTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
+  auto new_board_data_array =
+      tile_data_array_t(std::get<IDX_BOARD>(gbda).size());
+  std::transform(std::begin(std::get<IDX_BOARD>(gbda)),
+                 std::end(std::get<IDX_BOARD>(gbda)),
+                 std::begin(new_board_data_array), [](const Tile t) {
                    return Tile{t.value, false};
                  });
+  return gameboard_data_array_t{std::get<IDX_PLAYSIZE>(gbda),
+                                new_board_data_array};
 }
 
 bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
@@ -191,15 +199,15 @@ bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
             std::any_of(std::begin(list_of_offsets), std::end(list_of_offsets),
                         offset_in_range_with_same_value));
   };
-  return std::any_of(std::begin(gbda.board), std::end(gbda.board),
-                     can_move_to_offset);
+  return std::any_of(std::begin(std::get<IDX_BOARD>(gbda)),
+                     std::end(std::get<IDX_BOARD>(gbda)), can_move_to_offset);
 }
 
 std::vector<size_t>
 collectFreeTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
   std::vector<size_t> freeTiles;
   auto index_counter{0};
-  for (const auto t : gbda.board) {
+  for (const auto t : std::get<IDX_BOARD>(gbda)) {
     if (!t.value) {
       freeTiles.push_back(index_counter);
     }
@@ -408,7 +416,7 @@ long long MoveCountOnGameBoard(GameBoard gb) {
 }
 
 void unblockTilesOnGameboard(GameBoard &gb) {
-  unblockTilesOnGameboardDataArray(gb.gbda);
+  gb.gbda = unblockTilesOnGameboardDataArray(gb.gbda);
 }
 
 bool canMoveOnGameboard(GameBoard &gb) {
