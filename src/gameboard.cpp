@@ -34,34 +34,43 @@ size_t getPlaySizeOfGameboardDataArray(gameboard_data_array_t gbda) {
   return std::get<IDX_PLAYSIZE>(gbda);
 }
 
-int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
-  int x, y;
-  std::tie(x, y) = pt.get();
-  return x + getPlaySizeOfGameboardDataArray(gbda) * y;
-}
+struct gameboard_data_point_t {
+  static int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
+    int x, y;
+    std::tie(x, y) = pt.get();
+    return x + getPlaySizeOfGameboardDataArray(gbda) * y;
+  }
+
+  Tile operator()(gameboard_data_array_t gbda, point2D_t pt) const {
+    return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
+  }
+  Tile &operator()(gameboard_data_array_t &gbda, point2D_t pt) {
+    return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
+  }
+};
 
 Tile getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
-  return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
+  return gameboard_data_point_t{}(gbda, pt);
 }
 
 void setTileOnGameboardDataArray(gameboard_data_array_t &gbda, point2D_t pt,
                                  Tile tile) {
-  std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)] = tile;
+  gameboard_data_point_t{}(gbda, pt) = tile;
 }
 
 ull getTileValueOnGameboardDataArray(gameboard_data_array_t gbda,
                                      point2D_t pt) {
-  return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)].value;
+  return gameboard_data_point_t{}(gbda, pt).value;
 }
 
 void setTileValueOnGameboardDataArray(gameboard_data_array_t &gbda,
                                       point2D_t pt, ull value) {
-  std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)].value = value;
+  gameboard_data_point_t{}(gbda, pt).value = value;
 }
 
 bool getTileBlockedOnGameboardDataArray(gameboard_data_array_t gbda,
                                         point2D_t pt) {
-  return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)].blocked;
+  return gameboard_data_point_t{}(gbda, pt).blocked;
 }
 
 template<size_t num_of_bars>
