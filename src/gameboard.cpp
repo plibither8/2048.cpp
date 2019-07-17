@@ -314,23 +314,19 @@ collasped_or_shifted_tilesOnGameboardDataArray(gameboard_data_array_t gbda,
   return std::make_tuple(action_taken, COLLASPE_OR_SHIFT_T::ACTION_NONE);
 }
 
-void discoverLargestTileValueOnGameboard(GameBoard &gb, Tile targetTile) {
-  gb.largestTile = std::max(gb.largestTile, targetTile.value);
-}
+bool updateGameBoardStats(GameBoard &gb, ull target_tile_value) {
+  gb.score += target_tile_value;
 
-void discoverWinningTileValueOnGameboard(GameBoard &gb, Tile targetTile) {
+  //  Discover the largest tile value on the gameboard...
+  gb.largestTile = std::max(gb.largestTile, target_tile_value);
+
+  //  Discover the winning tile value on the gameboard...
   if (!hasWonOnGameboard(gb)) {
     constexpr auto GAME_TILE_WINNING_SCORE = 2048;
-    if (targetTile.value == GAME_TILE_WINNING_SCORE) {
+    if (target_tile_value == GAME_TILE_WINNING_SCORE) {
       gb.win = true;
     }
   }
-}
-
-bool updateGameBoardStats(GameBoard &gb, Tile targetTile) {
-  gb.score += targetTile.value;
-  discoverLargestTileValueOnGameboard(gb, targetTile);
-  discoverWinningTileValueOnGameboard(gb, targetTile);
   return true;
 }
 
@@ -345,7 +341,7 @@ void moveOnGameboard(GameBoard &gb, delta_t dt_point) {
       collaspeTilesOnGameboardDataArray(gb.gbda, dt_point);
       const auto targetTile = getTileOnGameboardDataArray(
           gb.gbda, dt_point.first + dt_point.second);
-      updateGameBoardStats(gb, targetTile);
+      updateGameBoardStats(gb, targetTile.value);
     }
     if (action_was_taken == COLLASPE_OR_SHIFT_T::ACTION_SHIFT) {
       shiftTilesOnGameboardDataArray(gb.gbda, dt_point);
