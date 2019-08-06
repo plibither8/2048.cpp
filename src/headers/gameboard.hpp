@@ -7,11 +7,10 @@
 
 namespace Game {
 
-using tile_data_array_t = std::vector<Tile>;
-
-using gameboard_data_array_t = std::tuple<size_t, tile_data_array_t>;
-
 struct GameBoard {
+  using tile_data_array_t = std::vector<Tile>;
+  using gameboard_data_array_t = std::tuple<size_t, tile_data_array_t>;
+
   gameboard_data_array_t gbda;
   bool win{};
   bool moved{true};
@@ -20,10 +19,8 @@ struct GameBoard {
   long long moveCount{-1};
 
   GameBoard() = default;
-  explicit GameBoard(ull playsize)
-      : gbda{playsize, tile_data_array_t(playsize * playsize)} {}
-  explicit GameBoard(ull playsize, const tile_data_array_t &prempt_board)
-      : gbda{playsize, prempt_board} {}
+  explicit GameBoard(ull playsize);
+  explicit GameBoard(ull playsize, tile_data_array_t prempt_board);
 };
 
 using load_gameboard_status_t = std::tuple<bool, GameBoard>;

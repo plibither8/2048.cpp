@@ -28,6 +28,7 @@ private:
   std::uniform_int_distribution<> dist;
 };
 
+using gameboard_data_array_t = GameBoard::gameboard_data_array_t;
 enum gameboard_data_array_fields { IDX_PLAYSIZE, IDX_BOARD, MAX_NO_INDEXES };
 
 size_t getPlaySizeOfGameboardDataArray(gameboard_data_array_t gbda) {
@@ -169,6 +170,7 @@ bool check_recursive_offset_in_game_bounds(delta_t dt_point, int playsize) {
 
 gameboard_data_array_t
 unblockTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
+  using tile_data_array_t = GameBoard::tile_data_array_t;
   auto new_board_data_array =
       tile_data_array_t(std::get<IDX_BOARD>(gbda).size());
   std::transform(std::begin(std::get<IDX_BOARD>(gbda)),
@@ -411,6 +413,13 @@ void doTumbleTilesRightOnGameboard(GameBoard &gb) {
 }
 
 } // namespace
+
+GameBoard::GameBoard(ull playsize)
+    : GameBoard{playsize, tile_data_array_t(playsize * playsize)} {
+}
+GameBoard::GameBoard(ull playsize, tile_data_array_t prempt_board)
+    : gbda{playsize, prempt_board} {
+}
 
 bool hasWonOnGameboard(GameBoard gb) {
   return gb.win;
