@@ -12,6 +12,7 @@
 #include "statistics.hpp"
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -92,7 +93,7 @@ void drawScoreBoard(std::ostream &os) {
                     border_padding_char)
      << gamePlayBoard.score << inner_border_padding << vertical_border_pattern
      << "\n";
-  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+  if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     const auto tempBestScore =
         (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
     os << outer_border_padding << vertical_border_pattern
@@ -106,11 +107,11 @@ void drawScoreBoard(std::ostream &os) {
   }
   os << outer_border_padding << vertical_border_pattern << inner_border_padding
      << bold_on << moves_text_label << bold_off
-     << std::string(inner_padding_length -
-                        std::string{moves_text_label}.length() -
-                        std::to_string(gamePlayBoard.MoveCount()).length(),
-                    border_padding_char)
-     << gamePlayBoard.MoveCount() << inner_border_padding
+     << std::string(
+            inner_padding_length - std::string{moves_text_label}.length() -
+                std::to_string(MoveCountOnGameBoard(gamePlayBoard)).length(),
+            border_padding_char)
+     << MoveCountOnGameBoard(gamePlayBoard) << inner_border_padding
      << vertical_border_pattern << "\n";
   os << outer_border_padding << bottom_board << "\n \n";
 }
@@ -136,19 +137,19 @@ void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
 }
 
 gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
-  gamePlayBoard.unblockTiles();
+  unblockTilesOnGameboard(gamePlayBoard);
   if (gamePlayBoard.moved) {
-    gamePlayBoard.addTile();
-    gamePlayBoard.registerMoveByOne();
+    addTileOnGameboard(gamePlayBoard);
+    registerMoveByOneOnGameboard(gamePlayBoard);
   }
 
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (gamePlayBoard.hasWon()) {
+    if (hasWonOnGameboard(gamePlayBoard)) {
       gamestatus[FLAG_WIN] = true;
       gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
     }
   }
-  if (!gamePlayBoard.canMove()) {
+  if (!canMoveOnGameboard(gamePlayBoard)) {
     gamestatus[FLAG_END_GAME] = true;
   }
   return gamestatus;
@@ -212,19 +213,19 @@ gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
 void decideMove(Directions d) {
   switch (d) {
   case UP:
-    gamePlayBoard.tumbleTilesUp();
+    tumbleTilesUpOnGameboard(gamePlayBoard);
     break;
 
   case DOWN:
-    gamePlayBoard.tumbleTilesDown();
+    tumbleTilesDownOnGameboard(gamePlayBoard);
     break;
 
   case LEFT:
-    gamePlayBoard.tumbleTilesLeft();
+    tumbleTilesLeftOnGameboard(gamePlayBoard);
     break;
 
   case RIGHT:
-    gamePlayBoard.tumbleTilesRight();
+    tumbleTilesRightOnGameboard(gamePlayBoard);
     break;
   }
 }
@@ -391,11 +392,11 @@ void saveScore(Scoreboard::Score finalscore) {
 }
 
 void DoPostGameSaveStuff(double duration) {
-  if (gamePlayBoard.getPlaySize() == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+  if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     Scoreboard::Score finalscore{};
     finalscore.score = gamePlayBoard.score;
-    finalscore.win = gamePlayBoard.hasWon();
-    finalscore.moveCount = gamePlayBoard.MoveCount();
+    finalscore.win = hasWonOnGameboard(gamePlayBoard);
+    finalscore.moveCount = MoveCountOnGameBoard(gamePlayBoard);
     finalscore.largestTile = gamePlayBoard.largestTile;
     finalscore.duration = duration;
 
@@ -418,7 +419,7 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   gamePlayBoard = gb;
   if (cont == PlayGameFlag::BrandNewGame) {
     gamePlayBoard = GameBoard(userInput_PlaySize);
-    gamePlayBoard.addTile();
+    addTileOnGameboard(gamePlayBoard);
   }
 
   const auto startTime = std::chrono::high_resolution_clock::now();

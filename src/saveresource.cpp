@@ -8,13 +8,13 @@ namespace {
 
 bool generateFilefromPreviousGameStatisticsData(std::ostream &os,
                                                 const GameBoard &gb) {
-  os << gb.score << ":" << gb.MoveCount();
+  os << gb.score << ":" << MoveCountOnGameBoard(gb);
   return true;
 }
 
 bool generateFilefromPreviousGameStateData(std::ostream &os,
                                            const GameBoard &gb) {
-  os << gb.printState();
+  os << printStateOfGameBoard(gb);
   return true;
 }
 

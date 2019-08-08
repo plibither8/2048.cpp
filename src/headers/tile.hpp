@@ -13,4 +13,6 @@ public:
   Color::Modifier tileColor(ull);
 };
 
+std::string drawTileString(Tile currentTile);
+
 #endif
