@@ -64,8 +64,10 @@ std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
           }
         }
         tile_processed_counter++;
-        return Tile(std::get<IDX_TILE_VALUE>(tile_internal),
-                    std::get<IDX_TILE_BLOCKED>(tile_internal));
+        const unsigned long long tile_value =
+            std::get<IDX_TILE_VALUE>(tile_internal);
+        const bool tile_blocked = std::get<IDX_TILE_BLOCKED>(tile_internal);
+        return Tile{tile_value, tile_blocked};
       };
   std::transform(std::begin(buf), std::end(buf), std::back_inserter(result_buf),
                  prime_tile_data);

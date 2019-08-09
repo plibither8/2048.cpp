@@ -4,7 +4,9 @@
 #include <sstream>
 #include <vector>
 
-Color::Modifier Tile::tileColor(ull value) {
+namespace {
+
+Color::Modifier tileColor(ull value) {
   std::vector<Color::Modifier> colors{red, yellow, magenta, blue, cyan, yellow,
                                       red, yellow, magenta, blue, green};
   int log = log2(value);
@@ -13,13 +15,15 @@ Color::Modifier Tile::tileColor(ull value) {
   return colors[index];
 }
 
+} // namespace
+
 std::string drawTileString(Tile currentTile) {
   std::ostringstream tile_richtext;
   if (!currentTile.value) {
     tile_richtext << "    ";
   } else {
-    tile_richtext << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
+    tile_richtext << tileColor(currentTile.value) << bold_on << std::setw(4)
+                  << currentTile.value << bold_off << def;
   }
   return tile_richtext.str();
 }
