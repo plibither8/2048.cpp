@@ -4,11 +4,15 @@
 #include "color.hpp"
 #include "global.hpp"
 
+namespace Game {
+
 struct tile_t {
   ull value{};
   bool blocked{};
 };
 
-std::ostream &operator<<(std::ostream &os, const tile_t &t);
+} // namespace Game
+
+std::ostream &operator<<(std::ostream &os, const Game::tile_t &t);
 
 #endif

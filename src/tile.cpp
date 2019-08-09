@@ -4,6 +4,8 @@
 #include <sstream>
 #include <vector>
 
+namespace Game {
+
 namespace {
 
 Color::Modifier tileColor(ull value) {
@@ -27,6 +29,10 @@ std::string drawTileString(tile_t currentTile) {
 }
 
 } // namespace
+
+} // namespace Game
+
+using namespace Game;
 
 std::ostream &operator<<(std::ostream &os, const tile_t &t) {
   return os << drawTileString(t);
