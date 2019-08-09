@@ -15,8 +15,6 @@ Color::Modifier tileColor(ull value) {
   return colors[index];
 }
 
-} // namespace
-
 std::string drawTileString(tile_t currentTile) {
   std::ostringstream tile_richtext;
   if (!currentTile.value) {
@@ -26,4 +24,10 @@ std::string drawTileString(tile_t currentTile) {
                   << currentTile.value << bold_off << def;
   }
   return tile_richtext.str();
+}
+
+} // namespace
+
+std::ostream &operator<<(std::ostream &os, const tile_t &t) {
+  return os << drawTileString(t);
 }

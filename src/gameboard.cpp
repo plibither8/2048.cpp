@@ -118,8 +118,7 @@ std::string drawSelf(gameboard_data_array_t gbda) {
       const auto sp = (is_first_col ? "  " : " ");
       str_os << sp;
       str_os << "│ ";
-      str_os << drawTileString(
-          getTileOnGameboardDataArray(gbda, point2D_t{x, y}));
+      str_os << getTileOnGameboardDataArray(gbda, point2D_t{x, y});
     }
     str_os << " │";
     str_os << "\n";

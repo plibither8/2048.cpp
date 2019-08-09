@@ -9,6 +9,6 @@ struct tile_t {
   bool blocked{};
 };
 
-std::string drawTileString(tile_t currentTile);
+std::ostream &operator<<(std::ostream &os, const tile_t &t);
 
 #endif
