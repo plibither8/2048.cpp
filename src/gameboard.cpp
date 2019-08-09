@@ -42,20 +42,20 @@ struct gameboard_data_point_t {
     return x + getPlaySizeOfGameboardDataArray(gbda) * y;
   }
 
-  Tile operator()(gameboard_data_array_t gbda, point2D_t pt) const {
+  tile_t operator()(gameboard_data_array_t gbda, point2D_t pt) const {
     return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
   }
-  Tile &operator()(gameboard_data_array_t &gbda, point2D_t pt) {
+  tile_t &operator()(gameboard_data_array_t &gbda, point2D_t pt) {
     return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
   }
 };
 
-Tile getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
+tile_t getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
   return gameboard_data_point_t{}(gbda, pt);
 }
 
 void setTileOnGameboardDataArray(gameboard_data_array_t &gbda, point2D_t pt,
-                                 Tile tile) {
+                                 tile_t tile) {
   gameboard_data_point_t{}(gbda, pt) = tile;
 }
 
@@ -175,8 +175,8 @@ unblockTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
       tile_data_array_t(std::get<IDX_BOARD>(gbda).size());
   std::transform(std::begin(std::get<IDX_BOARD>(gbda)),
                  std::end(std::get<IDX_BOARD>(gbda)),
-                 std::begin(new_board_data_array), [](const Tile t) {
-                   return Tile{t.value, false};
+                 std::begin(new_board_data_array), [](const tile_t t) {
+                   return tile_t{t.value, false};
                  });
   return gameboard_data_array_t{std::get<IDX_PLAYSIZE>(gbda),
                                 new_board_data_array};
@@ -185,7 +185,7 @@ unblockTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
 bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
   auto index_counter{0};
 
-  const auto can_move_to_offset = [=, &index_counter](const Tile t) {
+  const auto can_move_to_offset = [=, &index_counter](const tile_t t) {
     const int playsize = getPlaySizeOfGameboardDataArray(gbda);
     const auto current_point =
         point2D_t{index_counter % playsize, index_counter / playsize};
@@ -251,8 +251,8 @@ bool addTileOnGameboardDataArray(gameboard_data_array_t &gbda) {
 
 bool collaspeTilesOnGameboardDataArray(gameboard_data_array_t &gbda,
                                        delta_t dt_point) {
-  Tile currentTile = getTileOnGameboardDataArray(gbda, dt_point.first);
-  Tile targetTile =
+  tile_t currentTile = getTileOnGameboardDataArray(gbda, dt_point.first);
+  tile_t targetTile =
       getTileOnGameboardDataArray(gbda, dt_point.first + dt_point.second);
 
   currentTile.value = 0;
@@ -267,8 +267,8 @@ bool collaspeTilesOnGameboardDataArray(gameboard_data_array_t &gbda,
 
 bool shiftTilesOnGameboardDataArray(gameboard_data_array_t &gbda,
                                     delta_t dt_point) {
-  Tile currentTile = getTileOnGameboardDataArray(gbda, dt_point.first);
-  Tile targetTile =
+  tile_t currentTile = getTileOnGameboardDataArray(gbda, dt_point.first);
+  tile_t targetTile =
       getTileOnGameboardDataArray(gbda, dt_point.first + dt_point.second);
 
   targetTile.value = currentTile.value;

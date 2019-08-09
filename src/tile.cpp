@@ -17,7 +17,7 @@ Color::Modifier tileColor(ull value) {
 
 } // namespace
 
-std::string drawTileString(Tile currentTile) {
+std::string drawTileString(tile_t currentTile) {
   std::ostringstream tile_richtext;
   if (!currentTile.value) {
     tile_richtext << "    ";

@@ -4,11 +4,11 @@
 #include "color.hpp"
 #include "global.hpp"
 
-struct Tile {
+struct tile_t {
   ull value{};
   bool blocked{};
 };
 
-std::string drawTileString(Tile currentTile);
+std::string drawTileString(tile_t currentTile);
 
 #endif

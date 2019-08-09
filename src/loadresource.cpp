@@ -37,8 +37,9 @@ std::vector<std::string> get_file_tile_data(std::istream &buf) {
   return tempbuffer;
 }
 
-std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
-  std::vector<Tile> result_buf;
+std::vector<tile_t>
+process_file_tile_string_data(std::vector<std::string> buf) {
+  std::vector<tile_t> result_buf;
   auto tile_processed_counter{0};
   const auto prime_tile_data =
       [&tile_processed_counter](const std::string tile_data) {
@@ -67,7 +68,7 @@ std::vector<Tile> process_file_tile_string_data(std::vector<std::string> buf) {
         const unsigned long long tile_value =
             std::get<IDX_TILE_VALUE>(tile_internal);
         const bool tile_blocked = std::get<IDX_TILE_BLOCKED>(tile_internal);
-        return Tile{tile_value, tile_blocked};
+        return tile_t{tile_value, tile_blocked};
       };
   std::transform(std::begin(buf), std::end(buf), std::back_inserter(result_buf),
                  prime_tile_data);
