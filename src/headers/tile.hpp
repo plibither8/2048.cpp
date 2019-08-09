@@ -1,7 +1,6 @@
 #ifndef TILE_H
 #define TILE_H
 
-#include "color.hpp"
 #include "global.hpp"
 
 namespace Game {

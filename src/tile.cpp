@@ -1,4 +1,5 @@
 #include "tile.hpp"
+#include "color.hpp"
 #include <cmath>
 #include <iomanip>
 #include <sstream>
