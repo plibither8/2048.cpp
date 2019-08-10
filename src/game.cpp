@@ -1,4 +1,5 @@
 #include "game.hpp"
+#include "color.hpp"
 #include "game-graphics.hpp"
 #include "game-input.hpp"
 #include "game-pregamemenu.hpp"

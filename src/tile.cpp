@@ -1,10 +1,15 @@
 #include "tile.hpp"
+#include "color.hpp"
 #include <cmath>
 #include <iomanip>
 #include <sstream>
 #include <vector>
 
-Color::Modifier Tile::tileColor(ull value) {
+namespace Game {
+
+namespace {
+
+Color::Modifier tileColor(ull value) {
   std::vector<Color::Modifier> colors{red, yellow, magenta, blue, cyan, yellow,
                                       red, yellow, magenta, blue, green};
   int log = log2(value);
@@ -13,13 +18,23 @@ Color::Modifier Tile::tileColor(ull value) {
   return colors[index];
 }
 
-std::string drawTileString(Tile currentTile) {
+std::string drawTileString(tile_t currentTile) {
   std::ostringstream tile_richtext;
   if (!currentTile.value) {
     tile_richtext << "    ";
   } else {
-    tile_richtext << currentTile.tileColor(currentTile.value) << bold_on
-                  << std::setw(4) << currentTile.value << bold_off << def;
+    tile_richtext << tileColor(currentTile.value) << bold_on << std::setw(4)
+                  << currentTile.value << bold_off << def;
   }
   return tile_richtext.str();
+}
+
+} // namespace
+
+} // namespace Game
+
+using namespace Game;
+
+std::ostream &operator<<(std::ostream &os, const tile_t &t) {
+  return os << drawTileString(t);
 }
