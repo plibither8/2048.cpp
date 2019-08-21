@@ -23,8 +23,6 @@ struct GameBoard {
   explicit GameBoard(ull playsize, tile_data_array_t prempt_board);
 };
 
-using load_gameboard_status_t = std::tuple<bool, GameBoard>;
-
 bool hasWonOnGameboard(GameBoard gb);
 long long MoveCountOnGameBoard(GameBoard gb);
 
