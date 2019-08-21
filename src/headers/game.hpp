@@ -1,9 +1,8 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "gameboard.hpp"
-
 namespace Game {
+struct GameBoard;
 
 enum class PlayGameFlag { BrandNewGame, ContinuePreviousGame };
 void playGame(PlayGameFlag cont, GameBoard gb,

@@ -1,13 +1,13 @@
 #ifndef LOADRESOURCE_H
 #define LOADRESOURCE_H
 
-#include "gameboard.hpp"
 #include <string>
 #include <tuple>
 
 namespace Game {
-namespace Loader {
+using load_gameboard_status_t = std::tuple<bool, struct GameBoard>;
 
+namespace Loader {
 load_gameboard_status_t load_GameBoard_data_from_file(std::string filename);
 
 // Output: {[loadfile_ok_status], [decltype(gameboard.score)],
