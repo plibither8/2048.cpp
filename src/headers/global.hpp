@@ -30,7 +30,6 @@ void DrawAsOneTimeFlag(std::ostream &os, bool &trigger, T f) {
 void pause_for_keypress();
 void wait_for_any_letter_input(std::istream &is);
 void clearScreen();
-void drawAscii();
 std::string secondsFormat(double);
 
 #endif

@@ -119,7 +119,7 @@ void drawScoreBoard(std::ostream &os) {
 
 void drawBoard(std::ostream &os) {
   clearScreen();
-  drawAscii();
+  DrawAlways(os, Game::Graphics::AsciiArt2048);
   drawScoreBoard(os);
   os << gamePlayBoard;
 }

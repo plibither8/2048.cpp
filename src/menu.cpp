@@ -35,7 +35,7 @@ void continueGame() {
 
 void showScores() {
   clearScreen();
-  drawAscii();
+  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
   Scoreboard::prettyPrintScoreboard(std::cout);
   Statistics::prettyPrintStats(std::cout);
   std::cout << std::flush;
@@ -44,7 +44,7 @@ void showScores() {
 }
 
 void drawMainMenuGraphics(std::ostream &out_os) {
-  drawAscii();
+  DrawAlways(out_os, Game::Graphics::AsciiArt2048);
   DrawAlways(out_os, Game::Graphics::Menu::MainMenuTitlePrompt);
   DrawAlways(out_os, Game::Graphics::Menu::MainMenuOptionsPrompt);
   // Only outputs if there is an input error...

@@ -104,7 +104,7 @@ bool soloLoop() {
   pregamesetup_status = pregamesetup_status_t{};
 
   clearScreen();
-  drawAscii();
+  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
   DrawAsOneTimeFlag(std::cout, noSave, Graphics::GameBoardNoSaveErrorPrompt);
   DrawAlways(std::cout, QuestionAboutBoardSizePrompt);
 

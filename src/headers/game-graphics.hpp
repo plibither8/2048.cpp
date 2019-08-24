@@ -11,6 +11,7 @@ enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
 namespace Game {
 namespace Graphics {
+std::string AsciiArt2048();
 std::string MessageScoreSavedPrompt();
 std::string AskForPlayerNamePrompt();
 std::string BoardInputPrompt();

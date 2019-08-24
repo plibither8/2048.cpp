@@ -4,6 +4,24 @@
 
 namespace Game {
 namespace Graphics {
+std::string AsciiArt2048() {
+  constexpr auto title_card_2048 = R"(
+   /\\\\\\\\\          /\\\\\\\                /\\\         /\\\\\\\\\
+  /\\\///////\\\      /\\\/////\\\            /\\\\\       /\\\///////\\\
+  \///      \//\\\    /\\\    \//\\\         /\\\/\\\      \/\\\     \/\\\
+             /\\\/    \/\\\     \/\\\       /\\\/\/\\\      \///\\\\\\\\\/
+           /\\\//      \/\\\     \/\\\     /\\\/  \/\\\       /\\\///////\\\
+         /\\\//         \/\\\     \/\\\   /\\\\\\\\\\\\\\\\   /\\\      \//\\\
+        /\\\/            \//\\\    /\\\   \///////////\\\//   \//\\\      /\\\
+        /\\\\\\\\\\\\\\\   \///\\\\\\\/              \/\\\      \///\\\\\\\\\/
+        \///////////////      \///////                \///         \/////////
+  )";
+  std::ostringstream title_card_richtext;
+  title_card_richtext << green << bold_on << title_card_2048 << bold_off << def;
+  title_card_richtext << "\n\n\n";
+  return title_card_richtext.str();
+}
+
 std::string MessageScoreSavedPrompt() {
   constexpr auto score_saved_text = "Score saved!";
   constexpr auto sp = "  ";
