@@ -1,5 +1,6 @@
 #include "menu.hpp"
 #include "color.hpp"
+#include "game-graphics.hpp"
 #include "game.hpp"
 #include "global.hpp"
 #include "scores.hpp"
@@ -42,71 +43,14 @@ void showScores() {
   Menu::startMenu();
 }
 
-void drawMainMenuTitle(std::ostream &out_os) {
-  constexpr auto greetings_text = "Welcome to ";
-  constexpr auto gamename_text = "2048!";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream title_richtext;
-  title_richtext << bold_on << sp << greetings_text << blue << gamename_text
-                 << def << bold_off << "\n";
-
-  str_os << title_richtext.str();
-  out_os << str_os.str();
-}
-
-void drawMainMenuOptions(std::ostream &out_os) {
-  const auto menu_list_txt = {"1. Play a New Game", "2. Continue Previous Game",
-                              "3. View Highscores and Statistics", "4. Exit"};
-  constexpr auto sp = "        ";
-
-  std::ostringstream str_os;
-
-  str_os << "\n";
-  for (const auto txt : menu_list_txt) {
-    str_os << sp << txt << "\n";
-  }
-  str_os << "\n";
-
-  out_os << str_os.str();
-}
-
-void drawInputMenuErrorInvalidInput(std::ostream &out_os, bool err) {
-  if (err) {
-    constexpr auto err_input_text = "Invalid input. Please try again.";
-    constexpr auto sp = "  ";
-
-    std::ostringstream str_os;
-    std::ostringstream err_input_richtext;
-    err_input_richtext << red << sp << err_input_text << def << "\n\n";
-
-    str_os << err_input_richtext.str();
-    out_os << str_os.str();
-  }
-}
-
-void drawInputMenuPrompt(std::ostream &out_os) {
-  constexpr auto prompt_choice_text = "Enter Choice: ";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream prompt_choice_richtext;
-
-  prompt_choice_richtext << sp << prompt_choice_text;
-
-  str_os << prompt_choice_richtext.str();
-
-  out_os << str_os.str();
-}
-
 void drawMainMenuGraphics(std::ostream &out_os) {
   drawAscii();
-  drawMainMenuTitle(out_os);
-  drawMainMenuOptions(out_os);
+  DrawAlways(out_os, Game::Graphics::Menu::MainMenuTitlePrompt);
+  DrawAlways(out_os, Game::Graphics::Menu::MainMenuOptionsPrompt);
   // Only outputs if there is an input error...
-  drawInputMenuErrorInvalidInput(out_os, FlagInputErrornousChoice);
-  drawInputMenuPrompt(out_os);
+  DrawOnlyWhen(out_os, FlagInputErrornousChoice,
+               Game::Graphics::Menu::InputMenuErrorInvalidInputPrompt);
+  DrawAlways(out_os, Game::Graphics::Menu::InputMenuPrompt);
 }
 
 void receive_input_flags(std::istream &in_os) {

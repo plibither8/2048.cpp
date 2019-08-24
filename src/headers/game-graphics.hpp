@@ -25,6 +25,12 @@ std::string BoardSizeErrorPrompt();
 std::string InputCommandListPrompt();
 std::string EndlessModeCommandListPrompt();
 std::string InputCommandListFooterPrompt();
+namespace Menu {
+std::string MainMenuTitlePrompt();
+std::string MainMenuOptionsPrompt();
+std::string InputMenuErrorInvalidInputPrompt();
+std::string InputMenuPrompt();
+} // namespace Menu
 } // namespace Graphics
 } // namespace Game
 
