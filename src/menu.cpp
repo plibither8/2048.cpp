@@ -43,18 +43,6 @@ void showScores() {
   Menu::startMenu();
 }
 
-std::string drawMainMenuGraphics(bool input_error_choice_invalid) {
-  std::ostringstream str_os;
-  DrawAlways(str_os, Game::Graphics::AsciiArt2048);
-  DrawAlways(str_os, Game::Graphics::Menu::MainMenuTitlePrompt);
-  DrawAlways(str_os, Game::Graphics::Menu::MainMenuOptionsPrompt);
-  // Only outputs if there is an input error...
-  DrawOnlyWhen(str_os, input_error_choice_invalid,
-               Game::Graphics::Menu::InputMenuErrorInvalidInputPrompt);
-  DrawAlways(str_os, Game::Graphics::Menu::InputMenuPrompt);
-  return str_os.str();
-}
-
 void receive_input_flags(std::istream &in_os) {
   // Reset ErrornousChoice flag...
   FlagInputErrornousChoice = bool{};
@@ -100,7 +88,8 @@ bool soloLoop() {
   mainmenustatus = mainmenustatus_t{};
   clearScreen();
   DrawAlways(std::cout,
-             DataSuppliment(FlagInputErrornousChoice, drawMainMenuGraphics));
+             DataSuppliment(FlagInputErrornousChoice,
+                            Game::Graphics::Menu::MainMenuGraphicsOverlay));
   receive_input_flags(std::cin);
   process_MainMenu();
   return FlagInputErrornousChoice;
