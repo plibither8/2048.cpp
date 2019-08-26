@@ -227,13 +227,13 @@ std::string InputMenuPrompt() {
 
 std::string MainMenuGraphicsOverlay(bool input_error_choice_invalid) {
   std::ostringstream str_os;
-  DrawAlways(str_os, Game::Graphics::AsciiArt2048);
-  DrawAlways(str_os, Game::Graphics::Menu::MainMenuTitlePrompt);
-  DrawAlways(str_os, Game::Graphics::Menu::MainMenuOptionsPrompt);
+  DrawAlways(str_os, AsciiArt2048);
+  DrawAlways(str_os, MainMenuTitlePrompt);
+  DrawAlways(str_os, MainMenuOptionsPrompt);
   // Only outputs if there is an input error...
   DrawOnlyWhen(str_os, input_error_choice_invalid,
-               Game::Graphics::Menu::InputMenuErrorInvalidInputPrompt);
-  DrawAlways(str_os, Game::Graphics::Menu::InputMenuPrompt);
+               InputMenuErrorInvalidInputPrompt);
+  DrawAlways(str_os, InputMenuPrompt);
   return str_os.str();
 }
 
