@@ -3,6 +3,7 @@
 #include "game-graphics.hpp"
 #include "game.hpp"
 #include "global.hpp"
+#include "menu-graphics.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <array>
@@ -87,6 +88,7 @@ bool soloLoop() {
   // No choice in Menu selected, reset all flags...
   mainmenustatus = mainmenustatus_t{};
   clearScreen();
+  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
   DrawAlways(std::cout,
              DataSuppliment(FlagInputErrornousChoice,
                             Game::Graphics::Menu::MainMenuGraphicsOverlay));
