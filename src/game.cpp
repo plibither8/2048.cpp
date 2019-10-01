@@ -339,38 +339,6 @@ void endlessGameLoop() {
   drawEndScreen(std::cout, world_gamestatus);
 }
 
-void drawEndGameStatistics(std::ostream &os, Scoreboard::Score finalscore) {
-  constexpr auto stats_title_text = "STATISTICS";
-  constexpr auto divider_text = "──────────";
-  const auto stats_attributes_text = {
-      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
-  constexpr auto num_of_stats_attributes_text = 4;
-  constexpr auto sp = "  ";
-
-  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-  data_stats = {
-      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
-      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration)};
-
-  std::ostringstream stats_richtext;
-  stats_richtext << yellow << sp << stats_title_text << def << "\n";
-  stats_richtext << yellow << sp << divider_text << def << "\n";
-
-  auto counter{0};
-  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
-                                    &stats_richtext](const std::string) {
-    stats_richtext << sp << std::left << std::setw(19)
-                   << std::begin(stats_attributes_text)[counter] << bold_on
-                   << std::begin(data_stats)[counter] << bold_off << "\n";
-    counter++;
-  };
-  std::for_each(std::begin(stats_attributes_text),
-                std::end(stats_attributes_text), populate_stats_info);
-
-  os << stats_richtext.str();
-  os << "\n\n";
-}
-
 void saveEndGameStats(Scoreboard::Score finalscore) {
   using namespace Statistics;
   total_game_stats_t stats;
@@ -401,7 +369,8 @@ void DoPostGameSaveStuff(double duration) {
     finalscore.largestTile = gamePlayBoard.largestTile;
     finalscore.duration = duration;
 
-    drawEndGameStatistics(std::cout, finalscore);
+    DrawAlways(std::cout,
+               DataSuppliment(finalscore, Graphics::EndGameStatisticsPrompt));
     saveEndGameStats(finalscore);
 
     DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);

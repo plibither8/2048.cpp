@@ -1,6 +1,8 @@
 #include "game-graphics.hpp"
 #include "color.hpp"
 #include "global.hpp"
+#include "scores.hpp"
+#include <iomanip>
 #include <sstream>
 
 namespace Game {
@@ -164,6 +166,44 @@ std::string InputCommandListFooterPrompt() {
   for (const auto txt : input_commands_list_footer_text) {
     str_os << sp << txt << "\n";
   }
+  return str_os.str();
+}
+
+std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore) {
+  std::ostringstream str_os;
+  constexpr auto stats_title_text = "STATISTICS";
+  constexpr auto divider_text = "──────────";
+  const auto stats_attributes_text = {
+      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+  constexpr auto num_of_stats_attributes_text = 4;
+  constexpr auto sp = "  ";
+
+  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
+  data_stats = {
+      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
+      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration)};
+
+  std::ostringstream stats_richtext;
+  stats_richtext << yellow << sp << stats_title_text << def << "\n";
+  stats_richtext << yellow << sp << divider_text << def << "\n";
+
+  auto counter{0};
+  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
+                                    &stats_richtext](const std::string) {
+    stats_richtext << sp << std::left << std::setw(19)
+                   << std::begin(stats_attributes_text)[counter] << bold_on
+                   << std::begin(data_stats)[counter] << bold_off << "\n";
+    counter++;
+  };
+
+  for (const auto s : stats_attributes_text) {
+    populate_stats_info(s);
+  }
+  //  std::for_each(std::begin(stats_attributes_text),
+  //                std::end(stats_attributes_text), populate_stats_info);
+
+  str_os << stats_richtext.str();
+  str_os << "\n\n";
   return str_os.str();
 }
 

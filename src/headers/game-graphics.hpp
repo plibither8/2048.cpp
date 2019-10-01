@@ -9,6 +9,10 @@ enum GameBoardDimensions {
 };
 enum { COMPETITION_GAME_BOARD_PLAY_SIZE = 4 };
 
+namespace Scoreboard {
+struct Score;
+}
+
 namespace Game {
 namespace Graphics {
 std::string AsciiArt2048();
@@ -26,6 +30,7 @@ std::string BoardSizeErrorPrompt();
 std::string InputCommandListPrompt();
 std::string EndlessModeCommandListPrompt();
 std::string InputCommandListFooterPrompt();
+std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore);
 } // namespace Graphics
 } // namespace Game
 
