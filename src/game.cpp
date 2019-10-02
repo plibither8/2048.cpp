@@ -324,8 +324,14 @@ void DoPostGameSaveStuff(double duration) {
     finalscore.largestTile = gamePlayBoard.largestTile;
     finalscore.duration = duration;
 
-    DrawAlways(std::cout,
-               DataSuppliment(finalscore, Graphics::EndGameStatisticsPrompt));
+    const auto finalscore_display_data =
+        std::make_tuple(std::to_string(finalscore.score),
+                        std::to_string(finalscore.largestTile),
+                        std::to_string(finalscore.moveCount),
+                        secondsFormat(finalscore.duration));
+
+    DrawAlways(std::cout, DataSuppliment(finalscore_display_data,
+                                         Graphics::EndGameStatisticsPrompt));
     saveEndGameStats(finalscore);
 
     DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);

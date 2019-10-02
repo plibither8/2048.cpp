@@ -1,7 +1,7 @@
 #include "game-graphics.hpp"
 #include "color.hpp"
 #include "global.hpp"
-#include "scores.hpp"
+#include <array>
 #include <iomanip>
 #include <sstream>
 
@@ -169,19 +169,26 @@ std::string InputCommandListFooterPrompt() {
   return str_os.str();
 }
 
-std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore) {
+std::string EndGameStatisticsPrompt(finalscore_display_data_t finalscore) {
   std::ostringstream str_os;
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
+  constexpr auto sp = "  ";
   const auto stats_attributes_text = {
       "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
-  constexpr auto num_of_stats_attributes_text = 4;
-  constexpr auto sp = "  ";
-
-  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-  data_stats = {
-      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
-      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration)};
+  enum FinalScoreDisplayDataFields {
+    IDX_FINAL_SCORE_VALUE,
+    IDX_LARGEST_TILE,
+    IDX_MOVE_COUNT,
+    IDX_DURATION,
+    MAX_NUM_OF_FINALSCOREDISPLAYDATA_INDEXES
+  };
+  const auto data_stats =
+      std::array<std::string, MAX_NUM_OF_FINALSCOREDISPLAYDATA_INDEXES>{
+          std::get<IDX_FINAL_SCORE_VALUE>(finalscore),
+          std::get<IDX_LARGEST_TILE>(finalscore),
+          std::get<IDX_MOVE_COUNT>(finalscore),
+          std::get<IDX_DURATION>(finalscore)};
 
   std::ostringstream stats_richtext;
   stats_richtext << yellow << sp << stats_title_text << def << "\n";
@@ -199,8 +206,6 @@ std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore) {
   for (const auto s : stats_attributes_text) {
     populate_stats_info(s);
   }
-  //  std::for_each(std::begin(stats_attributes_text),
-  //                std::end(stats_attributes_text), populate_stats_info);
 
   str_os << stats_richtext.str();
   str_os << "\n\n";
