@@ -34,8 +34,8 @@ std::string InputCommandListFooterPrompt();
 std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore);
 using scoreboard_display_data_t =
     std::tuple<bool, std::string, std::string, std::string>;
-std::string CurrentGameScoreBoardPrompt(scoreboard_display_data_t scdd);
-
+std::string GameScoreBoardBox(scoreboard_display_data_t scdd);
+std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd);
 } // namespace Graphics
 } // namespace Game
 

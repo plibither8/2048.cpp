@@ -57,11 +57,6 @@ ull load_game_best_score() {
   return tempscore;
 }
 
-void drawBoard(std::ostream &os, Graphics::scoreboard_display_data_t scdd) {
-  DrawAlways(os, Game::Graphics::AsciiArt2048);
-  DrawAlways(os, DataSuppliment(scdd, Graphics::CurrentGameScoreBoardPrompt));
-}
-
 void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
   const auto InputControlLists = [&gamestatus] {
     std::ostringstream str_os;
@@ -105,7 +100,7 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
       std::make_tuple(comp_mode, std::to_string(gameboard_score),
                       std::to_string(tempBestScore), std::to_string(movecount));
   clearScreen();
-  drawBoard(os, scdd);
+  DrawAlways(os, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
   os << gamePlayBoard;
   DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
                     Graphics::GameStateNowSavedPrompt);
@@ -294,7 +289,7 @@ void endlessGameLoop() {
       std::make_tuple(comp_mode, std::to_string(gameboard_score),
                       std::to_string(tempBestScore), std::to_string(movecount));
   clearScreen();
-  drawBoard(std::cout, scdd);
+  DrawAlways(std::cout, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
   std::cout << gamePlayBoard;
   drawEndScreen(std::cout, world_gamestatus);
 }

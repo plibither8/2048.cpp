@@ -207,7 +207,7 @@ std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore) {
   return str_os.str();
 }
 
-std::string CurrentGameScoreBoardPrompt(scoreboard_display_data_t scdd) {
+std::string GameScoreBoardBox(scoreboard_display_data_t scdd) {
   std::ostringstream str_os;
   constexpr auto score_text_label = "SCORE:";
   constexpr auto bestscore_text_label = "BEST SCORE:";
@@ -279,6 +279,13 @@ std::string CurrentGameScoreBoardPrompt(scoreboard_display_data_t scdd) {
          << movecount << inner_border_padding << vertical_border_pattern
          << "\n";
   str_os << outer_border_padding << bottom_board << "\n \n";
+  return str_os.str();
+}
+
+std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd) {
+  std::ostringstream str_os;
+  DrawAlways(str_os, AsciiArt2048);
+  DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardBox));
   return str_os.str();
 }
 
