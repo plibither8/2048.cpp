@@ -57,20 +57,9 @@ ull load_game_best_score() {
   return tempscore;
 }
 
-void drawBoard(std::ostream &os) {
-  clearScreen();
+void drawBoard(std::ostream &os, Graphics::scoreboard_display_data_t scdd) {
   DrawAlways(os, Game::Graphics::AsciiArt2048);
-  const auto gameboard_score = gamePlayBoard.score;
-  const auto tempBestScore =
-      (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
-  const auto comp_mode =
-      std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
-  const auto movecount = MoveCountOnGameBoard(gamePlayBoard);
-  const auto scdd =
-      std::make_tuple(comp_mode, std::to_string(gameboard_score),
-                      std::to_string(tempBestScore), std::to_string(movecount));
   DrawAlways(os, DataSuppliment(scdd, Graphics::CurrentGameScoreBoardPrompt));
-  os << gamePlayBoard;
 }
 
 void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
@@ -106,7 +95,18 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
 }
 
 gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
-  drawBoard(os);
+  const auto gameboard_score = gamePlayBoard.score;
+  const auto tempBestScore =
+      (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+  const auto comp_mode =
+      std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
+  const auto movecount = MoveCountOnGameBoard(gamePlayBoard);
+  const auto scdd =
+      std::make_tuple(comp_mode, std::to_string(gameboard_score),
+                      std::to_string(tempBestScore), std::to_string(movecount));
+  clearScreen();
+  drawBoard(os, scdd);
+  os << gamePlayBoard;
   DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
                     Graphics::GameStateNowSavedPrompt);
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
@@ -284,7 +284,18 @@ void endlessGameLoop() {
     std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
   }
 
-  drawBoard(std::cout);
+  const auto gameboard_score = gamePlayBoard.score;
+  const auto tempBestScore =
+      (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+  const auto comp_mode =
+      std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
+  const auto movecount = MoveCountOnGameBoard(gamePlayBoard);
+  const auto scdd =
+      std::make_tuple(comp_mode, std::to_string(gameboard_score),
+                      std::to_string(tempBestScore), std::to_string(movecount));
+  clearScreen();
+  drawBoard(std::cout, scdd);
+  std::cout << gamePlayBoard;
   drawEndScreen(std::cout, world_gamestatus);
 }
 
