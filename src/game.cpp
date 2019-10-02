@@ -57,70 +57,19 @@ ull load_game_best_score() {
   return tempscore;
 }
 
-void drawScoreBoard(std::ostream &os) {
-  constexpr auto score_text_label = "SCORE:";
-  constexpr auto bestscore_text_label = "BEST SCORE:";
-  constexpr auto moves_text_label = "MOVES:";
-
-  // * border padding: vvv
-  // | l-outer: 2, r-outer: 0
-  // | l-inner: 1, r-inner: 1
-  // * top border / bottom border: vvv
-  // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
-  // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
-  enum {
-    UI_SCOREBOARD_SIZE = 27,
-    UI_BORDER_OUTER_PADDING = 2,
-    UI_BORDER_INNER_PADDING = 1
-  }; // length of horizontal board - (corners + border padding)
-  constexpr auto border_padding_char = ' ';
-  constexpr auto vertical_border_pattern = "│";
-  constexpr auto top_board =
-      "┌───────────────────────────┐"; // Multibyte character set
-  constexpr auto bottom_board =
-      "└───────────────────────────┘"; // Multibyte character set
-  const auto outer_border_padding =
-      std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
-  const auto inner_border_padding =
-      std::string(UI_BORDER_INNER_PADDING, border_padding_char);
-  const auto inner_padding_length =
-      UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
-  os << outer_border_padding << top_board << "\n";
-  os << outer_border_padding << vertical_border_pattern << inner_border_padding
-     << bold_on << score_text_label << bold_off
-     << std::string(inner_padding_length -
-                        std::string{score_text_label}.length() -
-                        std::to_string(gamePlayBoard.score).length(),
-                    border_padding_char)
-     << gamePlayBoard.score << inner_border_padding << vertical_border_pattern
-     << "\n";
-  if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
-    const auto tempBestScore =
-        (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
-    os << outer_border_padding << vertical_border_pattern
-       << inner_border_padding << bold_on << bestscore_text_label << bold_off
-       << std::string(inner_padding_length -
-                          std::string{bestscore_text_label}.length() -
-                          std::to_string(tempBestScore).length(),
-                      border_padding_char)
-       << tempBestScore << inner_border_padding << vertical_border_pattern
-       << "\n";
-  }
-  os << outer_border_padding << vertical_border_pattern << inner_border_padding
-     << bold_on << moves_text_label << bold_off
-     << std::string(
-            inner_padding_length - std::string{moves_text_label}.length() -
-                std::to_string(MoveCountOnGameBoard(gamePlayBoard)).length(),
-            border_padding_char)
-     << MoveCountOnGameBoard(gamePlayBoard) << inner_border_padding
-     << vertical_border_pattern << "\n";
-  os << outer_border_padding << bottom_board << "\n \n";
-}
-
 void drawBoard(std::ostream &os) {
   clearScreen();
   DrawAlways(os, Game::Graphics::AsciiArt2048);
-  drawScoreBoard(os);
+  const auto gameboard_score = gamePlayBoard.score;
+  const auto tempBestScore =
+      (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+  const auto comp_mode =
+      std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
+  const auto movecount = MoveCountOnGameBoard(gamePlayBoard);
+  const auto scdd =
+      std::make_tuple(comp_mode, std::to_string(gameboard_score),
+                      std::to_string(tempBestScore), std::to_string(movecount));
+  DrawAlways(os, DataSuppliment(scdd, Graphics::CurrentGameScoreBoardPrompt));
   os << gamePlayBoard;
 }
 

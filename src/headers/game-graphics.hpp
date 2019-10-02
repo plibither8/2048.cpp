@@ -2,6 +2,7 @@
 #define GAMEGRAPHICS_H
 
 #include <string>
+#include <tuple>
 
 enum GameBoardDimensions {
   MIN_GAME_BOARD_PLAY_SIZE = 3,
@@ -31,6 +32,10 @@ std::string InputCommandListPrompt();
 std::string EndlessModeCommandListPrompt();
 std::string InputCommandListFooterPrompt();
 std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore);
+using scoreboard_display_data_t =
+    std::tuple<bool, std::string, std::string, std::string>;
+std::string CurrentGameScoreBoardPrompt(scoreboard_display_data_t scdd);
+
 } // namespace Graphics
 } // namespace Game
 

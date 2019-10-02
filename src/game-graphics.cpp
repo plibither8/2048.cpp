@@ -207,5 +207,80 @@ std::string EndGameStatisticsPrompt(Scoreboard::Score finalscore) {
   return str_os.str();
 }
 
+std::string CurrentGameScoreBoardPrompt(scoreboard_display_data_t scdd) {
+  std::ostringstream str_os;
+  constexpr auto score_text_label = "SCORE:";
+  constexpr auto bestscore_text_label = "BEST SCORE:";
+  constexpr auto moves_text_label = "MOVES:";
+
+  // * border padding: vvv
+  // | l-outer: 2, r-outer: 0
+  // | l-inner: 1, r-inner: 1
+  // * top border / bottom border: vvv
+  // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
+  // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
+  enum {
+    UI_SCOREBOARD_SIZE = 27,
+    UI_BORDER_OUTER_PADDING = 2,
+    UI_BORDER_INNER_PADDING = 1
+  }; // length of horizontal board - (corners + border padding)
+  constexpr auto border_padding_char = ' ';
+  constexpr auto vertical_border_pattern = "│";
+  constexpr auto top_board =
+      "┌───────────────────────────┐"; // Multibyte character set
+  constexpr auto bottom_board =
+      "└───────────────────────────┘"; // Multibyte character set
+  const auto outer_border_padding =
+      std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
+  const auto inner_border_padding =
+      std::string(UI_BORDER_INNER_PADDING, border_padding_char);
+  const auto inner_padding_length =
+      UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
+
+  enum ScoreBoardDisplayDataFields {
+    IDX_COMPETITION_MODE,
+    IDX_GAMEBOARD_SCORE,
+    IDX_BESTSCORE,
+    IDX_MOVECOUNT,
+    MAX_SCOREBOARDDISPLAYDATA_INDEXES
+  };
+
+  const auto competition_mode = std::get<IDX_COMPETITION_MODE>(scdd);
+  const auto gameboard_score = std::get<IDX_GAMEBOARD_SCORE>(scdd);
+  const auto temp_bestscore = std::get<IDX_BESTSCORE>(scdd);
+  const auto movecount = std::get<IDX_MOVECOUNT>(scdd);
+
+  str_os << outer_border_padding << top_board << "\n";
+  str_os << outer_border_padding << vertical_border_pattern
+         << inner_border_padding << bold_on << score_text_label << bold_off
+         << std::string(inner_padding_length -
+                            std::string{score_text_label}.length() -
+                            gameboard_score.length(),
+                        border_padding_char)
+         << gameboard_score << inner_border_padding << vertical_border_pattern
+         << "\n";
+  if (competition_mode) {
+    str_os << outer_border_padding << vertical_border_pattern
+           << inner_border_padding << bold_on << bestscore_text_label
+           << bold_off
+           << std::string(inner_padding_length -
+                              std::string{bestscore_text_label}.length() -
+                              temp_bestscore.length(),
+                          border_padding_char)
+           << temp_bestscore << inner_border_padding << vertical_border_pattern
+           << "\n";
+  }
+  str_os << outer_border_padding << vertical_border_pattern
+         << inner_border_padding << bold_on << moves_text_label << bold_off
+         << std::string(inner_padding_length -
+                            std::string{moves_text_label}.length() -
+                            movecount.length(),
+                        border_padding_char)
+         << movecount << inner_border_padding << vertical_border_pattern
+         << "\n";
+  str_os << outer_border_padding << bottom_board << "\n \n";
+  return str_os.str();
+}
+
 } // namespace Graphics
 } // namespace Game
