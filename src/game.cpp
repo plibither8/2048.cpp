@@ -256,19 +256,6 @@ wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
   return loop_again;
 }
 
-void drawEndScreen(std::ostream &os, gamestatus_t gamestatus) {
-  const auto standardWinLosePrompt = [&gamestatus] {
-    std::ostringstream str_os;
-    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Graphics::YouWinPrompt);
-    // else..
-    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Graphics::GameOverPrompt);
-    return str_os.str();
-  };
-  DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
-  // else..
-  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE], Graphics::EndOfEndlessPrompt);
-}
-
 void endlessGameLoop() {
   auto loop_again{true};
   gamestatus_t world_gamestatus{};
@@ -289,7 +276,9 @@ void endlessGameLoop() {
   clearScreen();
   DrawAlways(std::cout, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
   std::cout << gamePlayBoard;
-  drawEndScreen(std::cout, world_gamestatus);
+  const auto esdd = std::make_tuple(world_gamestatus[FLAG_WIN],
+                                    world_gamestatus[FLAG_ENDLESS_MODE]);
+  DrawAlways(std::cout, DataSuppliment(esdd, Graphics::drawEndScreen));
 }
 
 void saveEndGameStats(Scoreboard::Score finalscore) {

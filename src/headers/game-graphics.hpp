@@ -34,6 +34,8 @@ using scoreboard_display_data_t =
     std::tuple<bool, std::string, std::string, std::string>;
 std::string GameScoreBoardBox(scoreboard_display_data_t scdd);
 std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd);
+using end_screen_display_data_t = std::tuple<bool, bool>;
+std::string drawEndScreen(end_screen_display_data_t esdd);
 } // namespace Graphics
 } // namespace Game
 

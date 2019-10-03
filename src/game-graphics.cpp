@@ -294,5 +294,28 @@ std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd) {
   return str_os.str();
 }
 
+std::string drawEndScreen(end_screen_display_data_t esdd) {
+  enum EndScreenDisplayDataFields {
+    IDX_FLAG_WIN,
+    IDX_FLAG_ENDLESS_MODE,
+    MAX_ENDSCREENDISPLAYDATA_INDEXES
+  };
+  const auto did_win = std::get<IDX_FLAG_WIN>(esdd);
+  const auto is_endless_mode = std::get<IDX_FLAG_ENDLESS_MODE>(esdd);
+
+  std::ostringstream str_os;
+  const auto standardWinLosePrompt = [=] {
+    std::ostringstream str_os;
+    DrawOnlyWhen(str_os, did_win, YouWinPrompt);
+    // else..
+    DrawOnlyWhen(str_os, !did_win, GameOverPrompt);
+    return str_os.str();
+  };
+  DrawOnlyWhen(str_os, !is_endless_mode, standardWinLosePrompt);
+  // else..
+  DrawOnlyWhen(str_os, is_endless_mode, EndOfEndlessPrompt);
+  return str_os.str();
+}
+
 } // namespace Graphics
 } // namespace Game
