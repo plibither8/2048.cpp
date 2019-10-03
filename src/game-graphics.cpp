@@ -317,5 +317,22 @@ std::string drawEndScreen(end_screen_display_data_t esdd) {
   return str_os.str();
 }
 
+std::string drawInputControls(input_controls_display_data_t gamestatus) {
+  const auto is_in_endless_mode = std::get<0>(gamestatus);
+  const auto is_in_question_mode = std::get<1>(gamestatus);
+  std::ostringstream str_os;
+  const auto InputControlLists = [=] {
+    std::ostringstream str_os;
+    DrawAlways(str_os, Graphics::InputCommandListPrompt);
+    DrawOnlyWhen(str_os, is_in_endless_mode,
+                 Graphics::EndlessModeCommandListPrompt);
+    DrawAlways(str_os, Graphics::InputCommandListFooterPrompt);
+    return str_os.str();
+  };
+  // When game is paused to ask a question, hide regular inut prompts..
+  DrawOnlyWhen(str_os, !is_in_question_mode, InputControlLists);
+  return str_os.str();
+}
+
 } // namespace Graphics
 } // namespace Game

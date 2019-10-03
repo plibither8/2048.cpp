@@ -55,19 +55,6 @@ ull load_game_best_score() {
   return tempscore;
 }
 
-void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
-  const auto InputControlLists = [&gamestatus] {
-    std::ostringstream str_os;
-    DrawAlways(str_os, Graphics::InputCommandListPrompt);
-    DrawOnlyWhen(str_os, gamestatus[FLAG_ENDLESS_MODE],
-                 Graphics::EndlessModeCommandListPrompt);
-    DrawAlways(str_os, Graphics::InputCommandListFooterPrompt);
-    return str_os.str();
-  };
-  // When game is paused to ask a question, hide regular inut prompts..
-  DrawOnlyWhen(os, !gamestatus[FLAG_QUESTION_STAY_OR_QUIT], InputControlLists);
-}
-
 gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   unblockTilesOnGameboard(gamePlayBoard);
   if (gamePlayBoard.moved) {
@@ -104,7 +91,10 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
                     Graphics::GameStateNowSavedPrompt);
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
                Graphics::QuestionEndOfWinningGamePrompt);
-  drawInputControls(os, gamestatus);
+  const auto input_controls_display_data = std::make_tuple(
+      gamestatus[FLAG_ENDLESS_MODE], gamestatus[FLAG_QUESTION_STAY_OR_QUIT]);
+  DrawAlways(os, DataSuppliment(input_controls_display_data,
+                                Graphics::drawInputControls));
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
                     Graphics::InvalidInputGameBoardErrorPrompt);
   return gamestatus;
