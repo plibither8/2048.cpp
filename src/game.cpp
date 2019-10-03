@@ -1,5 +1,4 @@
 #include "game.hpp"
-#include "color.hpp"
 #include "game-graphics.hpp"
 #include "game-input.hpp"
 #include "game-pregamemenu.hpp"
@@ -7,11 +6,9 @@
 #include "global.hpp"
 #include "loadresource.hpp"
 #include "menu.hpp"
-#include "point2d.hpp"
 #include "saveresource.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
-#include <algorithm>
 #include <array>
 #include <chrono>
 #include <iostream>
