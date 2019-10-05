@@ -103,7 +103,7 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
   const auto input_controls_display_data =
       make_input_controls_display_data(gamestatus);
   DrawAlways(os, DataSuppliment(input_controls_display_data,
-                                Graphics::drawInputControls));
+                                Graphics::GameInputControlsOverlay));
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
                     Graphics::InvalidInputGameBoardErrorPrompt);
   return gamestatus;
@@ -275,7 +275,7 @@ void endlessGameLoop() {
   DrawAlways(std::cout, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
   std::cout << gamePlayBoard;
   const auto esdd = make_end_screen_display_data(world_gamestatus);
-  DrawAlways(std::cout, DataSuppliment(esdd, Graphics::drawEndScreen));
+  DrawAlways(std::cout, DataSuppliment(esdd, Graphics::GameEndScreenOverlay));
 }
 
 void saveEndGameStats(Scoreboard::Score finalscore) {

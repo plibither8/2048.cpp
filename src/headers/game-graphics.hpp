@@ -35,9 +35,9 @@ using scoreboard_display_data_t =
 std::string GameScoreBoardBox(scoreboard_display_data_t scdd);
 std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd);
 using end_screen_display_data_t = std::tuple<bool, bool>;
-std::string drawEndScreen(end_screen_display_data_t esdd);
+std::string GameEndScreenOverlay(end_screen_display_data_t esdd);
 using input_controls_display_data_t = std::tuple<bool, bool>;
-std::string drawInputControls(input_controls_display_data_t gamestatus);
+std::string GameInputControlsOverlay(input_controls_display_data_t gamestatus);
 } // namespace Graphics
 } // namespace Game
 

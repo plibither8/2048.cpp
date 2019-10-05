@@ -294,7 +294,7 @@ std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd) {
   return str_os.str();
 }
 
-std::string drawEndScreen(end_screen_display_data_t esdd) {
+std::string GameEndScreenOverlay(end_screen_display_data_t esdd) {
   enum EndScreenDisplayDataFields {
     IDX_FLAG_WIN,
     IDX_FLAG_ENDLESS_MODE,
@@ -317,7 +317,7 @@ std::string drawEndScreen(end_screen_display_data_t esdd) {
   return str_os.str();
 }
 
-std::string drawInputControls(input_controls_display_data_t gamestatus) {
+std::string GameInputControlsOverlay(input_controls_display_data_t gamestatus) {
   const auto is_in_endless_mode = std::get<0>(gamestatus);
   const auto is_in_question_mode = std::get<1>(gamestatus);
   std::ostringstream str_os;
