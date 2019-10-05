@@ -71,7 +71,7 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   return gamestatus;
 }
 
-gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
+Graphics::scoreboard_display_data_t make_scoreboard_display_data() {
   const auto gameboard_score = gamePlayBoard.score;
   const auto tempBestScore =
       (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
@@ -81,6 +81,18 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
   const auto scdd =
       std::make_tuple(comp_mode, std::to_string(gameboard_score),
                       std::to_string(tempBestScore), std::to_string(movecount));
+  return scdd;
+};
+
+Graphics::input_controls_display_data_t
+make_input_controls_display_data(gamestatus_t gamestatus) {
+  const auto icdd = std::make_tuple(gamestatus[FLAG_ENDLESS_MODE],
+                                    gamestatus[FLAG_QUESTION_STAY_OR_QUIT]);
+  return icdd;
+};
+
+gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
+  const auto scdd = make_scoreboard_display_data();
   clearScreen();
   DrawAlways(os, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
   os << gamePlayBoard;
@@ -88,8 +100,8 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
                     Graphics::GameStateNowSavedPrompt);
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
                Graphics::QuestionEndOfWinningGamePrompt);
-  const auto input_controls_display_data = std::make_tuple(
-      gamestatus[FLAG_ENDLESS_MODE], gamestatus[FLAG_QUESTION_STAY_OR_QUIT]);
+  const auto input_controls_display_data =
+      make_input_controls_display_data(gamestatus);
   DrawAlways(os, DataSuppliment(input_controls_display_data,
                                 Graphics::drawInputControls));
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
@@ -243,6 +255,13 @@ wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
   return loop_again;
 }
 
+Graphics::end_screen_display_data_t
+make_end_screen_display_data(gamestatus_t world_gamestatus) {
+  const auto esdd = std::make_tuple(world_gamestatus[FLAG_WIN],
+                                    world_gamestatus[FLAG_ENDLESS_MODE]);
+  return esdd;
+};
+
 void endlessGameLoop() {
   auto loop_again{true};
   gamestatus_t world_gamestatus{};
@@ -251,20 +270,11 @@ void endlessGameLoop() {
     std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
   }
 
-  const auto gameboard_score = gamePlayBoard.score;
-  const auto tempBestScore =
-      (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
-  const auto comp_mode =
-      std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
-  const auto movecount = MoveCountOnGameBoard(gamePlayBoard);
-  const auto scdd =
-      std::make_tuple(comp_mode, std::to_string(gameboard_score),
-                      std::to_string(tempBestScore), std::to_string(movecount));
+  const auto scdd = make_scoreboard_display_data();
   clearScreen();
   DrawAlways(std::cout, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
   std::cout << gamePlayBoard;
-  const auto esdd = std::make_tuple(world_gamestatus[FLAG_WIN],
-                                    world_gamestatus[FLAG_ENDLESS_MODE]);
+  const auto esdd = make_end_screen_display_data(world_gamestatus);
   DrawAlways(std::cout, DataSuppliment(esdd, Graphics::drawEndScreen));
 }
 
@@ -289,6 +299,14 @@ void saveScore(Scoreboard::Score finalscore) {
   Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
 }
 
+Graphics::finalscore_display_data_t
+make_finalscore_display_data(Scoreboard::Score finalscore) {
+  const auto fsdd = std::make_tuple(
+      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
+      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration));
+  return fsdd;
+};
+
 void DoPostGameSaveStuff(double duration) {
   if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     Scoreboard::Score finalscore{};
@@ -299,11 +317,7 @@ void DoPostGameSaveStuff(double duration) {
     finalscore.duration = duration;
 
     const auto finalscore_display_data =
-        std::make_tuple(std::to_string(finalscore.score),
-                        std::to_string(finalscore.largestTile),
-                        std::to_string(finalscore.moveCount),
-                        secondsFormat(finalscore.duration));
-
+        make_finalscore_display_data(finalscore);
     DrawAlways(std::cout, DataSuppliment(finalscore_display_data,
                                          Graphics::EndGameStatisticsPrompt));
     saveEndGameStats(finalscore);
