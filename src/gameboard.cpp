@@ -87,7 +87,7 @@ std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
   const auto generate_x_bar_pattern = [playsize](const bar_pattern_t t) {
     enum { PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
     constexpr auto sp = "  ";
-    constexpr auto separator = "──────";
+    constexpr auto separator = "────────────";
     std::ostringstream temp_richtext;
     temp_richtext << sp << std::get<PATTERN_HEAD>(t);
     for (auto i = 0; i < playsize; i++) {
@@ -115,12 +115,18 @@ std::string drawSelf(gameboard_data_array_t gbda) {
                               std::get<XN_BAR>(vertibar));
     for (auto x = 0; x < playsize; x++) {
       const auto is_first_col = (x == 0);
-      const auto sp = (is_first_col ? "  " : " ");
+      const auto sp = (is_first_col ? " " : " ");
       str_os << sp;
-      str_os << "│ ";
+   //change 2
+   if(is_first_col == true){
+        str_os << " |";}
+      else{
+         str_os << "       |";
+      }
       str_os << getTileOnGameboardDataArray(gbda, point2D_t{x, y});
     }
-    str_os << " │";
+    //change3
+    str_os << "        |";
     str_os << "\n";
   }
   str_os << std::get<BASE_BAR>(vertibar);
