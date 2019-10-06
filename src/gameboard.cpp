@@ -115,7 +115,7 @@ std::string drawSelf(gameboard_data_array_t gbda) {
                               std::get<XN_BAR>(vertibar));
     for (auto x = 0; x < playsize; x++) {
       const auto is_first_col = (x == 0);
-      const auto sp = (is_first_col ? " " : " ");
+      const auto sp = (is_first_col ? "  " : " ");
       str_os << sp;
    //change 2
    if(is_first_col == true){
