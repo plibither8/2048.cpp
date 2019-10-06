@@ -26,7 +26,6 @@ using load_score_status_t = std::tuple<bool, Scoreboard_t>;
 // Note: returns a tuple containing a std::vector<Score> of all read scores.
 load_score_status_t loadFromFileScore(std::string filename);
 bool saveToFileScore(std::string filename, Score s);
-void prettyPrintScoreboard(std::ostream &os);
 } // namespace Scoreboard
 
 std::istream &operator>>(std::istream &is, Scoreboard::Score &s);

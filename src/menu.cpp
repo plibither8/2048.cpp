@@ -4,6 +4,7 @@
 #include "game.hpp"
 #include "global.hpp"
 #include "menu-graphics.hpp"
+#include "scores-graphics.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
 #include <array>
@@ -37,7 +38,7 @@ void continueGame() {
 void showScores() {
   clearScreen();
   DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
-  Scoreboard::prettyPrintScoreboard(std::cout);
+  DrawAlways(std::cout, Scoreboard::Graphics::ScoreboardOverlay);
   Statistics::prettyPrintStats(std::cout);
   std::cout << std::flush;
   pause_for_keypress();
