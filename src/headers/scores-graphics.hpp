@@ -1,0 +1,4 @@
+#ifndef SCORESGRAPHICS_H
+#define SCORESGRAPHICS_H
+
+#endif
