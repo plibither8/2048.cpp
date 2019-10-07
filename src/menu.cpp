@@ -7,6 +7,7 @@
 #include "scores-graphics.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
+#include <algorithm>
 #include <array>
 #include <iostream>
 #include <sstream>
@@ -35,10 +36,38 @@ void continueGame() {
   Game::continueGame();
 }
 
+Scoreboard::Graphics::scoreboard_display_data_list_t
+make_scoreboard_display_data_list() {
+  using namespace Scoreboard::Graphics;
+  auto scoreList = Scoreboard::Scoreboard_t{};
+  // bool loaded_scorelist;
+  // Warning: Does not care if file exists or not!
+  std::tie(std::ignore, scoreList) =
+      Scoreboard::loadFromFileScore("../data/scores.txt");
+
+  auto counter{1};
+  const auto convert_to_display_list_t = [&counter](const Scoreboard::Score s) {
+    const auto data_stats = std::make_tuple(
+        std::to_string(counter), s.name, std::to_string(s.score),
+        s.win ? "Yes" : "No", std::to_string(s.moveCount),
+        std::to_string(s.largestTile), secondsFormat(s.duration));
+    counter++;
+    return data_stats;
+  };
+
+  auto scoreboard_display_list = scoreboard_display_data_list_t{};
+  std::transform(std::begin(scoreList), std::end(scoreList),
+                 std::back_inserter(scoreboard_display_list),
+                 convert_to_display_list_t);
+  return scoreboard_display_list;
+};
+
 void showScores() {
+  const auto sbddl = make_scoreboard_display_data_list();
   clearScreen();
   DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
-  DrawAlways(std::cout, Scoreboard::Graphics::ScoreboardOverlay);
+  DrawAlways(std::cout,
+             DataSuppliment(sbddl, Scoreboard::Graphics::ScoreboardOverlay));
   Statistics::prettyPrintStats(std::cout);
   std::cout << std::flush;
   pause_for_keypress();

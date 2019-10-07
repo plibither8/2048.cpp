@@ -1,14 +1,12 @@
 #include "scores-graphics.hpp"
 #include "color.hpp"
-#include "scores.hpp"
 #include <iomanip>
 #include <sstream>
-#include <vector>
 
 namespace Scoreboard {
 namespace Graphics {
 
-std::string ScoreboardOverlay() {
+std::string ScoreboardOverlay(scoreboard_display_data_list_t sbddl) {
   constexpr auto no_save_text = "No saved scores.";
   const auto score_attributes_text = {
       "No.", "Name", "Score", "Won?", "Moves", "Largest Tile", "Duration"};
@@ -25,16 +23,11 @@ std::string ScoreboardOverlay() {
 
   std::ostringstream str_os;
 
-  std::vector<Score> scoreList{};
-  // bool loaded_scorelist;
-  // Warning: Does not care if file exists or not!
-  std::tie(std::ignore, scoreList) = loadFromFileScore("../data/scores.txt");
-
   str_os << green << bold_on << sp << score_title_text << bold_off << def
          << "\n";
   str_os << green << bold_on << sp << divider_text << bold_off << def << "\n";
 
-  const auto number_of_scores = scoreList.size();
+  const auto number_of_scores = sbddl.size();
   if (number_of_scores) {
     str_os << sp << header_border_text << "\n";
     str_os << std::left;
@@ -52,25 +45,17 @@ std::string ScoreboardOverlay() {
     str_os << std::right;
     str_os << sp << mid_border_text << "\n";
 
-    auto counter{1};
-    const auto print_score_stat = [&counter, &str_os](const Score i) {
-      constexpr auto number_of_fields = 7;
-      auto data_stats = std::array<std::string, number_of_fields>{};
-      data_stats = {std::to_string(counter),     i.name,
-                    std::to_string(i.score),     i.win ? "Yes" : "No",
-                    std::to_string(i.moveCount), std::to_string(i.largestTile),
-                    secondsFormat(i.duration)};
-      str_os << sp << "│ " << std::setw(2) << data_stats[0] << ". │ "
-             << std::left << std::setw(18) << data_stats[1] << std::right
-             << " │ " << std::setw(8) << data_stats[2] << " │ " << std::setw(4)
-             << data_stats[3] << " │ " << std::setw(5) << data_stats[4] << " │ "
-             << std::setw(12) << data_stats[5] << " │ " << std::setw(12)
-             << data_stats[6] << " │"
+    const auto print_score_stat = [&str_os](const scoreboard_display_data_t i) {
+      str_os << sp << "│ " << std::setw(2) << std::get<0>(i) << ". │ "
+             << std::left << std::setw(18) << std::get<1>(i) << std::right
+             << " │ " << std::setw(8) << std::get<2>(i) << " │ " << std::setw(4)
+             << std::get<3>(i) << " │ " << std::setw(5) << std::get<4>(i)
+             << " │ " << std::setw(12) << std::get<5>(i) << " │ "
+             << std::setw(12) << std::get<6>(i) << " │"
              << "\n";
-      counter++;
     };
 
-    for (const auto s : scoreList) {
+    for (const auto s : sbddl) {
       print_score_stat(s);
     }
     str_os << sp << bottom_border_text << "\n";
