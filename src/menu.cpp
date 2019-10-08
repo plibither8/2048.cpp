@@ -63,13 +63,30 @@ make_scoreboard_display_data_list() {
   return scoreboard_display_list;
 };
 
+Statistics::total_stats_display_data_t make_total_stats_display_data() {
+  Statistics::total_game_stats_t stats;
+  bool stats_file_loaded{};
+  std::tie(stats_file_loaded, stats) =
+      Statistics::loadFromFileStatistics("../data/statistics.txt");
+
+  const auto tsdd = std::make_tuple(
+      stats_file_loaded, std::to_string(stats.bestScore),
+      std::to_string(stats.gameCount), std::to_string(stats.winCount),
+      std::to_string(stats.totalMoveCount), secondsFormat(stats.totalDuration));
+  return tsdd;
+};
+
 void showScores() {
   const auto sbddl = make_scoreboard_display_data_list();
+  const auto tsdd = make_total_stats_display_data();
+
   clearScreen();
   DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
   DrawAlways(std::cout,
              DataSuppliment(sbddl, Scoreboard::Graphics::ScoreboardOverlay));
-  DrawAlways(std::cout, Statistics::TotalStatisticsOverlay);
+
+  DrawAlways(std::cout,
+             DataSuppliment(tsdd, Statistics::TotalStatisticsOverlay));
   std::cout << std::flush;
   pause_for_keypress();
   Menu::startMenu();

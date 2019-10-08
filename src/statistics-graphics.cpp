@@ -1,13 +1,12 @@
 #include "statistics-graphics.hpp"
 #include "color.hpp"
-#include "statistics.hpp"
 #include <array>
 #include <iomanip>
 #include <sstream>
 
 namespace Statistics {
 
-std::string TotalStatisticsOverlay() {
+std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";
   constexpr auto header_border_text = "┌────────────────────┬─────────────┐";
@@ -20,19 +19,27 @@ std::string TotalStatisticsOverlay() {
       "Press any key to return to the main menu... ";
   constexpr auto sp = "  ";
 
+  enum TotalStatsDisplayDataFields {
+    IDX_DATA_AVAILABLE,
+    IDX_BEST_SCORE,
+    IDX_GAME_COUNT,
+    IDX_GAME_WIN_COUNT,
+    IDX_TOTAL_MOVE_COUNT,
+    IDX_TOTAL_DURATION,
+    MAX_TOTALSTATSDISPLAYDATA_INDEXES
+  };
+
   std::ostringstream stats_richtext;
 
-  total_game_stats_t stats;
-  bool stats_file_loaded{};
-  std::tie(stats_file_loaded, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
+  const auto stats_file_loaded = std::get<IDX_DATA_AVAILABLE>(tsdd);
   if (stats_file_loaded) {
     constexpr auto num_of_stats_attributes_text = 5;
     auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-    data_stats = {
-        std::to_string(stats.bestScore), std::to_string(stats.gameCount),
-        std::to_string(stats.winCount), std::to_string(stats.totalMoveCount),
-        secondsFormat(stats.totalDuration)};
+    data_stats = {std::get<IDX_BEST_SCORE>(tsdd),
+                  std::get<IDX_GAME_COUNT>(tsdd),
+                  std::get<IDX_GAME_WIN_COUNT>(tsdd),
+                  std::get<IDX_TOTAL_MOVE_COUNT>(tsdd),
+                  std::get<IDX_TOTAL_DURATION>(tsdd)};
 
     auto counter{0};
     const auto populate_stats_info = [data_stats, stats_attributes_text,
