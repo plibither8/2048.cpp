@@ -6,6 +6,7 @@
 #include "menu-graphics.hpp"
 #include "scores-graphics.hpp"
 #include "scores.hpp"
+#include "statistics-graphics.hpp"
 #include "statistics.hpp"
 #include <algorithm>
 #include <array>
@@ -68,7 +69,7 @@ void showScores() {
   DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
   DrawAlways(std::cout,
              DataSuppliment(sbddl, Scoreboard::Graphics::ScoreboardOverlay));
-  Statistics::prettyPrintStats(std::cout);
+  DrawAlways(std::cout, Statistics::TotalStatisticsOverlay);
   std::cout << std::flush;
   pause_for_keypress();
   Menu::startMenu();
