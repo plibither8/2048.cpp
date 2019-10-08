@@ -63,7 +63,8 @@ make_scoreboard_display_data_list() {
   return scoreboard_display_list;
 };
 
-Statistics::total_stats_display_data_t make_total_stats_display_data() {
+Statistics::Graphics::total_stats_display_data_t
+make_total_stats_display_data() {
   Statistics::total_game_stats_t stats;
   bool stats_file_loaded{};
   std::tie(stats_file_loaded, stats) =
@@ -77,19 +78,19 @@ Statistics::total_stats_display_data_t make_total_stats_display_data() {
 };
 
 void showScores() {
+  using namespace Game::Graphics;
+  using namespace Scoreboard::Graphics;
+  using namespace Statistics::Graphics;
   const auto sbddl = make_scoreboard_display_data_list();
   const auto tsdd = make_total_stats_display_data();
 
   clearScreen();
-  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
-  DrawAlways(std::cout,
-             DataSuppliment(sbddl, Scoreboard::Graphics::ScoreboardOverlay));
-
-  DrawAlways(std::cout,
-             DataSuppliment(tsdd, Statistics::TotalStatisticsOverlay));
+  DrawAlways(std::cout, AsciiArt2048);
+  DrawAlways(std::cout, DataSuppliment(sbddl, ScoreboardOverlay));
+  DrawAlways(std::cout, DataSuppliment(tsdd, TotalStatisticsOverlay));
   std::cout << std::flush;
   pause_for_keypress();
-  Menu::startMenu();
+  ::Menu::startMenu();
 }
 
 void receive_input_flags(std::istream &in_os) {

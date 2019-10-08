@@ -5,10 +5,12 @@
 #include <tuple>
 
 namespace Statistics {
+namespace Graphics {
 using total_stats_display_data_t =
     std::tuple<bool, std::string, std::string, std::string, std::string,
                std::string>;
 std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd);
+} // namespace Graphics
 } // namespace Statistics
 
 #endif

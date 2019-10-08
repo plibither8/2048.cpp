@@ -5,6 +5,7 @@
 #include <sstream>
 
 namespace Statistics {
+namespace Graphics {
 
 std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
   constexpr auto stats_title_text = "STATISTICS";
@@ -74,4 +75,5 @@ std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
   return stats_richtext.str();
 }
 
+} // namespace Graphics
 } // namespace Statistics
