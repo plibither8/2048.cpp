@@ -1,0 +1,4 @@
+#ifndef STATISTICSGRAPHICS_H
+#define STATISTICSGRAPHICS_H
+
+#endif
