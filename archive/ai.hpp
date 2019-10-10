@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-enum Directions { UP, DOWN, RIGHT, LEFT };
+enum class Directions { UP, DOWN, RIGHT, LEFT };
 
 class Tile {
 
@@ -199,16 +199,16 @@ void Game::input(int err) {
   switch (toupper(c)) {
 
   case 'W':
-    decideMove(UP);
+    decideMove(Directions::UP);
     break;
   case 'A':
-    decideMove(LEFT);
+    decideMove(Directions::LEFT);
     break;
   case 'S':
-    decideMove(DOWN);
+    decideMove(Directions::DOWN);
     break;
   case 'D':
-    decideMove(RIGHT);
+    decideMove(Directions::RIGHT);
     break;
   default:
     drawBoard();
@@ -271,7 +271,7 @@ void Game::decideMove(Directions d) {
 
   switch (d) {
 
-  case UP:
+  case (Directions::UP):
 
     for (int x = 0; x < BOARD_SIZE; x++) {
       int y = 1;
@@ -284,7 +284,7 @@ void Game::decideMove(Directions d) {
     }
     break;
 
-  case DOWN:
+  case (Directions::DOWN):
 
     for (int x = 0; x < BOARD_SIZE; x++) {
       int y = BOARD_SIZE - 2;
@@ -297,7 +297,7 @@ void Game::decideMove(Directions d) {
     }
     break;
 
-  case LEFT:
+  case (Directions::LEFT):
 
     for (int y = 0; y < BOARD_SIZE; y++) {
       int x = 1;
@@ -310,7 +310,7 @@ void Game::decideMove(Directions d) {
     }
     break;
 
-  case RIGHT:
+  case (Directions::RIGHT):
 
     for (int y = 0; y < BOARD_SIZE; y++) {
       int x = BOARD_SIZE - 2;
