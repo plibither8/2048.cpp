@@ -2,6 +2,7 @@
 #include "game-graphics.hpp"
 #include "game-input.hpp"
 #include "game-pregamemenu.hpp"
+#include "gameboard-graphics.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
 #include "loadresource.hpp"
@@ -95,7 +96,7 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
   const auto scdd = make_scoreboard_display_data();
   clearScreen();
   DrawAlways(os, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
-  os << gamePlayBoard;
+  DrawAlways(os, DataSuppliment(gamePlayBoard, drawGameBoard));
   DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
                     Graphics::GameStateNowSavedPrompt);
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
@@ -273,7 +274,7 @@ void endlessGameLoop() {
   const auto scdd = make_scoreboard_display_data();
   clearScreen();
   DrawAlways(std::cout, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
-  std::cout << gamePlayBoard;
+  DrawAlways(std::cout, DataSuppliment(gamePlayBoard, drawGameBoard));
   const auto esdd = make_end_screen_display_data(world_gamestatus);
   DrawAlways(std::cout, DataSuppliment(esdd, Graphics::GameEndScreenOverlay));
 }

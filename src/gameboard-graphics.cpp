@@ -1,4 +1,5 @@
 #include "gameboard-graphics.hpp"
+#include "gameboard.hpp"
 #include "point2d.hpp"
 #include <algorithm>
 #include <array>
@@ -37,8 +38,6 @@ std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
   return temp_bars;
 }
 
-} // namespace
-
 std::string drawSelf(GameBoard::gameboard_data_array_t gbda) {
   enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
   const int playsize = getPlaySizeOfGameboardDataArray(gbda);
@@ -61,6 +60,12 @@ std::string drawSelf(GameBoard::gameboard_data_array_t gbda) {
   str_os << std::get<BASE_BAR>(vertibar);
   str_os << "\n";
   return str_os.str();
+}
+
+} // namespace
+
+std::string drawGameBoard(GameBoard gb) {
+  return drawSelf(gb.gbda);
 }
 
 } // namespace Game

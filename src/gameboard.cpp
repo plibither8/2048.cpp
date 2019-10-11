@@ -413,9 +413,3 @@ std::string printStateOfGameBoard(GameBoard gb) {
 }
 
 } // namespace Game
-
-using namespace Game;
-
-std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
-  return os << drawSelf(gb.gbda);
-}

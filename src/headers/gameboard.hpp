@@ -46,6 +46,4 @@ std::string printStateOfGameBoard(GameBoard gb);
 
 } // namespace Game
 
-std::ostream &operator<<(std::ostream &os, const Game::GameBoard &gb);
-
 #endif
