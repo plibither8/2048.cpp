@@ -1,6 +1,8 @@
 #include "gameboard-graphics.hpp"
 #include "gameboard.hpp"
 #include "point2d.hpp"
+#include "tile-graphics.hpp"
+#include "tile.hpp"
 #include <algorithm>
 #include <array>
 #include <sstream>
@@ -50,9 +52,10 @@ std::string drawSelf(GameBoard::gameboard_data_array_t gbda) {
     for (auto x = 0; x < playsize; x++) {
       const auto is_first_col = (x == 0);
       const auto sp = (is_first_col ? "  " : " ");
+      const auto tile = getTileOnGameboardDataArray(gbda, point2D_t{x, y});
       str_os << sp;
       str_os << "│ ";
-      str_os << getTileOnGameboardDataArray(gbda, point2D_t{x, y});
+      str_os << drawTileString(tile);
     }
     str_os << " │";
     str_os << "\n";
