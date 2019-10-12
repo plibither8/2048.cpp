@@ -289,7 +289,6 @@ std::string GameScoreBoardBox(scoreboard_display_data_t scdd) {
 
 std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd) {
   std::ostringstream str_os;
-  DrawAlways(str_os, AsciiArt2048);
   DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardBox));
   return str_os.str();
 }

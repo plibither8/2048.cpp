@@ -93,21 +93,40 @@ make_input_controls_display_data(gamestatus_t gamestatus) {
 };
 
 gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
+  // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
-  const auto scdd = make_scoreboard_display_data();
+  // 1. Clear screen
   clearScreen();
+
+  // 2. Draw Game Title Art
+  DrawAlways(os, AsciiArt2048);
+
+  // 3. Draw Scoreboard of current game session
+  const auto scdd = make_scoreboard_display_data();
   DrawAlways(os, DataSuppliment(scdd, GameScoreBoardOverlay));
+
+  // 4 Draw current 2048 game active gameboard
   DrawAlways(os, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
+
+  // 5 Draw anyinstant status feedback, like
+  // "Game saved!" (which disappers after next key input).
   DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME], GameStateNowSavedPrompt);
+
+  // 6. Draw any "questions to the player" (from the game) text output
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
                QuestionEndOfWinningGamePrompt);
+
+  // 7. Draw Keyboard / Input Keycodes to the player
   const auto input_controls_display_data =
       make_input_controls_display_data(gamestatus);
   DrawAlways(os, DataSuppliment(input_controls_display_data,
                                 GameInputControlsOverlay));
+
+  // 8. Draw any game error messages to the player (to do with keyboard input)
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
                     InvalidInputGameBoardErrorPrompt);
+
   return gamestatus;
 }
 
@@ -276,6 +295,7 @@ void endlessGameLoop() {
 
   const auto scdd = make_scoreboard_display_data();
   clearScreen();
+  DrawAlways(std::cout, AsciiArt2048);
   DrawAlways(std::cout, DataSuppliment(scdd, GameScoreBoardOverlay));
   DrawAlways(std::cout, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
   const auto esdd = make_end_screen_display_data(world_gamestatus);
