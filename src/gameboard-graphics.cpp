@@ -8,6 +8,8 @@
 #include <sstream>
 
 namespace Game {
+namespace Gameboard {
+namespace Graphics {
 namespace {
 
 template<size_t num_of_bars>
@@ -67,8 +69,9 @@ std::string drawSelf(GameBoard::gameboard_data_array_t gbda) {
 
 } // namespace
 
-std::string drawGameBoard(GameBoard gb) {
+std::string GameBoardTextOutput(GameBoard gb) {
   return drawSelf(gb.gbda);
 }
-
+} // namespace Graphics
+} // namespace Gameboard
 } // namespace Game

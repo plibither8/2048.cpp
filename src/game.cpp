@@ -93,20 +93,21 @@ make_input_controls_display_data(gamestatus_t gamestatus) {
 };
 
 gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
+  using namespace Graphics;
+  using namespace Gameboard::Graphics;
   const auto scdd = make_scoreboard_display_data();
   clearScreen();
-  DrawAlways(os, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
-  DrawAlways(os, DataSuppliment(gamePlayBoard, drawGameBoard));
-  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
-                    Graphics::GameStateNowSavedPrompt);
+  DrawAlways(os, DataSuppliment(scdd, GameScoreBoardOverlay));
+  DrawAlways(os, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME], GameStateNowSavedPrompt);
   DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
-               Graphics::QuestionEndOfWinningGamePrompt);
+               QuestionEndOfWinningGamePrompt);
   const auto input_controls_display_data =
       make_input_controls_display_data(gamestatus);
   DrawAlways(os, DataSuppliment(input_controls_display_data,
-                                Graphics::GameInputControlsOverlay));
+                                GameInputControlsOverlay));
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
-                    Graphics::InvalidInputGameBoardErrorPrompt);
+                    InvalidInputGameBoardErrorPrompt);
   return gamestatus;
 }
 
@@ -264,6 +265,8 @@ make_end_screen_display_data(gamestatus_t world_gamestatus) {
 };
 
 void endlessGameLoop() {
+  using namespace Graphics;
+  using namespace Gameboard::Graphics;
   auto loop_again{true};
   gamestatus_t world_gamestatus{};
 
@@ -273,10 +276,10 @@ void endlessGameLoop() {
 
   const auto scdd = make_scoreboard_display_data();
   clearScreen();
-  DrawAlways(std::cout, DataSuppliment(scdd, Graphics::GameScoreBoardOverlay));
-  DrawAlways(std::cout, DataSuppliment(gamePlayBoard, drawGameBoard));
+  DrawAlways(std::cout, DataSuppliment(scdd, GameScoreBoardOverlay));
+  DrawAlways(std::cout, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
   const auto esdd = make_end_screen_display_data(world_gamestatus);
-  DrawAlways(std::cout, DataSuppliment(esdd, Graphics::GameEndScreenOverlay));
+  DrawAlways(std::cout, DataSuppliment(esdd, GameEndScreenOverlay));
 }
 
 void saveEndGameStats(Scoreboard::Score finalscore) {

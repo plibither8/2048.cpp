@@ -5,7 +5,12 @@
 
 namespace Game {
 struct GameBoard;
-std::string drawGameBoard(GameBoard gb);
+namespace Gameboard {
+namespace Graphics {
+std::string GameBoardTextOutput(GameBoard gb);
+
+}
+} // namespace Gameboard
 } // namespace Game
 
 #endif
