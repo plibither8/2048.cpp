@@ -21,7 +21,7 @@
 
 namespace Game {
 namespace {
-enum Directions { UP, DOWN, RIGHT, LEFT };
+enum class Directions { UP, DOWN, RIGHT, LEFT };
 
 enum GameStatusFlag {
   FLAG_WIN,
@@ -213,19 +213,19 @@ gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
 
 void decideMove(Directions d) {
   switch (d) {
-  case UP:
+  case (Directions::UP):
     tumbleTilesUpOnGameboard(gamePlayBoard);
     break;
 
-  case DOWN:
+  case (Directions::DOWN):
     tumbleTilesDownOnGameboard(gamePlayBoard);
     break;
 
-  case LEFT:
+  case (Directions::LEFT):
     tumbleTilesLeftOnGameboard(gamePlayBoard);
     break;
 
-  case RIGHT:
+  case (Directions::RIGHT):
     tumbleTilesRightOnGameboard(gamePlayBoard);
     break;
   }
@@ -234,16 +234,16 @@ void decideMove(Directions d) {
 bool process_agent_input(Input::intendedmove_t &intendedmove) {
   using namespace Input;
   if (intendedmove[FLAG_MOVE_LEFT]) {
-    decideMove(LEFT);
+    decideMove(Directions::LEFT);
   }
   if (intendedmove[FLAG_MOVE_RIGHT]) {
-    decideMove(RIGHT);
+    decideMove(Directions::RIGHT);
   }
   if (intendedmove[FLAG_MOVE_UP]) {
-    decideMove(UP);
+    decideMove(Directions::UP);
   }
   if (intendedmove[FLAG_MOVE_DOWN]) {
-    decideMove(DOWN);
+    decideMove(Directions::DOWN);
   }
   // Reset all move flags...
   intendedmove = intendedmove_t{};
