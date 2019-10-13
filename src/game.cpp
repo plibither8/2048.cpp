@@ -297,9 +297,32 @@ make_end_screen_display_data(gamestatus_t world_gamestatus) {
   return esdd;
 };
 
-void endlessGameLoop() {
+std::string drawEndGameLoopGraphics(gamestatus_t world_gamestatus) {
+  // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
+  std::ostringstream str_os;
+  // 1. Clear screen
+  clearScreen();
+
+  // 2. Draw Game Title Art
+  DrawAlways(str_os, AsciiArt2048);
+
+  // 3. Draw Scoreboard of ending current game session
+  const auto scdd = make_scoreboard_display_data();
+  DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardOverlay));
+
+  // 4 Draw snapshot of ending 2048 session's gameboard
+  DrawAlways(str_os, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
+
+  // 5. Draw "You win!" or "You Lose" prompt, only if not in endless mode.
+  const auto esdd = make_end_screen_display_data(world_gamestatus);
+  DrawAlways(str_os, DataSuppliment(esdd, GameEndScreenOverlay));
+
+  return str_os.str();
+}
+
+void endlessGameLoop() {
   auto loop_again{true};
   gamestatus_t world_gamestatus{};
 
@@ -307,13 +330,8 @@ void endlessGameLoop() {
     std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
   }
 
-  const auto scdd = make_scoreboard_display_data();
-  clearScreen();
-  DrawAlways(std::cout, AsciiArt2048);
-  DrawAlways(std::cout, DataSuppliment(scdd, GameScoreBoardOverlay));
-  DrawAlways(std::cout, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
-  const auto esdd = make_end_screen_display_data(world_gamestatus);
-  DrawAlways(std::cout, DataSuppliment(esdd, GameEndScreenOverlay));
+  DrawAlways(std::cout,
+             DataSuppliment(world_gamestatus, drawEndGameLoopGraphics));
 }
 
 void saveEndGameStats(Scoreboard::Score finalscore) {
