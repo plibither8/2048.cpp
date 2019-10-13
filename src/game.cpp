@@ -25,6 +25,7 @@ enum GameStatusFlag {
   FLAG_SAVED_GAME,
   FLAG_INPUT_ERROR,
   FLAG_ENDLESS_MODE,
+  FLAG_GAME_IS_ASKING_QUESTION_MODE,
   FLAG_QUESTION_STAY_OR_QUIT,
   MAX_NO_GAME_STATUS_FLAGS
 };
@@ -63,6 +64,7 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (hasWonOnGameboard(gamePlayBoard)) {
       gamestatus[FLAG_WIN] = true;
+      gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE] = true;
       gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
     }
   }
@@ -92,6 +94,15 @@ make_input_controls_display_data(gamestatus_t gamestatus) {
   return icdd;
 };
 
+std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
+  using namespace Graphics;
+
+  std::ostringstream str_os;
+  DrawOnlyWhen(str_os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
+               QuestionEndOfWinningGamePrompt);
+  return str_os.str();
+}
+
 gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
@@ -114,8 +125,8 @@ gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
   DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME], GameStateNowSavedPrompt);
 
   // 6. Draw any "questions to the player" (from the game) text output
-  DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
-               QuestionEndOfWinningGamePrompt);
+  DrawOnlyWhen(os, gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE],
+               DataSuppliment(gamestatus, DisplayGameQuestionsToPlayerPrompt));
 
   // 7. Draw Keyboard / Input Keycodes to the player
   const auto input_controls_display_data =
@@ -262,6 +273,9 @@ wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
   if (gamestatus[FLAG_SAVED_GAME]) {
     saveGamePlayState();
   }
+
+  // New loop cycle: reset question asking event trigger
+  gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE] = false;
   return std::make_tuple(loop_again, gamestatus);
 }
 
