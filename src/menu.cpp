@@ -1,9 +1,14 @@
 #include "menu.hpp"
 #include "color.hpp"
+#include "game-graphics.hpp"
 #include "game.hpp"
 #include "global.hpp"
+#include "menu-graphics.hpp"
+#include "scores-graphics.hpp"
 #include "scores.hpp"
+#include "statistics-graphics.hpp"
 #include "statistics.hpp"
+#include <algorithm>
 #include <array>
 #include <iostream>
 #include <sstream>
@@ -32,81 +37,60 @@ void continueGame() {
   Game::continueGame();
 }
 
+Scoreboard::Graphics::scoreboard_display_data_list_t
+make_scoreboard_display_data_list() {
+  using namespace Scoreboard::Graphics;
+  auto scoreList = Scoreboard::Scoreboard_t{};
+  // bool loaded_scorelist;
+  // Warning: Does not care if file exists or not!
+  std::tie(std::ignore, scoreList) =
+      Scoreboard::loadFromFileScore("../data/scores.txt");
+
+  auto counter{1};
+  const auto convert_to_display_list_t = [&counter](const Scoreboard::Score s) {
+    const auto data_stats = std::make_tuple(
+        std::to_string(counter), s.name, std::to_string(s.score),
+        s.win ? "Yes" : "No", std::to_string(s.moveCount),
+        std::to_string(s.largestTile), secondsFormat(s.duration));
+    counter++;
+    return data_stats;
+  };
+
+  auto scoreboard_display_list = scoreboard_display_data_list_t{};
+  std::transform(std::begin(scoreList), std::end(scoreList),
+                 std::back_inserter(scoreboard_display_list),
+                 convert_to_display_list_t);
+  return scoreboard_display_list;
+};
+
+Statistics::Graphics::total_stats_display_data_t
+make_total_stats_display_data() {
+  Statistics::total_game_stats_t stats;
+  bool stats_file_loaded{};
+  std::tie(stats_file_loaded, stats) =
+      Statistics::loadFromFileStatistics("../data/statistics.txt");
+
+  const auto tsdd = std::make_tuple(
+      stats_file_loaded, std::to_string(stats.bestScore),
+      std::to_string(stats.gameCount), std::to_string(stats.winCount),
+      std::to_string(stats.totalMoveCount), secondsFormat(stats.totalDuration));
+  return tsdd;
+};
+
 void showScores() {
+  using namespace Game::Graphics;
+  using namespace Scoreboard::Graphics;
+  using namespace Statistics::Graphics;
+  const auto sbddl = make_scoreboard_display_data_list();
+  const auto tsdd = make_total_stats_display_data();
+
   clearScreen();
-  drawAscii();
-  Scoreboard::prettyPrintScoreboard(std::cout);
-  Statistics::prettyPrintStats(std::cout);
+  DrawAlways(std::cout, AsciiArt2048);
+  DrawAlways(std::cout, DataSuppliment(sbddl, ScoreboardOverlay));
+  DrawAlways(std::cout, DataSuppliment(tsdd, TotalStatisticsOverlay));
   std::cout << std::flush;
   pause_for_keypress();
-  Menu::startMenu();
-}
-
-void drawMainMenuTitle(std::ostream &out_os) {
-  constexpr auto greetings_text = "Welcome to ";
-  constexpr auto gamename_text = "2048!";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream title_richtext;
-  title_richtext << bold_on << sp << greetings_text << blue << gamename_text
-                 << def << bold_off << "\n";
-
-  str_os << title_richtext.str();
-  out_os << str_os.str();
-}
-
-void drawMainMenuOptions(std::ostream &out_os) {
-  const auto menu_list_txt = {"1. Play a New Game", "2. Continue Previous Game",
-                              "3. View Highscores and Statistics", "4. Exit"};
-  constexpr auto sp = "        ";
-
-  std::ostringstream str_os;
-
-  str_os << "\n";
-  for (const auto txt : menu_list_txt) {
-    str_os << sp << txt << "\n";
-  }
-  str_os << "\n";
-
-  out_os << str_os.str();
-}
-
-void drawInputMenuErrorInvalidInput(std::ostream &out_os, bool err) {
-  if (err) {
-    constexpr auto err_input_text = "Invalid input. Please try again.";
-    constexpr auto sp = "  ";
-
-    std::ostringstream str_os;
-    std::ostringstream err_input_richtext;
-    err_input_richtext << red << sp << err_input_text << def << "\n\n";
-
-    str_os << err_input_richtext.str();
-    out_os << str_os.str();
-  }
-}
-
-void drawInputMenuPrompt(std::ostream &out_os) {
-  constexpr auto prompt_choice_text = "Enter Choice: ";
-  constexpr auto sp = "  ";
-
-  std::ostringstream str_os;
-  std::ostringstream prompt_choice_richtext;
-
-  prompt_choice_richtext << sp << prompt_choice_text;
-
-  str_os << prompt_choice_richtext.str();
-
-  out_os << str_os.str();
-}
-
-void drawMainMenuGraphics(std::ostream &out_os) {
-  drawAscii();
-  drawMainMenuTitle(out_os);
-  drawMainMenuOptions(out_os);
-  // Only outputs if there is an input error...
-  drawInputMenuErrorInvalidInput(out_os, FlagInputErrornousChoice);
-  drawInputMenuPrompt(out_os);
+  ::Menu::startMenu();
 }
 
 void receive_input_flags(std::istream &in_os) {
@@ -153,7 +137,10 @@ bool soloLoop() {
   // No choice in Menu selected, reset all flags...
   mainmenustatus = mainmenustatus_t{};
   clearScreen();
-  drawMainMenuGraphics(std::cout);
+  DrawAlways(std::cout, Game::Graphics::AsciiArt2048);
+  DrawAlways(std::cout,
+             DataSuppliment(FlagInputErrornousChoice,
+                            Game::Graphics::Menu::MainMenuGraphicsOverlay));
   receive_input_flags(std::cin);
   process_MainMenu();
   return FlagInputErrornousChoice;

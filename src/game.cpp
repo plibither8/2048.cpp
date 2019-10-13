@@ -1,21 +1,17 @@
 #include "game.hpp"
-#include "color.hpp"
 #include "game-graphics.hpp"
 #include "game-input.hpp"
 #include "game-pregamemenu.hpp"
+#include "gameboard-graphics.hpp"
 #include "gameboard.hpp"
 #include "global.hpp"
 #include "loadresource.hpp"
 #include "menu.hpp"
-#include "point2d.hpp"
 #include "saveresource.hpp"
 #include "scores.hpp"
 #include "statistics.hpp"
-#include <algorithm>
 #include <array>
 #include <chrono>
-#include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <sstream>
 
@@ -29,6 +25,7 @@ enum GameStatusFlag {
   FLAG_SAVED_GAME,
   FLAG_INPUT_ERROR,
   FLAG_ENDLESS_MODE,
+  FLAG_GAME_IS_ASKING_QUESTION_MODE,
   FLAG_QUESTION_STAY_OR_QUIT,
   MAX_NO_GAME_STATUS_FLAGS
 };
@@ -57,86 +54,6 @@ ull load_game_best_score() {
   return tempscore;
 }
 
-void drawScoreBoard(std::ostream &os) {
-  constexpr auto score_text_label = "SCORE:";
-  constexpr auto bestscore_text_label = "BEST SCORE:";
-  constexpr auto moves_text_label = "MOVES:";
-
-  // * border padding: vvv
-  // | l-outer: 2, r-outer: 0
-  // | l-inner: 1, r-inner: 1
-  // * top border / bottom border: vvv
-  // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
-  // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
-  enum {
-    UI_SCOREBOARD_SIZE = 27,
-    UI_BORDER_OUTER_PADDING = 2,
-    UI_BORDER_INNER_PADDING = 1
-  }; // length of horizontal board - (corners + border padding)
-  constexpr auto border_padding_char = ' ';
-  constexpr auto vertical_border_pattern = "│";
-  constexpr auto top_board =
-      "┌───────────────────────────┐"; // Multibyte character set
-  constexpr auto bottom_board =
-      "└───────────────────────────┘"; // Multibyte character set
-  const auto outer_border_padding =
-      std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
-  const auto inner_border_padding =
-      std::string(UI_BORDER_INNER_PADDING, border_padding_char);
-  const auto inner_padding_length =
-      UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
-  os << outer_border_padding << top_board << "\n";
-  os << outer_border_padding << vertical_border_pattern << inner_border_padding
-     << bold_on << score_text_label << bold_off
-     << std::string(inner_padding_length -
-                        std::string{score_text_label}.length() -
-                        std::to_string(gamePlayBoard.score).length(),
-                    border_padding_char)
-     << gamePlayBoard.score << inner_border_padding << vertical_border_pattern
-     << "\n";
-  if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
-    const auto tempBestScore =
-        (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
-    os << outer_border_padding << vertical_border_pattern
-       << inner_border_padding << bold_on << bestscore_text_label << bold_off
-       << std::string(inner_padding_length -
-                          std::string{bestscore_text_label}.length() -
-                          std::to_string(tempBestScore).length(),
-                      border_padding_char)
-       << tempBestScore << inner_border_padding << vertical_border_pattern
-       << "\n";
-  }
-  os << outer_border_padding << vertical_border_pattern << inner_border_padding
-     << bold_on << moves_text_label << bold_off
-     << std::string(
-            inner_padding_length - std::string{moves_text_label}.length() -
-                std::to_string(MoveCountOnGameBoard(gamePlayBoard)).length(),
-            border_padding_char)
-     << MoveCountOnGameBoard(gamePlayBoard) << inner_border_padding
-     << vertical_border_pattern << "\n";
-  os << outer_border_padding << bottom_board << "\n \n";
-}
-
-void drawBoard(std::ostream &os) {
-  clearScreen();
-  drawAscii();
-  drawScoreBoard(os);
-  os << gamePlayBoard;
-}
-
-void drawInputControls(std::ostream &os, gamestatus_t gamestatus) {
-  const auto InputControlLists = [&gamestatus] {
-    std::ostringstream str_os;
-    DrawAlways(str_os, Graphics::InputCommandListPrompt);
-    DrawOnlyWhen(str_os, gamestatus[FLAG_ENDLESS_MODE],
-                 Graphics::EndlessModeCommandListPrompt);
-    DrawAlways(str_os, Graphics::InputCommandListFooterPrompt);
-    return str_os.str();
-  };
-  // When game is paused to ask a question, hide regular inut prompts..
-  DrawOnlyWhen(os, !gamestatus[FLAG_QUESTION_STAY_OR_QUIT], InputControlLists);
-}
-
 gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   unblockTilesOnGameboard(gamePlayBoard);
   if (gamePlayBoard.moved) {
@@ -147,6 +64,7 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
     if (hasWonOnGameboard(gamePlayBoard)) {
       gamestatus[FLAG_WIN] = true;
+      gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE] = true;
       gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
     }
   }
@@ -156,15 +74,70 @@ gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   return gamestatus;
 }
 
+Graphics::scoreboard_display_data_t make_scoreboard_display_data() {
+  const auto gameboard_score = gamePlayBoard.score;
+  const auto tempBestScore =
+      (bestScore < gamePlayBoard.score ? gamePlayBoard.score : bestScore);
+  const auto comp_mode =
+      std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
+  const auto movecount = MoveCountOnGameBoard(gamePlayBoard);
+  const auto scdd =
+      std::make_tuple(comp_mode, std::to_string(gameboard_score),
+                      std::to_string(tempBestScore), std::to_string(movecount));
+  return scdd;
+};
+
+Graphics::input_controls_display_data_t
+make_input_controls_display_data(gamestatus_t gamestatus) {
+  const auto icdd = std::make_tuple(gamestatus[FLAG_ENDLESS_MODE],
+                                    gamestatus[FLAG_QUESTION_STAY_OR_QUIT]);
+  return icdd;
+};
+
+std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
+  using namespace Graphics;
+
+  std::ostringstream str_os;
+  DrawOnlyWhen(str_os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
+               QuestionEndOfWinningGamePrompt);
+  return str_os.str();
+}
+
 gamestatus_t drawGraphics(std::ostream &os, gamestatus_t gamestatus) {
-  drawBoard(os);
-  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME],
-                    Graphics::GameStateNowSavedPrompt);
-  DrawOnlyWhen(os, gamestatus[FLAG_QUESTION_STAY_OR_QUIT],
-               Graphics::QuestionEndOfWinningGamePrompt);
-  drawInputControls(os, gamestatus);
+  // Graphical Output has a specific ordering...
+  using namespace Graphics;
+  using namespace Gameboard::Graphics;
+  // 1. Clear screen
+  clearScreen();
+
+  // 2. Draw Game Title Art
+  DrawAlways(os, AsciiArt2048);
+
+  // 3. Draw Scoreboard of current game session
+  const auto scdd = make_scoreboard_display_data();
+  DrawAlways(os, DataSuppliment(scdd, GameScoreBoardOverlay));
+
+  // 4 Draw current 2048 game active gameboard
+  DrawAlways(os, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
+
+  // 5 Draw anyinstant status feedback, like
+  // "Game saved!" (which disappers after next key input).
+  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME], GameStateNowSavedPrompt);
+
+  // 6. Draw any "questions to the player" (from the game) text output
+  DrawOnlyWhen(os, gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE],
+               DataSuppliment(gamestatus, DisplayGameQuestionsToPlayerPrompt));
+
+  // 7. Draw Keyboard / Input Keycodes to the player
+  const auto input_controls_display_data =
+      make_input_controls_display_data(gamestatus);
+  DrawAlways(os, DataSuppliment(input_controls_display_data,
+                                GameInputControlsOverlay));
+
+  // 8. Draw any game error messages to the player (to do with keyboard input)
   DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
-                    Graphics::InvalidInputGameBoardErrorPrompt);
+                    InvalidInputGameBoardErrorPrompt);
+
   return gamestatus;
 }
 
@@ -300,6 +273,9 @@ wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
   if (gamestatus[FLAG_SAVED_GAME]) {
     saveGamePlayState();
   }
+
+  // New loop cycle: reset question asking event trigger
+  gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE] = false;
   return std::make_tuple(loop_again, gamestatus);
 }
 
@@ -314,17 +290,36 @@ wrapper_bool_gamestatus_t soloGameLoop(gamestatus_t gamestatus) {
   return loop_again;
 }
 
-void drawEndScreen(std::ostream &os, gamestatus_t gamestatus) {
-  const auto standardWinLosePrompt = [&gamestatus] {
-    std::ostringstream str_os;
-    DrawOnlyWhen(str_os, gamestatus[FLAG_WIN], Graphics::YouWinPrompt);
-    // else..
-    DrawOnlyWhen(str_os, !gamestatus[FLAG_WIN], Graphics::GameOverPrompt);
-    return str_os.str();
-  };
-  DrawOnlyWhen(os, !gamestatus[FLAG_ENDLESS_MODE], standardWinLosePrompt);
-  // else..
-  DrawOnlyWhen(os, gamestatus[FLAG_ENDLESS_MODE], Graphics::EndOfEndlessPrompt);
+Graphics::end_screen_display_data_t
+make_end_screen_display_data(gamestatus_t world_gamestatus) {
+  const auto esdd = std::make_tuple(world_gamestatus[FLAG_WIN],
+                                    world_gamestatus[FLAG_ENDLESS_MODE]);
+  return esdd;
+};
+
+std::string drawEndGameLoopGraphics(gamestatus_t world_gamestatus) {
+  // Graphical Output has a specific ordering...
+  using namespace Graphics;
+  using namespace Gameboard::Graphics;
+  std::ostringstream str_os;
+  // 1. Clear screen
+  clearScreen();
+
+  // 2. Draw Game Title Art
+  DrawAlways(str_os, AsciiArt2048);
+
+  // 3. Draw Scoreboard of ending current game session
+  const auto scdd = make_scoreboard_display_data();
+  DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardOverlay));
+
+  // 4 Draw snapshot of ending 2048 session's gameboard
+  DrawAlways(str_os, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
+
+  // 5. Draw "You win!" or "You Lose" prompt, only if not in endless mode.
+  const auto esdd = make_end_screen_display_data(world_gamestatus);
+  DrawAlways(str_os, DataSuppliment(esdd, GameEndScreenOverlay));
+
+  return str_os.str();
 }
 
 void endlessGameLoop() {
@@ -335,40 +330,8 @@ void endlessGameLoop() {
     std::tie(loop_again, world_gamestatus) = soloGameLoop(world_gamestatus);
   }
 
-  drawBoard(std::cout);
-  drawEndScreen(std::cout, world_gamestatus);
-}
-
-void drawEndGameStatistics(std::ostream &os, Scoreboard::Score finalscore) {
-  constexpr auto stats_title_text = "STATISTICS";
-  constexpr auto divider_text = "──────────";
-  const auto stats_attributes_text = {
-      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
-  constexpr auto num_of_stats_attributes_text = 4;
-  constexpr auto sp = "  ";
-
-  auto data_stats = std::array<std::string, num_of_stats_attributes_text>{};
-  data_stats = {
-      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
-      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration)};
-
-  std::ostringstream stats_richtext;
-  stats_richtext << yellow << sp << stats_title_text << def << "\n";
-  stats_richtext << yellow << sp << divider_text << def << "\n";
-
-  auto counter{0};
-  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
-                                    &stats_richtext](const std::string) {
-    stats_richtext << sp << std::left << std::setw(19)
-                   << std::begin(stats_attributes_text)[counter] << bold_on
-                   << std::begin(data_stats)[counter] << bold_off << "\n";
-    counter++;
-  };
-  std::for_each(std::begin(stats_attributes_text),
-                std::end(stats_attributes_text), populate_stats_info);
-
-  os << stats_richtext.str();
-  os << "\n\n";
+  DrawAlways(std::cout,
+             DataSuppliment(world_gamestatus, drawEndGameLoopGraphics));
 }
 
 void saveEndGameStats(Scoreboard::Score finalscore) {
@@ -392,6 +355,14 @@ void saveScore(Scoreboard::Score finalscore) {
   Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
 }
 
+Graphics::finalscore_display_data_t
+make_finalscore_display_data(Scoreboard::Score finalscore) {
+  const auto fsdd = std::make_tuple(
+      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
+      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration));
+  return fsdd;
+};
+
 void DoPostGameSaveStuff(double duration) {
   if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
     Scoreboard::Score finalscore{};
@@ -401,7 +372,10 @@ void DoPostGameSaveStuff(double duration) {
     finalscore.largestTile = gamePlayBoard.largestTile;
     finalscore.duration = duration;
 
-    drawEndGameStatistics(std::cout, finalscore);
+    const auto finalscore_display_data =
+        make_finalscore_display_data(finalscore);
+    DrawAlways(std::cout, DataSuppliment(finalscore_display_data,
+                                         Graphics::EndGameStatisticsPrompt));
     saveEndGameStats(finalscore);
 
     DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);

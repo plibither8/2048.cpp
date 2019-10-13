@@ -5,6 +5,8 @@
 #include <tuple>
 #include <vector>
 
+struct point2D_t;
+
 namespace Game {
 
 struct GameBoard {
@@ -23,6 +25,10 @@ struct GameBoard {
   explicit GameBoard(ull playsize, tile_data_array_t prempt_board);
 };
 
+size_t getPlaySizeOfGameboardDataArray(GameBoard::gameboard_data_array_t gbda);
+tile_t getTileOnGameboardDataArray(GameBoard::gameboard_data_array_t gbda,
+                                   point2D_t pt);
+
 bool hasWonOnGameboard(GameBoard gb);
 long long MoveCountOnGameBoard(GameBoard gb);
 
@@ -39,7 +45,5 @@ void tumbleTilesRightOnGameboard(GameBoard &gb);
 std::string printStateOfGameBoard(GameBoard gb);
 
 } // namespace Game
-
-std::ostream &operator<<(std::ostream &os, const Game::GameBoard &gb);
 
 #endif

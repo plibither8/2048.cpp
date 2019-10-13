@@ -1,9 +1,30 @@
 #include "game-graphics.hpp"
 #include "color.hpp"
+#include "global.hpp"
+#include <array>
+#include <iomanip>
 #include <sstream>
 
 namespace Game {
 namespace Graphics {
+std::string AsciiArt2048() {
+  constexpr auto title_card_2048 = R"(
+   /\\\\\\\\\          /\\\\\\\                /\\\         /\\\\\\\\\
+  /\\\///////\\\      /\\\/////\\\            /\\\\\       /\\\///////\\\
+  \///      \//\\\    /\\\    \//\\\         /\\\/\\\      \/\\\     \/\\\
+             /\\\/    \/\\\     \/\\\       /\\\/\/\\\      \///\\\\\\\\\/
+           /\\\//      \/\\\     \/\\\     /\\\/  \/\\\       /\\\///////\\\
+         /\\\//         \/\\\     \/\\\   /\\\\\\\\\\\\\\\\   /\\\      \//\\\
+        /\\\/            \//\\\    /\\\   \///////////\\\//   \//\\\      /\\\
+        /\\\\\\\\\\\\\\\   \///\\\\\\\/              \/\\\      \///\\\\\\\\\/
+        \///////////////      \///////                \///         \/////////
+  )";
+  std::ostringstream title_card_richtext;
+  title_card_richtext << green << bold_on << title_card_2048 << bold_off << def;
+  title_card_richtext << "\n\n\n";
+  return title_card_richtext.str();
+}
+
 std::string MessageScoreSavedPrompt() {
   constexpr auto score_saved_text = "Score saved!";
   constexpr auto sp = "  ";
@@ -145,6 +166,170 @@ std::string InputCommandListFooterPrompt() {
   for (const auto txt : input_commands_list_footer_text) {
     str_os << sp << txt << "\n";
   }
+  return str_os.str();
+}
+
+std::string EndGameStatisticsPrompt(finalscore_display_data_t finalscore) {
+  std::ostringstream str_os;
+  constexpr auto stats_title_text = "STATISTICS";
+  constexpr auto divider_text = "──────────";
+  constexpr auto sp = "  ";
+  const auto stats_attributes_text = {
+      "Final score:", "Largest Tile:", "Number of moves:", "Time taken:"};
+  enum FinalScoreDisplayDataFields {
+    IDX_FINAL_SCORE_VALUE,
+    IDX_LARGEST_TILE,
+    IDX_MOVE_COUNT,
+    IDX_DURATION,
+    MAX_NUM_OF_FINALSCOREDISPLAYDATA_INDEXES
+  };
+  const auto data_stats =
+      std::array<std::string, MAX_NUM_OF_FINALSCOREDISPLAYDATA_INDEXES>{
+          std::get<IDX_FINAL_SCORE_VALUE>(finalscore),
+          std::get<IDX_LARGEST_TILE>(finalscore),
+          std::get<IDX_MOVE_COUNT>(finalscore),
+          std::get<IDX_DURATION>(finalscore)};
+
+  std::ostringstream stats_richtext;
+  stats_richtext << yellow << sp << stats_title_text << def << "\n";
+  stats_richtext << yellow << sp << divider_text << def << "\n";
+
+  auto counter{0};
+  const auto populate_stats_info = [data_stats, stats_attributes_text, &counter,
+                                    &stats_richtext](const std::string) {
+    stats_richtext << sp << std::left << std::setw(19)
+                   << std::begin(stats_attributes_text)[counter] << bold_on
+                   << std::begin(data_stats)[counter] << bold_off << "\n";
+    counter++;
+  };
+
+  for (const auto s : stats_attributes_text) {
+    populate_stats_info(s);
+  }
+
+  str_os << stats_richtext.str();
+  str_os << "\n\n";
+  return str_os.str();
+}
+
+std::string GameScoreBoardBox(scoreboard_display_data_t scdd) {
+  std::ostringstream str_os;
+  constexpr auto score_text_label = "SCORE:";
+  constexpr auto bestscore_text_label = "BEST SCORE:";
+  constexpr auto moves_text_label = "MOVES:";
+
+  // * border padding: vvv
+  // | l-outer: 2, r-outer: 0
+  // | l-inner: 1, r-inner: 1
+  // * top border / bottom border: vvv
+  // | tl_corner + horizontal_sep + tr_corner = length: 1 + 27 + 1
+  // | bl_corner + horizontal_sep + br_corner = length: 1 + 27 + 1
+  enum {
+    UI_SCOREBOARD_SIZE = 27,
+    UI_BORDER_OUTER_PADDING = 2,
+    UI_BORDER_INNER_PADDING = 1
+  }; // length of horizontal board - (corners + border padding)
+  constexpr auto border_padding_char = ' ';
+  constexpr auto vertical_border_pattern = "│";
+  constexpr auto top_board =
+      "┌───────────────────────────┐"; // Multibyte character set
+  constexpr auto bottom_board =
+      "└───────────────────────────┘"; // Multibyte character set
+  const auto outer_border_padding =
+      std::string(UI_BORDER_OUTER_PADDING, border_padding_char);
+  const auto inner_border_padding =
+      std::string(UI_BORDER_INNER_PADDING, border_padding_char);
+  const auto inner_padding_length =
+      UI_SCOREBOARD_SIZE - (std::string{inner_border_padding}.length() * 2);
+
+  enum ScoreBoardDisplayDataFields {
+    IDX_COMPETITION_MODE,
+    IDX_GAMEBOARD_SCORE,
+    IDX_BESTSCORE,
+    IDX_MOVECOUNT,
+    MAX_SCOREBOARDDISPLAYDATA_INDEXES
+  };
+
+  const auto competition_mode = std::get<IDX_COMPETITION_MODE>(scdd);
+  const auto gameboard_score = std::get<IDX_GAMEBOARD_SCORE>(scdd);
+  const auto temp_bestscore = std::get<IDX_BESTSCORE>(scdd);
+  const auto movecount = std::get<IDX_MOVECOUNT>(scdd);
+
+  str_os << outer_border_padding << top_board << "\n";
+  str_os << outer_border_padding << vertical_border_pattern
+         << inner_border_padding << bold_on << score_text_label << bold_off
+         << std::string(inner_padding_length -
+                            std::string{score_text_label}.length() -
+                            gameboard_score.length(),
+                        border_padding_char)
+         << gameboard_score << inner_border_padding << vertical_border_pattern
+         << "\n";
+  if (competition_mode) {
+    str_os << outer_border_padding << vertical_border_pattern
+           << inner_border_padding << bold_on << bestscore_text_label
+           << bold_off
+           << std::string(inner_padding_length -
+                              std::string{bestscore_text_label}.length() -
+                              temp_bestscore.length(),
+                          border_padding_char)
+           << temp_bestscore << inner_border_padding << vertical_border_pattern
+           << "\n";
+  }
+  str_os << outer_border_padding << vertical_border_pattern
+         << inner_border_padding << bold_on << moves_text_label << bold_off
+         << std::string(inner_padding_length -
+                            std::string{moves_text_label}.length() -
+                            movecount.length(),
+                        border_padding_char)
+         << movecount << inner_border_padding << vertical_border_pattern
+         << "\n";
+  str_os << outer_border_padding << bottom_board << "\n \n";
+  return str_os.str();
+}
+
+std::string GameScoreBoardOverlay(scoreboard_display_data_t scdd) {
+  std::ostringstream str_os;
+  DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardBox));
+  return str_os.str();
+}
+
+std::string GameEndScreenOverlay(end_screen_display_data_t esdd) {
+  enum EndScreenDisplayDataFields {
+    IDX_FLAG_WIN,
+    IDX_FLAG_ENDLESS_MODE,
+    MAX_ENDSCREENDISPLAYDATA_INDEXES
+  };
+  const auto did_win = std::get<IDX_FLAG_WIN>(esdd);
+  const auto is_endless_mode = std::get<IDX_FLAG_ENDLESS_MODE>(esdd);
+
+  std::ostringstream str_os;
+  const auto standardWinLosePrompt = [=] {
+    std::ostringstream str_os;
+    DrawOnlyWhen(str_os, did_win, YouWinPrompt);
+    // else..
+    DrawOnlyWhen(str_os, !did_win, GameOverPrompt);
+    return str_os.str();
+  };
+  DrawOnlyWhen(str_os, !is_endless_mode, standardWinLosePrompt);
+  // else..
+  DrawOnlyWhen(str_os, is_endless_mode, EndOfEndlessPrompt);
+  return str_os.str();
+}
+
+std::string GameInputControlsOverlay(input_controls_display_data_t gamestatus) {
+  const auto is_in_endless_mode = std::get<0>(gamestatus);
+  const auto is_in_question_mode = std::get<1>(gamestatus);
+  std::ostringstream str_os;
+  const auto InputControlLists = [=] {
+    std::ostringstream str_os;
+    DrawAlways(str_os, Graphics::InputCommandListPrompt);
+    DrawOnlyWhen(str_os, is_in_endless_mode,
+                 Graphics::EndlessModeCommandListPrompt);
+    DrawAlways(str_os, Graphics::InputCommandListFooterPrompt);
+    return str_os.str();
+  };
+  // When game is paused to ask a question, hide regular inut prompts..
+  DrawOnlyWhen(str_os, !is_in_question_mode, InputControlLists);
   return str_os.str();
 }
 

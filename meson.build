@@ -10,7 +10,7 @@ elif cxx.get_id() == 'intel'
 endif
 
 main_target_name = '2048'
-sources = ['src/2048.cpp', 'src/gameboard.cpp', 'src/game.cpp', 'src/game-input.cpp', 'src/game-graphics.cpp', 'src/game-pregamemenu.cpp', 'src/global.cpp', 'src/loadresource.cpp', 'src/menu.cpp', 'src/saveresource.cpp', 'src/scores.cpp', 'src/statistics.cpp', 'src/tile.cpp']
+sources = ['src/2048.cpp', 'src/gameboard.cpp', 'src/gameboard-graphics.cpp', 'src/game.cpp', 'src/game-input.cpp', 'src/game-graphics.cpp', 'src/game-pregamemenu.cpp', 'src/global.cpp', 'src/loadresource.cpp', 'src/menu.cpp', 'src/menu-graphics.cpp', 'src/saveresource.cpp', 'src/scores.cpp', 'src/scores-graphics.cpp', 'src/statistics.cpp', 'src/statistics-graphics.cpp', 'src/tile.cpp', 'src/tile-graphics.cpp']
 hdrs = include_directories('src/headers')
 
 executable(main_target_name, sources, 

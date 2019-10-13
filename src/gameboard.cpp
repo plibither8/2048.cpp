@@ -1,4 +1,5 @@
 #include "gameboard.hpp"
+#include "gameboard-graphics.hpp"
 #include "point2d.hpp"
 #include <algorithm>
 #include <array>
@@ -31,10 +32,6 @@ private:
 using gameboard_data_array_t = GameBoard::gameboard_data_array_t;
 enum gameboard_data_array_fields { IDX_PLAYSIZE, IDX_BOARD, MAX_NO_INDEXES };
 
-size_t getPlaySizeOfGameboardDataArray(gameboard_data_array_t gbda) {
-  return std::get<IDX_PLAYSIZE>(gbda);
-}
-
 struct gameboard_data_point_t {
   static int point2D_to_1D_index(gameboard_data_array_t gbda, point2D_t pt) {
     int x, y;
@@ -49,10 +46,6 @@ struct gameboard_data_point_t {
     return std::get<IDX_BOARD>(gbda)[point2D_to_1D_index(gbda, pt)];
   }
 };
-
-tile_t getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
-  return gameboard_data_point_t{}(gbda, pt);
-}
 
 void setTileOnGameboardDataArray(gameboard_data_array_t &gbda, point2D_t pt,
                                  tile_t tile) {
@@ -72,60 +65,6 @@ void setTileValueOnGameboardDataArray(gameboard_data_array_t &gbda,
 bool getTileBlockedOnGameboardDataArray(gameboard_data_array_t gbda,
                                         point2D_t pt) {
   return gameboard_data_point_t{}(gbda, pt).blocked;
-}
-
-template<size_t num_of_bars>
-std::array<std::string, num_of_bars> make_patterned_bars(int playsize) {
-  auto temp_bars = std::array<std::string, num_of_bars>{};
-  using bar_pattern_t = std::tuple<std::string, std::string, std::string>;
-
-  const auto bar_pattern_list = {std::make_tuple("┌", "┬", "┐"),
-                                 std::make_tuple("├", "┼", "┤"),
-                                 std::make_tuple("└", "┴", "┘")};
-
-  // generate types of horizontal bars...
-  const auto generate_x_bar_pattern = [playsize](const bar_pattern_t t) {
-    enum { PATTERN_HEAD, PATTERN_MID, PATTERN_TAIL };
-    constexpr auto sp = "  ";
-    constexpr auto separator = "──────";
-    std::ostringstream temp_richtext;
-    temp_richtext << sp << std::get<PATTERN_HEAD>(t);
-    for (auto i = 0; i < playsize; i++) {
-      const auto is_not_last_column = (i < playsize - 1);
-      temp_richtext << separator
-                    << (is_not_last_column ? std::get<PATTERN_MID>(t) :
-                                             std::get<PATTERN_TAIL>(t));
-    }
-    temp_richtext << "\n";
-    return temp_richtext.str();
-  };
-  std::transform(std::begin(bar_pattern_list), std::end(bar_pattern_list),
-                 std::begin(temp_bars), generate_x_bar_pattern);
-  return temp_bars;
-}
-
-std::string drawSelf(gameboard_data_array_t gbda) {
-  enum { TOP_BAR, XN_BAR, BASE_BAR, MAX_TYPES_OF_BARS };
-  const int playsize = getPlaySizeOfGameboardDataArray(gbda);
-  const auto vertibar = make_patterned_bars<MAX_TYPES_OF_BARS>(playsize);
-  std::ostringstream str_os;
-  for (auto y = 0; y < playsize; y++) {
-    const auto is_first_row = (y == 0);
-    str_os << (is_first_row ? std::get<TOP_BAR>(vertibar) :
-                              std::get<XN_BAR>(vertibar));
-    for (auto x = 0; x < playsize; x++) {
-      const auto is_first_col = (x == 0);
-      const auto sp = (is_first_col ? "  " : " ");
-      str_os << sp;
-      str_os << "│ ";
-      str_os << getTileOnGameboardDataArray(gbda, point2D_t{x, y});
-    }
-    str_os << " │";
-    str_os << "\n";
-  }
-  str_os << std::get<BASE_BAR>(vertibar);
-  str_os << "\n";
-  return str_os.str();
 }
 
 std::string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
@@ -420,6 +359,14 @@ GameBoard::GameBoard(ull playsize, tile_data_array_t prempt_board)
     : gbda{playsize, prempt_board} {
 }
 
+size_t getPlaySizeOfGameboardDataArray(gameboard_data_array_t gbda) {
+  return std::get<IDX_PLAYSIZE>(gbda);
+}
+
+tile_t getTileOnGameboardDataArray(gameboard_data_array_t gbda, point2D_t pt) {
+  return gameboard_data_point_t{}(gbda, pt);
+}
+
 bool hasWonOnGameboard(GameBoard gb) {
   return gb.win;
 }
@@ -466,9 +413,3 @@ std::string printStateOfGameBoard(GameBoard gb) {
 }
 
 } // namespace Game
-
-using namespace Game;
-
-std::ostream &operator<<(std::ostream &os, const GameBoard &gb) {
-  return os << drawSelf(gb.gbda);
-}
