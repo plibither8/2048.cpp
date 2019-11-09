@@ -309,10 +309,6 @@ void endlessGameLoop() {
              DataSuppliment(world_gamestatus, drawEndGameLoopGraphics));
 }
 
-void saveScore(Scoreboard::Score finalscore) {
-  Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
-}
-
 Graphics::finalscore_display_data_t
 make_finalscore_display_data(Scoreboard::Score finalscore) {
   const auto fsdd = std::make_tuple(
@@ -340,7 +336,7 @@ void DoPostGameSaveStuff(double duration) {
     const auto name = receive_input_player_name(std::cin);
     finalscore.name = name;
 
-    saveScore(finalscore);
+    Scoreboard::saveScore(finalscore);
     DrawAlways(std::cout, Graphics::MessageScoreSavedPrompt);
   }
 }

@@ -20,9 +20,19 @@ Scoreboard_t generateScorefromFileData(std::istream &is) {
   };
   return scoreList;
 }
+
+bool saveToFileScore(std::string filename, Score s) {
+  std::ofstream os(filename, std::ios_base::app);
+  return generateFilefromScoreData(os, s);
+}
+
 } // namespace
 
 namespace Scoreboard {
+bool operator>(const Score &a, const Score &b) {
+  return a.score > b.score;
+}
+
 load_score_status_t loadFromFileScore(std::string filename) {
   std::ifstream scores(filename);
   if (scores) {
@@ -34,13 +44,8 @@ load_score_status_t loadFromFileScore(std::string filename) {
   return load_score_status_t{false, Scoreboard_t{}};
 }
 
-bool saveToFileScore(std::string filename, Score s) {
-  std::ofstream os(filename, std::ios_base::app);
-  return generateFilefromScoreData(os, s);
-}
-
-bool operator>(const Score &a, const Score &b) {
-  return a.score > b.score;
+void saveScore(Score finalscore) {
+  saveToFileScore("../data/scores.txt", finalscore);
 }
 
 } // namespace Scoreboard
