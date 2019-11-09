@@ -309,6 +309,17 @@ void endlessGameLoop() {
              DataSuppliment(world_gamestatus, drawEndGameLoopGraphics));
 }
 
+Scoreboard::Score make_finalscore_from_game_session(double duration,
+                                                    GameBoard gb) {
+  Scoreboard::Score finalscore{};
+  finalscore.score = gb.score;
+  finalscore.win = hasWonOnGameboard(gb);
+  finalscore.moveCount = MoveCountOnGameBoard(gb);
+  finalscore.largestTile = gb.largestTile;
+  finalscore.duration = duration;
+  return finalscore;
+}
+
 Graphics::finalscore_display_data_t
 make_finalscore_display_data(Scoreboard::Score finalscore) {
   const auto fsdd = std::make_tuple(
@@ -317,15 +328,8 @@ make_finalscore_display_data(Scoreboard::Score finalscore) {
   return fsdd;
 };
 
-void DoPostGameSaveStuff(double duration) {
+void DoPostGameSaveStuff(Scoreboard::Score finalscore) {
   if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
-    Scoreboard::Score finalscore{};
-    finalscore.score = gamePlayBoard.score;
-    finalscore.win = hasWonOnGameboard(gamePlayBoard);
-    finalscore.moveCount = MoveCountOnGameBoard(gamePlayBoard);
-    finalscore.largestTile = gamePlayBoard.largestTile;
-    finalscore.duration = duration;
-
     const auto finalscore_display_data =
         make_finalscore_display_data(finalscore);
     DrawAlways(std::cout, DataSuppliment(finalscore_display_data,
@@ -358,7 +362,9 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   const auto duration = elapsed.count();
 
   if (cont == PlayGameFlag::BrandNewGame) {
-    DoPostGameSaveStuff(duration);
+    const auto finalscore =
+        make_finalscore_from_game_session(duration, gamePlayBoard);
+    DoPostGameSaveStuff(finalscore);
   }
 }
 
