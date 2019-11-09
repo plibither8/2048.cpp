@@ -90,12 +90,18 @@ std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
   return str_os.str();
 }
 
+using current_game_session_gameboard_t =
+    std::tuple<current_game_session_t, GameBoard>;
 current_game_session_t drawGraphics(std::ostream &os,
-                                    current_game_session_t currentgamestatus) {
+                                    current_game_session_gameboard_t cgs_gb) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
-  enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS };
+  enum tuple_cgs_gb_idx { IDX_CURRENTGAMESTATUS, IDX_GAMEBOARD };
+  enum tuple_currentgamestatus_idx { IDX_BESTSCORE, IDX_GAMESTATUS };
+
+  auto currentgamestatus = std::get<IDX_CURRENTGAMESTATUS>(cgs_gb);
+  const auto gb = std::get<IDX_GAMEBOARD>(cgs_gb);
 
   // 1. Clear screen
   clearScreen();
@@ -105,11 +111,11 @@ current_game_session_t drawGraphics(std::ostream &os,
 
   // 3. Draw Scoreboard of current game session
   const auto bestScore = std::get<IDX_BESTSCORE>(currentgamestatus);
-  const auto scdd = make_scoreboard_display_data(bestScore, gamePlayBoard);
+  const auto scdd = make_scoreboard_display_data(bestScore, gb);
   DrawAlways(os, DataSuppliment(scdd, GameScoreBoardOverlay));
 
   // 4. Draw current 2048 game active gameboard
-  DrawAlways(os, DataSuppliment(gamePlayBoard, GameBoardTextOutput));
+  DrawAlways(os, DataSuppliment(gb, GameBoardTextOutput));
 
   // 5. Get the current game status flags events
   auto gamestatus = std::get<IDX_GAMESTATUS>(currentgamestatus);
@@ -275,7 +281,9 @@ soloGameLoop(current_game_session_t currentgamesession) {
   const auto gamestatus_gameboard = std::make_tuple(gamestatus, gamePlayBoard);
   std::tie(*tuple_address_of_gamestatus, gamePlayBoard) =
       process_gamelogic(gamestatus_gameboard);
-  currentgamesession = drawGraphics(std::cout, currentgamesession);
+
+  const auto cgs_gb = std::make_tuple(currentgamesession, gamePlayBoard);
+  currentgamesession = drawGraphics(std::cout, cgs_gb);
 
   gamestatus = *tuple_address_of_gamestatus;
   gamestatus = receive_agent_input(player_intendedmove, gamestatus);
