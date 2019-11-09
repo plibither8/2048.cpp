@@ -309,23 +309,6 @@ void endlessGameLoop() {
              DataSuppliment(world_gamestatus, drawEndGameLoopGraphics));
 }
 
-void saveEndGameStats(Scoreboard::Score finalscore) {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  // Need some sort of stats data values only.
-  // No need to care if file loaded successfully or not...
-  std::tie(std::ignore, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  stats.bestScore =
-      stats.bestScore < finalscore.score ? finalscore.score : stats.bestScore;
-  stats.gameCount++;
-  stats.winCount = finalscore.win ? stats.winCount + 1 : stats.winCount;
-  stats.totalMoveCount += finalscore.moveCount;
-  stats.totalDuration += finalscore.duration;
-
-  saveToFileEndGameStatistics("../data/statistics.txt", stats);
-}
-
 void saveScore(Scoreboard::Score finalscore) {
   Scoreboard::saveToFileScore("../data/scores.txt", finalscore);
 }
@@ -351,7 +334,7 @@ void DoPostGameSaveStuff(double duration) {
         make_finalscore_display_data(finalscore);
     DrawAlways(std::cout, DataSuppliment(finalscore_display_data,
                                          Graphics::EndGameStatisticsPrompt));
-    saveEndGameStats(finalscore);
+    Statistics::saveEndGameStats(finalscore);
 
     DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);
     const auto name = receive_input_player_name(std::cin);

@@ -1,5 +1,6 @@
 #include "statistics.hpp"
 #include "color.hpp"
+#include "scores.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
@@ -20,6 +21,11 @@ bool generateFilefromStatsData(std::ostream &os, total_game_stats_t stats) {
   return true;
 }
 
+bool saveToFileEndGameStatistics(std::string filename, total_game_stats_t s) {
+  std::ofstream filedata(filename);
+  return generateFilefromStatsData(filedata, s);
+}
+
 } // namespace
 
 load_stats_status_t loadFromFileStatistics(std::string filename) {
@@ -29,11 +35,6 @@ load_stats_status_t loadFromFileStatistics(std::string filename) {
     return load_stats_status_t{true, stats};
   }
   return load_stats_status_t{false, total_game_stats_t{}};
-}
-
-bool saveToFileEndGameStatistics(std::string filename, total_game_stats_t s) {
-  std::ofstream filedata(filename);
-  return generateFilefromStatsData(filedata, s);
 }
 
 ull load_game_best_score() {
@@ -46,6 +47,22 @@ ull load_game_best_score() {
     tempscore = stats.bestScore;
   }
   return tempscore;
+}
+
+void saveEndGameStats(Scoreboard::Score finalscore) {
+  total_game_stats_t stats;
+  // Need some sort of stats data values only.
+  // No need to care if file loaded successfully or not...
+  std::tie(std::ignore, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
+  stats.bestScore =
+      stats.bestScore < finalscore.score ? finalscore.score : stats.bestScore;
+  stats.gameCount++;
+  stats.winCount = finalscore.win ? stats.winCount + 1 : stats.winCount;
+  stats.totalMoveCount += finalscore.moveCount;
+  stats.totalDuration += finalscore.duration;
+
+  saveToFileEndGameStatistics("../data/statistics.txt", stats);
 }
 
 } // namespace Statistics
