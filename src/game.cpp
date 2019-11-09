@@ -228,18 +228,6 @@ bool continue_playing_game(std::istream &in_os) {
   return true;
 }
 
-void saveGamePlayState() {
-  using namespace Saver;
-  // Currently two datafiles for now.
-  // Will be merged into one datafile in a future PR.
-  std::remove("../data/previousGame");
-  std::remove("../data/previousGameStats");
-
-  saveToFilePreviousGameStateData("../data/previousGame", gamePlayBoard);
-  saveToFilePreviousGameStatisticsData("../data/previousGameStats",
-                                       gamePlayBoard);
-}
-
 wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
   auto loop_again{true};
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
@@ -258,7 +246,7 @@ wrapper_bool_gamestatus_t process_gameStatus(gamestatus_t gamestatus) {
     loop_again = false;
   }
   if (gamestatus[FLAG_SAVED_GAME]) {
-    saveGamePlayState();
+    Saver::saveGamePlayState(gamePlayBoard);
   }
 
   // New loop cycle: reset question asking event trigger
