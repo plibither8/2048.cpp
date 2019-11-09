@@ -263,21 +263,22 @@ wrapper_bool_current_game_session_t
 soloGameLoop(current_game_session_t currentgamesession) {
   using namespace Input;
   constexpr auto TUPLE_IDX_GAMESTATUS = 1;
+  const auto tuple_address_of_gamestatus =
+      std::addressof(std::get<TUPLE_IDX_GAMESTATUS>(currentgamesession));
   intendedmove_t player_intendedmove{};
 
-  gamestatus_t gamestatus = std::get<TUPLE_IDX_GAMESTATUS>(currentgamesession);
-  std::get<TUPLE_IDX_GAMESTATUS>(currentgamesession) =
-      process_gamelogic(gamestatus);
+  gamestatus_t gamestatus = *tuple_address_of_gamestatus;
+  *tuple_address_of_gamestatus = process_gamelogic(gamestatus);
   currentgamesession = drawGraphics(std::cout, currentgamesession);
 
-  gamestatus = std::get<TUPLE_IDX_GAMESTATUS>(currentgamesession);
+  gamestatus = *tuple_address_of_gamestatus;
   gamestatus = receive_agent_input(player_intendedmove, gamestatus);
 
   process_agent_input(player_intendedmove);
 
   bool loop_again;
   std::tie(loop_again, gamestatus) = process_gameStatus(gamestatus);
-  std::get<TUPLE_IDX_GAMESTATUS>(currentgamesession) = gamestatus;
+  *tuple_address_of_gamestatus = gamestatus;
   return std::make_tuple(loop_again, currentgamesession);
 }
 
