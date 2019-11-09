@@ -35,26 +35,30 @@ using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
 // NOTE: current_game_session_t : (bestScore, gamestatus)
 using current_game_session_t = std::tuple<ull, gamestatus_t>;
 
+using gamestatus_gameboard_t = std::tuple<gamestatus_t, GameBoard>;
 GameBoard gamePlayBoard;
 
-gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
-  unblockTilesOnGameboard(gamePlayBoard);
-  if (gamePlayBoard.moved) {
-    addTileOnGameboard(gamePlayBoard);
-    registerMoveByOneOnGameboard(gamePlayBoard);
+gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
+  gamestatus_t gamestatus;
+  GameBoard gb;
+  std::tie(gamestatus, gb) = gsgb;
+  unblockTilesOnGameboard(gb);
+  if (gb.moved) {
+    addTileOnGameboard(gb);
+    registerMoveByOneOnGameboard(gb);
   }
 
   if (!gamestatus[FLAG_ENDLESS_MODE]) {
-    if (hasWonOnGameboard(gamePlayBoard)) {
+    if (hasWonOnGameboard(gb)) {
       gamestatus[FLAG_WIN] = true;
       gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE] = true;
       gamestatus[FLAG_QUESTION_STAY_OR_QUIT] = true;
     }
   }
-  if (!canMoveOnGameboard(gamePlayBoard)) {
+  if (!canMoveOnGameboard(gb)) {
     gamestatus[FLAG_END_GAME] = true;
   }
-  return gamestatus;
+  return std::make_tuple(gamestatus, gb);
 }
 
 Graphics::scoreboard_display_data_t make_scoreboard_display_data(ull bestScore,
@@ -268,7 +272,9 @@ soloGameLoop(current_game_session_t currentgamesession) {
   intendedmove_t player_intendedmove{};
 
   gamestatus_t gamestatus = *tuple_address_of_gamestatus;
-  *tuple_address_of_gamestatus = process_gamelogic(gamestatus);
+  const auto gamestatus_gameboard = std::make_tuple(gamestatus, gamePlayBoard);
+  std::tie(*tuple_address_of_gamestatus, gamePlayBoard) =
+      process_gamelogic(gamestatus_gameboard);
   currentgamesession = drawGraphics(std::cout, currentgamesession);
 
   gamestatus = *tuple_address_of_gamestatus;
