@@ -36,6 +36,18 @@ bool saveToFileEndGameStatistics(std::string filename, total_game_stats_t s) {
   return generateFilefromStatsData(filedata, s);
 }
 
+ull load_game_best_score() {
+  total_game_stats_t stats;
+  bool stats_file_loaded{};
+  ull tempscore{0};
+  std::tie(stats_file_loaded, stats) =
+      loadFromFileStatistics("../data/statistics.txt");
+  if (stats_file_loaded) {
+    tempscore = stats.bestScore;
+  }
+  return tempscore;
+}
+
 } // namespace Statistics
 
 using namespace Statistics;

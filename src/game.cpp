@@ -41,19 +41,6 @@ std::string receive_input_player_name(std::istream &is) {
   return name;
 }
 
-ull load_game_best_score() {
-  using namespace Statistics;
-  total_game_stats_t stats;
-  bool stats_file_loaded{};
-  ull tempscore{0};
-  std::tie(stats_file_loaded, stats) =
-      loadFromFileStatistics("../data/statistics.txt");
-  if (stats_file_loaded) {
-    tempscore = stats.bestScore;
-  }
-  return tempscore;
-}
-
 gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   unblockTilesOnGameboard(gamePlayBoard);
   if (gamePlayBoard.moved) {
@@ -390,7 +377,7 @@ void DoPostGameSaveStuff(double duration) {
 } // namespace
 
 void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
-  bestScore = load_game_best_score();
+  bestScore = Statistics::load_game_best_score();
   gamePlayBoard = gb;
   if (cont == PlayGameFlag::BrandNewGame) {
     gamePlayBoard = GameBoard(userInput_PlaySize);
