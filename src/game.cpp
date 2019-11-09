@@ -35,12 +35,6 @@ using gamestatus_t = std::array<bool, MAX_NO_GAME_STATUS_FLAGS>;
 ull bestScore;
 GameBoard gamePlayBoard;
 
-std::string receive_input_player_name(std::istream &is) {
-  std::string name;
-  is >> name;
-  return name;
-}
-
 gamestatus_t process_gamelogic(gamestatus_t gamestatus) {
   unblockTilesOnGameboard(gamePlayBoard);
   if (gamePlayBoard.moved) {
@@ -320,28 +314,9 @@ Scoreboard::Score make_finalscore_from_game_session(double duration,
   return finalscore;
 }
 
-Graphics::finalscore_display_data_t
-make_finalscore_display_data(Scoreboard::Score finalscore) {
-  const auto fsdd = std::make_tuple(
-      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
-      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration));
-  return fsdd;
-};
-
 void DoPostGameSaveStuff(Scoreboard::Score finalscore) {
   if (std::get<0>(gamePlayBoard.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
-    const auto finalscore_display_data =
-        make_finalscore_display_data(finalscore);
-    DrawAlways(std::cout, DataSuppliment(finalscore_display_data,
-                                         Graphics::EndGameStatisticsPrompt));
-    Statistics::saveEndGameStats(finalscore);
-
-    DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);
-    const auto name = receive_input_player_name(std::cin);
-    finalscore.name = name;
-
-    Scoreboard::saveScore(finalscore);
-    DrawAlways(std::cout, Graphics::MessageScoreSavedPrompt);
+    Statistics::CreateFinalScoreAndEndGameDataFile(finalscore);
   }
 }
 

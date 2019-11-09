@@ -7,6 +7,25 @@
 namespace Statistics {
 namespace Graphics {
 
+std::string AskForPlayerNamePrompt() {
+  constexpr auto score_prompt_text =
+      "Please enter your name to save this score: ";
+  constexpr auto sp = "  ";
+  std::ostringstream score_prompt_richtext;
+  score_prompt_richtext << bold_on << sp << score_prompt_text << bold_off;
+  return score_prompt_richtext.str();
+}
+
+std::string MessageScoreSavedPrompt() {
+  constexpr auto score_saved_text = "Score saved!";
+  constexpr auto sp = "  ";
+  std::ostringstream score_saved_richtext;
+  score_saved_richtext << "\n"
+                       << green << bold_on << sp << score_saved_text << bold_off
+                       << def << "\n";
+  return score_saved_richtext.str();
+}
+
 std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
   constexpr auto stats_title_text = "STATISTICS";
   constexpr auto divider_text = "──────────";

@@ -1,14 +1,23 @@
 #include "statistics.hpp"
 #include "color.hpp"
+#include "scores-graphics.hpp"
 #include "scores.hpp"
+#include "statistics-graphics.hpp"
 #include <algorithm>
 #include <array>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 
 namespace Statistics {
 
 namespace {
+
+std::string receive_input_player_name(std::istream &is) {
+  std::string name;
+  is >> name;
+  return name;
+}
 
 total_game_stats_t generateStatsFromInputData(std::istream &is) {
   total_game_stats_t stats;
@@ -25,6 +34,14 @@ bool saveToFileEndGameStatistics(std::string filename, total_game_stats_t s) {
   std::ofstream filedata(filename);
   return generateFilefromStatsData(filedata, s);
 }
+
+Scoreboard::Graphics::finalscore_display_data_t
+make_finalscore_display_data(Scoreboard::Score finalscore) {
+  const auto fsdd = std::make_tuple(
+      std::to_string(finalscore.score), std::to_string(finalscore.largestTile),
+      std::to_string(finalscore.moveCount), secondsFormat(finalscore.duration));
+  return fsdd;
+};
 
 } // namespace
 
@@ -63,6 +80,21 @@ void saveEndGameStats(Scoreboard::Score finalscore) {
   stats.totalDuration += finalscore.duration;
 
   saveToFileEndGameStatistics("../data/statistics.txt", stats);
+}
+
+void CreateFinalScoreAndEndGameDataFile(Scoreboard::Score finalscore) {
+  const auto finalscore_display_data = make_finalscore_display_data(finalscore);
+  DrawAlways(std::cout,
+             DataSuppliment(finalscore_display_data,
+                            Scoreboard::Graphics::EndGameStatisticsPrompt));
+  Statistics::saveEndGameStats(finalscore);
+
+  DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);
+  const auto name = receive_input_player_name(std::cin);
+  finalscore.name = name;
+
+  Scoreboard::saveScore(finalscore);
+  DrawAlways(std::cout, Graphics::MessageScoreSavedPrompt);
 }
 
 } // namespace Statistics
