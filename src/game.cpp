@@ -379,8 +379,9 @@ void DoPostGameSaveStuff(Scoreboard::Score finalscore, GameBoard gb) {
 } // namespace
 
 void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
+  const auto is_this_a_new_game = (cont == PlayGameFlag::BrandNewGame);
   auto bestScore = Statistics::load_game_best_score();
-  if (cont == PlayGameFlag::BrandNewGame) {
+  if (is_this_a_new_game) {
     gb = GameBoard(userInput_PlaySize);
     addTileOnGameboard(gb);
   }
@@ -391,7 +392,7 @@ void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   const std::chrono::duration<double> elapsed = finishTime - startTime;
   const auto duration = elapsed.count();
 
-  if (cont == PlayGameFlag::BrandNewGame) {
+  if (is_this_a_new_game) {
     const auto finalscore = make_finalscore_from_game_session(duration, gb);
     DoPostGameSaveStuff(finalscore, gb);
   }
