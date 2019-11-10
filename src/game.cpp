@@ -22,6 +22,7 @@ enum Directions { UP, DOWN, RIGHT, LEFT };
 enum GameStatusFlag {
   FLAG_WIN,
   FLAG_END_GAME,
+  FLAG_ONE_SHOT,
   FLAG_SAVED_GAME,
   FLAG_INPUT_ERROR,
   FLAG_ENDLESS_MODE,
@@ -88,52 +89,65 @@ std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
 
 // NOTE: current_game_session_t : (bestScore, gamestatus, gamePlayBoard)
 using current_game_session_t = std::tuple<ull, gamestatus_t, GameBoard>;
-current_game_session_t drawGraphics(std::ostream &os,
-                                    current_game_session_t cgs_gb) {
+std::string drawGraphics(current_game_session_t cgs) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
   enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
+  const auto bestScore = std::get<IDX_BESTSCORE>(cgs);
+  const auto gb = std::get<IDX_GAMEBOARD>(cgs);
+  const auto gamestatus = std::get<IDX_GAMESTATUS>(cgs);
 
-  const auto gb = std::get<IDX_GAMEBOARD>(cgs_gb);
+  std::ostringstream str_os;
 
   // 1. Clear screen
   clearScreen();
 
   // 2. Draw Game Title Art
-  DrawAlways(os, AsciiArt2048);
+  DrawAlways(str_os, AsciiArt2048);
 
   // 3. Draw Scoreboard of current game session
-  const auto bestScore = std::get<IDX_BESTSCORE>(cgs_gb);
   const auto scdd = make_scoreboard_display_data(bestScore, gb);
-  DrawAlways(os, DataSuppliment(scdd, GameScoreBoardOverlay));
+  DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardOverlay));
 
   // 4. Draw current 2048 game active gameboard
-  DrawAlways(os, DataSuppliment(gb, GameBoardTextOutput));
+  DrawAlways(str_os, DataSuppliment(gb, GameBoardTextOutput));
 
-  // 5. Get the current game status flags events
-  auto gamestatus = std::get<IDX_GAMESTATUS>(cgs_gb);
-
-  // 6. Draw anyinstant status feedback, like
+  // 5. Draw anyinstant status feedback, like
   // "Game saved!" (which disappers after next key input).
-  DrawAsOneTimeFlag(os, gamestatus[FLAG_SAVED_GAME], GameStateNowSavedPrompt);
+  DrawOnlyWhen(str_os, gamestatus[FLAG_SAVED_GAME], GameStateNowSavedPrompt);
 
-  // 7. Draw any "questions to the player" (from the game) text output
-  DrawOnlyWhen(os, gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE],
+  // 6. Draw any "questions to the player" (from the game) text output
+  DrawOnlyWhen(str_os, gamestatus[FLAG_GAME_IS_ASKING_QUESTION_MODE],
                DataSuppliment(gamestatus, DisplayGameQuestionsToPlayerPrompt));
 
-  // 8. Draw Keyboard / Input Keycodes to the player
+  // 7. Draw Keyboard / Input Keycodes to the player
   const auto input_controls_display_data =
       make_input_controls_display_data(gamestatus);
-  DrawAlways(os, DataSuppliment(input_controls_display_data,
-                                GameInputControlsOverlay));
+  DrawAlways(str_os, DataSuppliment(input_controls_display_data,
+                                    GameInputControlsOverlay));
 
-  // 9. Draw any game error messages to the player (to do with keyboard input)
-  DrawAsOneTimeFlag(os, gamestatus[FLAG_INPUT_ERROR],
-                    InvalidInputGameBoardErrorPrompt);
+  // 8. Draw any game error messages to the player (to do with keyboard input)
+  DrawOnlyWhen(str_os, gamestatus[FLAG_INPUT_ERROR],
+               InvalidInputGameBoardErrorPrompt);
 
-  std::get<IDX_GAMESTATUS>(cgs_gb) = gamestatus;
-  return cgs_gb;
+  return str_os.str();
+}
+
+gamestatus_t update_one_shot_display_flags(gamestatus_t gamestatus) {
+  const auto disable_one_shot_flag = [](bool &trigger) { trigger = !trigger; };
+  if (gamestatus[FLAG_ONE_SHOT]) {
+    disable_one_shot_flag(gamestatus[FLAG_ONE_SHOT]);
+    // Turn off display flag: [Saved Game]
+    if (gamestatus[FLAG_SAVED_GAME]) {
+      disable_one_shot_flag(gamestatus[FLAG_SAVED_GAME]);
+    }
+    // Turn off display flag: [Input Error]
+    if (gamestatus[FLAG_INPUT_ERROR]) {
+      disable_one_shot_flag(gamestatus[FLAG_INPUT_ERROR]);
+    }
+  }
+  return gamestatus;
 }
 
 using wrapper_bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
@@ -143,6 +157,7 @@ wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
   switch (toupper(c)) {
   case CODE_HOTKEY_ACTION_SAVE:
   case CODE_HOTKEY_ALTERNATE_ACTION_SAVE:
+    gamestatus[FLAG_ONE_SHOT] = true;
     gamestatus[FLAG_SAVED_GAME] = true;
     is_invalid_keycode = false;
     break;
@@ -173,6 +188,7 @@ gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
     std::tie(is_invalid_special_keypress_code, gamestatus) =
         check_input_other(c, gamestatus);
     if (is_invalid_keypress_code && is_invalid_special_keypress_code) {
+      gamestatus[FLAG_ONE_SHOT] = true;
       gamestatus[FLAG_INPUT_ERROR] = true;
     }
   }
@@ -278,7 +294,8 @@ bool_current_game_session_t soloGameLoop(current_game_session_t cgs) {
   std::tie(*gamestatus, *gb) =
       process_gamelogic(std::make_tuple(*gamestatus, *gb));
 
-  cgs = drawGraphics(std::cout, cgs);
+  DrawAlways(std::cout, DataSuppliment(cgs, drawGraphics));
+  *gamestatus = update_one_shot_display_flags(*gamestatus);
 
   intendedmove_t player_intendedmove{};
   *gamestatus = receive_agent_input(player_intendedmove, *gamestatus);
@@ -302,10 +319,12 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   using namespace Graphics;
   using namespace Gameboard::Graphics;
   enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
-
+  const auto bestScore = std::get<IDX_BESTSCORE>(finalgamestatus);
   const auto gb = std::get<IDX_GAMEBOARD>(finalgamestatus);
+  const auto end_gamestatus = std::get<IDX_GAMESTATUS>(finalgamestatus);
 
   std::ostringstream str_os;
+
   // 1. Clear screen
   clearScreen();
 
@@ -313,7 +332,6 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   DrawAlways(str_os, AsciiArt2048);
 
   // 3. Draw Scoreboard of ending current game session
-  const auto bestScore = std::get<IDX_BESTSCORE>(finalgamestatus);
   const auto scdd = make_scoreboard_display_data(bestScore, gb);
   DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardOverlay));
 
@@ -321,7 +339,6 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   DrawAlways(str_os, DataSuppliment(gb, GameBoardTextOutput));
 
   // 5. Draw "You win!" or "You Lose" prompt, only if not in endless mode.
-  const auto end_gamestatus = std::get<IDX_GAMESTATUS>(finalgamestatus);
   const auto esdd = make_end_screen_display_data(end_gamestatus);
   DrawAlways(str_os, DataSuppliment(esdd, GameEndScreenOverlay));
 
