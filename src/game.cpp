@@ -268,36 +268,26 @@ wrapper_bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
   return std::make_tuple(loop_again, gamestatus);
 }
 
-using wrapper_bool_current_game_session_t =
-    std::tuple<bool, current_game_session_t>;
-wrapper_bool_current_game_session_t
-soloGameLoop(current_game_session_t currentgamesession) {
+using bool_current_game_session_t = std::tuple<bool, current_game_session_t>;
+bool_current_game_session_t soloGameLoop(current_game_session_t cgs) {
   using namespace Input;
   enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
-  const auto tuple_address_of_gamestatus =
-      std::addressof(std::get<IDX_GAMESTATUS>(currentgamesession));
-  const auto gb = std::addressof(std::get<IDX_GAMEBOARD>(currentgamesession));
+  const auto gamestatus = std::addressof(std::get<IDX_GAMESTATUS>(cgs));
+  const auto gb = std::addressof(std::get<IDX_GAMEBOARD>(cgs));
+
+  std::tie(*gamestatus, *gb) =
+      process_gamelogic(std::make_tuple(*gamestatus, *gb));
+
+  cgs = drawGraphics(std::cout, cgs);
+
   intendedmove_t player_intendedmove{};
-
-  gamestatus_t gamestatus = *tuple_address_of_gamestatus;
-  std::tie(*tuple_address_of_gamestatus, *gb) =
-      process_gamelogic(std::make_tuple(gamestatus, *gb));
-
-  const auto cgs_gb =
-      std::make_tuple(std::get<IDX_BESTSCORE>(currentgamesession),
-                      std::get<IDX_GAMESTATUS>(currentgamesession), *gb);
-  currentgamesession = drawGraphics(std::cout, cgs_gb);
-
-  gamestatus = *tuple_address_of_gamestatus;
-  gamestatus = receive_agent_input(player_intendedmove, gamestatus);
-
+  *gamestatus = receive_agent_input(player_intendedmove, *gamestatus);
   std::tie(std::ignore, *gb) = process_agent_input(player_intendedmove, *gb);
 
   bool loop_again;
-  std::tie(loop_again, gamestatus) =
-      process_gameStatus(std::make_tuple(gamestatus, *gb));
-  *tuple_address_of_gamestatus = gamestatus;
-  return std::make_tuple(loop_again, currentgamesession);
+  std::tie(loop_again, *gamestatus) =
+      process_gameStatus(std::make_tuple(*gamestatus, *gb));
+  return std::make_tuple(loop_again, cgs);
 }
 
 Graphics::end_screen_display_data_t
