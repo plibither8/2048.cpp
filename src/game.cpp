@@ -89,14 +89,16 @@ std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
 
 // NOTE: current_game_session_t : (bestScore, gamestatus, gamePlayBoard)
 using current_game_session_t = std::tuple<ull, gamestatus_t, GameBoard>;
+enum tuple_cgs_t_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
+
 std::string drawGraphics(current_game_session_t cgs) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
-  enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
-  const auto bestScore = std::get<IDX_BESTSCORE>(cgs);
-  const auto gb = std::get<IDX_GAMEBOARD>(cgs);
-  const auto gamestatus = std::get<IDX_GAMESTATUS>(cgs);
+  using tup_idx = tuple_cgs_t_idx;
+  const auto bestScore = std::get<tup_idx::IDX_BESTSCORE>(cgs);
+  const auto gb = std::get<tup_idx::IDX_GAMEBOARD>(cgs);
+  const auto gamestatus = std::get<tup_idx::IDX_GAMESTATUS>(cgs);
 
   std::ostringstream str_os;
 
@@ -287,9 +289,10 @@ wrapper_bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
 using bool_current_game_session_t = std::tuple<bool, current_game_session_t>;
 bool_current_game_session_t soloGameLoop(current_game_session_t cgs) {
   using namespace Input;
-  enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
-  const auto gamestatus = std::addressof(std::get<IDX_GAMESTATUS>(cgs));
-  const auto gb = std::addressof(std::get<IDX_GAMEBOARD>(cgs));
+  using tup_idx = tuple_cgs_t_idx;
+  const auto gamestatus =
+      std::addressof(std::get<tup_idx::IDX_GAMESTATUS>(cgs));
+  const auto gb = std::addressof(std::get<tup_idx::IDX_GAMEBOARD>(cgs));
 
   std::tie(*gamestatus, *gb) =
       process_gamelogic(std::make_tuple(*gamestatus, *gb));
@@ -318,10 +321,11 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   // Graphical Output has a specific ordering...
   using namespace Graphics;
   using namespace Gameboard::Graphics;
-  enum tuple_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
-  const auto bestScore = std::get<IDX_BESTSCORE>(finalgamestatus);
-  const auto gb = std::get<IDX_GAMEBOARD>(finalgamestatus);
-  const auto end_gamestatus = std::get<IDX_GAMESTATUS>(finalgamestatus);
+  using tup_idx = tuple_cgs_t_idx;
+  const auto bestScore = std::get<tup_idx::IDX_BESTSCORE>(finalgamestatus);
+  const auto gb = std::get<tup_idx::IDX_GAMEBOARD>(finalgamestatus);
+  const auto end_gamestatus =
+      std::get<tup_idx::IDX_GAMESTATUS>(finalgamestatus);
 
   std::ostringstream str_os;
 
