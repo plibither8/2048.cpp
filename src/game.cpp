@@ -58,12 +58,13 @@ gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
   return std::make_tuple(gamestatus, gb);
 }
 
-Graphics::scoreboard_display_data_t make_scoreboard_display_data(ull bestScore,
-                                                                 GameBoard gb) {
+using competition_mode_t = bool;
+Graphics::scoreboard_display_data_t
+make_scoreboard_display_data(ull bestScore, competition_mode_t cm,
+                             GameBoard gb) {
   const auto gameboard_score = gb.score;
   const auto tempBestScore = (bestScore < gb.score ? gb.score : bestScore);
-  const auto comp_mode =
-      std::get<0>(gb.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE;
+  const auto comp_mode = cm;
   const auto movecount = MoveCountOnGameBoard(gb);
   const auto scdd =
       std::make_tuple(comp_mode, std::to_string(gameboard_score),
@@ -87,9 +88,16 @@ std::string DisplayGameQuestionsToPlayerPrompt(gamestatus_t gamestatus) {
   return str_os.str();
 }
 
-// NOTE: current_game_session_t : (bestScore, gamestatus, gamePlayBoard)
-using current_game_session_t = std::tuple<ull, gamestatus_t, GameBoard>;
-enum tuple_cgs_t_idx { IDX_BESTSCORE, IDX_GAMESTATUS, IDX_GAMEBOARD };
+// NOTE: current_game_session_t
+// : (bestScore, is_competition_mode, gamestatus, gamePlayBoard)
+using current_game_session_t =
+    std::tuple<ull, competition_mode_t, gamestatus_t, GameBoard>;
+enum tuple_cgs_t_idx {
+  IDX_BESTSCORE,
+  IDX_COMP_MODE,
+  IDX_GAMESTATUS,
+  IDX_GAMEBOARD
+};
 
 std::string drawGraphics(current_game_session_t cgs) {
   // Graphical Output has a specific ordering...
@@ -97,6 +105,7 @@ std::string drawGraphics(current_game_session_t cgs) {
   using namespace Gameboard::Graphics;
   using tup_idx = tuple_cgs_t_idx;
   const auto bestScore = std::get<tup_idx::IDX_BESTSCORE>(cgs);
+  const auto comp_mode = std::get<tup_idx::IDX_COMP_MODE>(cgs);
   const auto gb = std::get<tup_idx::IDX_GAMEBOARD>(cgs);
   const auto gamestatus = std::get<tup_idx::IDX_GAMESTATUS>(cgs);
 
@@ -109,7 +118,7 @@ std::string drawGraphics(current_game_session_t cgs) {
   DrawAlways(str_os, AsciiArt2048);
 
   // 3. Draw Scoreboard of current game session
-  const auto scdd = make_scoreboard_display_data(bestScore, gb);
+  const auto scdd = make_scoreboard_display_data(bestScore, comp_mode, gb);
   DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardOverlay));
 
   // 4. Draw current 2048 game active gameboard
@@ -323,6 +332,7 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   using namespace Gameboard::Graphics;
   using tup_idx = tuple_cgs_t_idx;
   const auto bestScore = std::get<tup_idx::IDX_BESTSCORE>(finalgamestatus);
+  const auto comp_mode = std::get<tup_idx::IDX_COMP_MODE>(finalgamestatus);
   const auto gb = std::get<tup_idx::IDX_GAMEBOARD>(finalgamestatus);
   const auto end_gamestatus =
       std::get<tup_idx::IDX_GAMESTATUS>(finalgamestatus);
@@ -336,7 +346,7 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   DrawAlways(str_os, AsciiArt2048);
 
   // 3. Draw Scoreboard of ending current game session
-  const auto scdd = make_scoreboard_display_data(bestScore, gb);
+  const auto scdd = make_scoreboard_display_data(bestScore, comp_mode, gb);
   DrawAlways(str_os, DataSuppliment(scdd, GameScoreBoardOverlay));
 
   // 4. Draw snapshot of ending 2048 session's gameboard
@@ -349,10 +359,11 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
   return str_os.str();
 }
 
-GameBoard endlessGameLoop(ull currentBestScore, GameBoard gb) {
+GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
+                          GameBoard gb) {
   auto loop_again{true};
   auto currentgamestatus =
-      std::make_tuple(currentBestScore, gamestatus_t{}, gb);
+      std::make_tuple(currentBestScore, cm, gamestatus_t{}, gb);
 
   while (loop_again) {
     std::tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
@@ -374,8 +385,8 @@ Scoreboard::Score make_finalscore_from_game_session(double duration,
   return finalscore;
 }
 
-void DoPostGameSaveStuff(Scoreboard::Score finalscore, GameBoard gb) {
-  if (std::get<0>(gb.gbda) == COMPETITION_GAME_BOARD_PLAY_SIZE) {
+void DoPostGameSaveStuff(Scoreboard::Score finalscore, competition_mode_t cm) {
+  if (cm) {
     Statistics::CreateFinalScoreAndEndGameDataFile(finalscore);
   }
 }
@@ -384,21 +395,24 @@ void DoPostGameSaveStuff(Scoreboard::Score finalscore, GameBoard gb) {
 
 void playGame(PlayGameFlag cont, GameBoard gb, ull userInput_PlaySize) {
   const auto is_this_a_new_game = (cont == PlayGameFlag::BrandNewGame);
-  auto bestScore = Statistics::load_game_best_score();
+  const auto is_competition_mode =
+      (userInput_PlaySize == COMPETITION_GAME_BOARD_PLAY_SIZE);
+  const auto bestScore = Statistics::load_game_best_score();
+
   if (is_this_a_new_game) {
     gb = GameBoard(userInput_PlaySize);
     addTileOnGameboard(gb);
   }
 
   const auto startTime = std::chrono::high_resolution_clock::now();
-  gb = endlessGameLoop(bestScore, gb);
+  gb = endlessGameLoop(bestScore, is_competition_mode, gb);
   const auto finishTime = std::chrono::high_resolution_clock::now();
   const std::chrono::duration<double> elapsed = finishTime - startTime;
   const auto duration = elapsed.count();
 
   if (is_this_a_new_game) {
     const auto finalscore = make_finalscore_from_game_session(duration, gb);
-    DoPostGameSaveStuff(finalscore, gb);
+    DoPostGameSaveStuff(finalscore, is_competition_mode);
   }
 }
 
