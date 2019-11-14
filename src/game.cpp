@@ -181,9 +181,11 @@ wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
   }
   return std::make_tuple(is_invalid_keycode, gamestatus);
 }
-
-gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
-                                 gamestatus_t gamestatus) {
+using intendedmove_gamestatus_t =
+    std::tuple<Input::intendedmove_t, gamestatus_t>;
+intendedmove_gamestatus_t
+receive_agent_input(Input::intendedmove_t intendedmove,
+                    gamestatus_t gamestatus) {
   using namespace Input;
   const bool game_still_in_play =
       !gamestatus[FLAG_END_GAME] && !gamestatus[FLAG_WIN];
@@ -203,7 +205,7 @@ gamestatus_t receive_agent_input(Input::intendedmove_t &intendedmove,
       gamestatus[FLAG_INPUT_ERROR] = true;
     }
   }
-  return gamestatus;
+  return std::make_tuple(intendedmove, gamestatus);
 }
 
 GameBoard decideMove(Directions d, GameBoard gb) {
@@ -228,7 +230,7 @@ GameBoard decideMove(Directions d, GameBoard gb) {
 }
 
 using bool_gameboard_t = std::tuple<bool, GameBoard>;
-bool_gameboard_t process_agent_input(Input::intendedmove_t &intendedmove,
+bool_gameboard_t process_agent_input(Input::intendedmove_t intendedmove,
                                      GameBoard gb) {
   using namespace Input;
   if (intendedmove[FLAG_MOVE_LEFT]) {
@@ -243,8 +245,7 @@ bool_gameboard_t process_agent_input(Input::intendedmove_t &intendedmove,
   if (intendedmove[FLAG_MOVE_DOWN]) {
     gb = decideMove(DOWN, gb);
   }
-  // Reset all move flags...
-  intendedmove = intendedmove_t{};
+
   return std::make_tuple(true, gb);
 }
 
@@ -310,7 +311,8 @@ bool_current_game_session_t soloGameLoop(current_game_session_t cgs) {
   *gamestatus = update_one_shot_display_flags(*gamestatus);
 
   intendedmove_t player_intendedmove{};
-  *gamestatus = receive_agent_input(player_intendedmove, *gamestatus);
+  std::tie(player_intendedmove, *gamestatus) =
+      receive_agent_input(player_intendedmove, *gamestatus);
   std::tie(std::ignore, *gb) = process_agent_input(player_intendedmove, *gb);
 
   bool loop_again;
