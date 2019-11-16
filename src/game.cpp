@@ -161,8 +161,8 @@ gamestatus_t update_one_shot_display_flags(gamestatus_t gamestatus) {
   return gamestatus;
 }
 
-using wrapper_bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
-wrapper_bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
+using bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
+bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
   using namespace Input::Keypress::Code;
   auto is_invalid_keycode{true};
   switch (toupper(c)) {
@@ -267,7 +267,7 @@ bool continue_playing_game(std::istream &in_os) {
   return true;
 }
 
-wrapper_bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
+bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
   gamestatus_t gamestatus;
   GameBoard gb;
   std::tie(gamestatus, gb) = gsgb;
