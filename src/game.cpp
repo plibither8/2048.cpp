@@ -389,7 +389,8 @@ Scoreboard::Score make_finalscore_from_game_session(double duration,
 
 void DoPostGameSaveStuff(Scoreboard::Score finalscore, competition_mode_t cm) {
   if (cm) {
-    Statistics::CreateFinalScoreAndEndGameDataFile(finalscore);
+    Statistics::CreateFinalScoreAndEndGameDataFile(std::cout, std::cin,
+                                                   finalscore);
   }
 }
 

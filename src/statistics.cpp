@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 namespace Statistics {
@@ -82,19 +81,19 @@ void saveEndGameStats(Scoreboard::Score finalscore) {
   saveToFileEndGameStatistics("../data/statistics.txt", stats);
 }
 
-void CreateFinalScoreAndEndGameDataFile(Scoreboard::Score finalscore) {
+void CreateFinalScoreAndEndGameDataFile(std::ostream &os, std::istream &is,
+                                        Scoreboard::Score finalscore) {
   const auto finalscore_display_data = make_finalscore_display_data(finalscore);
-  DrawAlways(std::cout,
-             DataSuppliment(finalscore_display_data,
-                            Scoreboard::Graphics::EndGameStatisticsPrompt));
-  Statistics::saveEndGameStats(finalscore);
+  DrawAlways(os, DataSuppliment(finalscore_display_data,
+                                Scoreboard::Graphics::EndGameStatisticsPrompt));
 
-  DrawAlways(std::cout, Graphics::AskForPlayerNamePrompt);
-  const auto name = receive_input_player_name(std::cin);
+  DrawAlways(os, Graphics::AskForPlayerNamePrompt);
+  const auto name = receive_input_player_name(is);
   finalscore.name = name;
 
   Scoreboard::saveScore(finalscore);
-  DrawAlways(std::cout, Graphics::MessageScoreSavedPrompt);
+  saveEndGameStats(finalscore);
+  DrawAlways(os, Graphics::MessageScoreSavedPrompt);
 }
 
 } // namespace Statistics
