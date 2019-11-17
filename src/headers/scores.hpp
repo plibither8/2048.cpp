@@ -25,7 +25,7 @@ using load_score_status_t = std::tuple<bool, Scoreboard_t>;
 // List of scores read until "exhausted".
 // Note: returns a tuple containing a std::vector<Score> of all read scores.
 load_score_status_t loadFromFileScore(std::string filename);
-bool saveToFileScore(std::string filename, Score s);
+void saveScore(Score finalscore);
 } // namespace Scoreboard
 
 std::istream &operator>>(std::istream &is, Scoreboard::Score &s);

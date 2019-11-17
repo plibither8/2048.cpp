@@ -8,9 +8,7 @@ namespace Game {
 struct GameBoard;
 
 namespace Saver {
-void saveToFilePreviousGameStateData(std::string filename, const GameBoard &gb);
-void saveToFilePreviousGameStatisticsData(std::string filename,
-                                          const GameBoard &gb);
+void saveGamePlayState(GameBoard gb);
 } // namespace Saver
 } // namespace Game
 

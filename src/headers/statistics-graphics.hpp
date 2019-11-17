@@ -6,6 +6,9 @@
 
 namespace Statistics {
 namespace Graphics {
+std::string AskForPlayerNamePrompt();
+std::string MessageScoreSavedPrompt();
+
 using total_stats_display_data_t =
     std::tuple<bool, std::string, std::string, std::string, std::string,
                std::string>;
