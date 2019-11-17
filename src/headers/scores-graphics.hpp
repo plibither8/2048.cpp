@@ -2,6 +2,7 @@
 #define SCORESGRAPHICS_H
 
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace Scoreboard {

@@ -1,5 +1,6 @@
 #include "scores-graphics.hpp"
 #include "color.hpp"
+#include <array>
 #include <iomanip>
 #include <sstream>
 
