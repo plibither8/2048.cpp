@@ -7,7 +7,7 @@
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
 
 > Terminal version of the game "2048" written in C++.
-
+[![Run on Repl.it](https://repl.it/badge/github/plibither8/2048.cpp)](https://repl.it/github/plibither8/2048.cpp)
 :tada: Featured on GitHub's [Twitter](https://twitter.com/github/status/1017094930991370240) and [Facebook](https://www.facebook.com/GitHub/videos/1433491453419807/) pages! :tada:
 
 <p align="center">
