@@ -50,7 +50,11 @@ void wait_for_any_letter_input(std::istream &is) {
 }
 
 void clearScreen() {
+#ifdef _WIN32
+  system("cls");
+#else
   system("clear");
+#endif
 };
 
 std::string secondsFormat(double sec) {
