@@ -25,4 +25,5 @@ install:
 - cmake --build build
 
 script:
-- echo 4 | ./2048
+- cd $TRAVIS_BUILD_DIR/build
+- ctest
