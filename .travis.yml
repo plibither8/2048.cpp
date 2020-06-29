@@ -1,25 +1,29 @@
 language: cpp
 group: travis_latest
-dist: xenial
+dist: bionic
 
 git:
-  depth: 3
+  depth: 25
   quiet: true
 
 matrix:
   include:
   - os: linux
-  - os: osx
-  - os: windows
     install:
-    - cd build
-    - cmake -G "MinGW Makefiles" -DCMAKE_SH="CMAKE_SH-NOTFOUND" ..
-    - cmake --build .
+    - mkdir build && cd build
+    - cmake ..
+    - cmake --build . --parallel
+  - os: osx
+    before_install:
+    - brew install ninja
+  - os: windows
+    before_install:
+    - cinst -y ninja
 
 install:
-- cd build
-- cmake ..
-- cmake --build .
+- cmake -G Ninja -B build
+- cmake --build build
 
 script:
-- echo 4 | ./2048
+- cd $TRAVIS_BUILD_DIR/build
+- ctest

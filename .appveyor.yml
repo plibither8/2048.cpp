@@ -12,7 +12,9 @@ init:
 - cmd: set PATH=%MINGW_DIR%;%PATH%
 
 install:
-- cd build
+- mkdir build && cd build
 - cmake ..
 - cmake --build .
-- echo 4 | ./2048
+
+test_script:
+- ctest
