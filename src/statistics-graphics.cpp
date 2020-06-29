@@ -62,8 +62,7 @@ std::string TotalStatisticsOverlay(total_stats_display_data_t tsdd) {
                   std::get<IDX_TOTAL_DURATION>(tsdd)};
 
     auto counter{0};
-    const auto populate_stats_info = [=,
-                                      &counter,
+    const auto populate_stats_info = [=, &counter,
                                       &stats_richtext](const std::string) {
       stats_richtext << sp << "│ " << bold_on << std::left << std::setw(18)
                      << std::begin(stats_attributes_text)[counter] << bold_off
