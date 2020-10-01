@@ -43,8 +43,9 @@ bool check_input_vim(char c, intendedmove_t &intendedmove) {
   case CODE_VIM_RIGHT:
     intendedmove[FLAG_MOVE_RIGHT] = true;
     return false;
+  default:
+      return true;   
   }
-  return true;
 }
 
 bool check_input_wasd(char c, intendedmove_t &intendedmove) {
@@ -62,8 +63,9 @@ bool check_input_wasd(char c, intendedmove_t &intendedmove) {
   case CODE_WASD_RIGHT:
     intendedmove[FLAG_MOVE_RIGHT] = true;
     return false;
+  default:
+    return true; 
   }
-  return true;
 }
 } // namespace Input
 } // namespace Game
