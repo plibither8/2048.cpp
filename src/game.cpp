@@ -370,7 +370,7 @@ GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
   while (loop_again) {
     std::tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
   }
-
+  gb = std::get<3>(currentgamestatus);
   DrawAlways(std::cout,
              DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
   return gb;
