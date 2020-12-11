@@ -1,7 +1,6 @@
 # 2048.cpp
 
-[![Build Status](https://travis-ci.org/plibither8/2048.cpp.svg?branch=master)](https://travis-ci.org/plibither8/2048.cpp)
-[![Build status](https://ci.appveyor.com/api/projects/status/sljhlvcx8k11ckw7?svg=true)](https://ci.appveyor.com/project/plibither8/2048-cpp)
+![Actions Status](https://github.com/plibither8/2048.cpp/workflows/ci/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37414d66e7d4146bf72a4a467fdc84d)](https://app.codacy.com/app/plibither8/2048.cpp?utm_source=github.com&utm_medium=referral&utm_content=plibither8/2048.cpp&utm_campaign=Badge_Grade_Dashboard)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/plibither8/2048.cpp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/plibither8/2048.cpp/context:cpp)
 [![Made with Love in India](https://madewithlove.org.in/badge.svg)](https://madewithlove.org.in/)
@@ -34,9 +33,9 @@ The game and code is made to run natively on the GNU/Linux and MacOS platforms, 
 ```sh
 git clone https://github.com/plibither8/2048.cpp
 ```
-2. Enter the project's build directory:
+2. Enter the project directory:
 ```sh
-cd 2048.cpp/build
+cd 2048.cpp
 ```
 
 ---
@@ -46,22 +45,18 @@ If you wish to manually select a C++ compiler, optionally add `CXX=clang++ cmake
 
 #### Building with CMake
 
-3. Generate build configuration
+3. Build the executable and if on Linux/MacOS run test
 ```sh
-cmake ../
+ctest -S setup.cmake
 ```
-4. Build the executable
+4. Install the program (optional)
 ```sh
-cmake --build .
-```
-5. Install the program (optional)
-```sh
-cmake --build . --target install
+cmake --install build
 ```
 
-6. Run the program and play the game! :tada:
+5. Run the program and play the game! :tada:
 ```sh
-2048    # run `./2048` if game is not installed
+2048    # run `build/2048` if game is not installed
 ```
 
 <p align="center">
@@ -72,21 +67,21 @@ cmake --build . --target install
 
 3. Generate build configuration
 ```sh
-meson ../
+meson build
 ```
-4. Build the executable
+4. Build and test the executable
 ```sh
-ninja
+meson test -C build
 ```
 5. Install the program (optional)
 ```sh
-meson configure --prefix=$HOME/.local
-ninja install
+meson configure build --prefix=$HOME/.local
+meson install -C build
 ```
 
 6. Run the program and play the game! :tada:
 ```sh
-2048    # run `./2048` if game is not installed
+2048    # run `build/2048` if game is not installed
 ```
 
 ## Contributing
