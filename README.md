@@ -45,7 +45,7 @@ If you wish to manually select a C++ compiler, optionally add `CXX=clang++ cmake
 
 #### Building with CMake
 
-3. Build the executable and if on Linux/MacOS run test
+3. Build the executable and run tests
 ```sh
 ctest -S setup.cmake
 ```
@@ -69,7 +69,7 @@ cmake --install build
 ```sh
 meson build
 ```
-4. Build and test the executable
+4. Build the executable and run tests
 ```sh
 meson test -C build
 ```
