@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  push:
+    paths:
+      - "**.cpp"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "**.cpp"
+      - "**.cmake"
+      - "**/CMakeLists.txt"
+      - ".github/workflows/ci.yml"
+
+jobs:
+
+  linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+    - uses: actions/checkout@v2
+
+    - run: ctest -S setup.cmake -VV
