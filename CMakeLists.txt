@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.7...3.20)
 project(2048 LANGUAGES CXX)
 include(CTest)
 
@@ -18,13 +18,16 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL PGI)
   string(APPEND CMAKE_CXX_FLAGS " -a")
 endif()
 
-
 add_executable(2048 ${SOURCES})
 target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/headers/)
-target_compile_features(2048 PRIVATE cxx_std_11)
+target_compile_features(2048 PRIVATE cxx_std_14)
 
 # --- test
-if(UNIX)
+
+find_program(PWSH NAMES pwsh powershell)
+if(PWSH)
+  add_test(NAME basic COMMAND ${PWSH} -c \"echo 4 | $<TARGET_FILE:2048>\")
+elseif(UNIX)
   add_test(NAME basic COMMAND sh -c "echo 4 | $<TARGET_FILE:2048>")
 endif()
 

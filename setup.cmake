@@ -8,6 +8,9 @@ set(_opts)
 # --- boilerplate follows
 
 # CTEST_CMAKE_GENERATOR must always be defined
+if(NOT DEFINED CTEST_CMAKE_GENERATOR AND DEFINED ENV{CMAKE_GENERATOR})
+  set(CTEST_CMAKE_GENERATOR $ENV{CMAKE_GENERATOR})
+endif()
 if(NOT DEFINED CTEST_CMAKE_GENERATOR AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
   find_program(_gen NAMES ninja ninja-build samu)
   if(_gen)
@@ -31,7 +34,7 @@ if(NOT DEFINED CTEST_CMAKE_GENERATOR)
 endif()
 
 if(NOT DEFINED CTEST_BUILD_CONFIGURATION)
-  set(CTEST_BUILD_CONFIGURATION "Release")
+  list(APPEND _opts -DCMAKE_BUILD_TYPE=Release)
 endif()
 
 set(CTEST_SOURCE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
@@ -40,50 +43,27 @@ if(NOT DEFINED CTEST_BINARY_DIRECTORY)
 endif()
 
 # -- build and test
-ctest_start("Experimental" ${CTEST_SOURCE_DIRECTORY} ${CTEST_BINARY_DIRECTORY})
+ctest_start("Experimental")
 
 ctest_configure(
-  BUILD ${CTEST_BINARY_DIRECTORY}
-  SOURCE ${CTEST_SOURCE_DIRECTORY}
   OPTIONS "${_opts}"
-  RETURN_VALUE return_code
-  CAPTURE_CMAKE_ERROR cmake_err)
-
-# if it's a generator or compiler mismatch, delete cache and try again
-if(NOT cmake_err EQUAL 0)
-  file(REMOVE ${CTEST_BINARY_DIRECTORY}/CMakeCache.txt)
-
-  ctest_configure(
-    BUILD ${CTEST_BINARY_DIRECTORY}
-    SOURCE ${CTEST_SOURCE_DIRECTORY}
-    OPTIONS "${_opts}"
-    RETURN_VALUE return_code
-    CAPTURE_CMAKE_ERROR cmake_err)
+  RETURN_VALUE _ret
+  CAPTURE_CMAKE_ERROR _err)
+if(NOT (_ret EQUAL 0 AND _err EQUAL 0))
+  message(FATAL_ERROR "Configure failed: return ${_ret} cmake return ${_err}")
 endif()
 
-if(return_code EQUAL 0 AND cmake_err EQUAL 0)
-  ctest_build(
-    BUILD ${CTEST_BINARY_DIRECTORY}
-    CONFIGURATION ${CTEST_BUILD_CONFIGURATION}
-    RETURN_VALUE return_code
-    NUMBER_ERRORS Nerror
-    CAPTURE_CMAKE_ERROR cmake_err
-    )
-else()
-  message(STATUS "SKIP: ctest_build(): returncode: ${return_code}; CMake error code: ${cmake_err}")
+ctest_build(
+  RETURN_VALUE _ret
+  CAPTURE_CMAKE_ERROR _err)
+if(NOT (_ret EQUAL 0 AND _err EQUAL 0))
+  message(FATAL_ERROR "Build failed.")
 endif()
 
-if(return_code EQUAL 0 AND Nerror EQUAL 0 AND cmake_err EQUAL 0)
-  ctest_test(
-  BUILD ${CTEST_BINARY_DIRECTORY}
-  RETURN_VALUE return_code
-  CAPTURE_CMAKE_ERROR ctest_err
-  PARALLEL_LEVEL ${Ncpu}
-  )
-else()
-  message(STATUS "SKIP: ctest_test(): returncode: ${return_code}; CMake error code: ${cmake_err}")
-endif()
+ctest_test(
+  RETURN_VALUE _ret
+  CAPTURE_CMAKE_ERROR _err)
 
-if(NOT ((WIN32 OR return_code EQUAL 0) AND Nerror EQUAL 0 AND cmake_err EQUAL 0 AND (WIN32 OR ctest_err EQUAL 0)))
-  message(FATAL_ERROR "Build and test failed.")
+if(NOT (_ret EQUAL 0 AND _err EQUAL 0))
+  message(FATAL_ERROR "Test failed.")
 endif()
