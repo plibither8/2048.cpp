@@ -1,5 +1,5 @@
 # 2048.cpp
-
+олпдоваловалдповлаопладво
 ![Actions Status](https://github.com/plibither8/2048.cpp/workflows/ci/badge.svg)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b37414d66e7d4146bf72a4a467fdc84d)](https://app.codacy.com/app/plibither8/2048.cpp?utm_source=github.com&utm_medium=referral&utm_content=plibither8/2048.cpp&utm_campaign=Badge_Grade_Dashboard)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/plibither8/2048.cpp.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/plibither8/2048.cpp/context:cpp)
