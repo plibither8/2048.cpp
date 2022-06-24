@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - "**.cpp"
+      - "**.hpp"
       - "**.cmake"
       - "**/CMakeLists.txt"
       - ".github/workflows/ci.yml"
   pull_request:
     paths:
       - "**.cpp"
+      - "**.hpp"
       - "**.cmake"
       - "**/CMakeLists.txt"
       - ".github/workflows/ci.yml"
