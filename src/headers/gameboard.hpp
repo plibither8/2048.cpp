@@ -1,11 +1,10 @@
 #ifndef GAMEBOARD_H
 #define GAMEBOARD_H
 
+#include "point2d.hpp"
 #include "tile.hpp"
 #include <tuple>
 #include <vector>
-
-struct point2D_t;
 
 namespace Game {
 
