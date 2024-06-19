@@ -67,6 +67,19 @@ bool getTileBlockedOnGameboardDataArray(gameboard_data_array_t gbda,
   return gameboard_data_point_t{}(gbda, pt).blocked;
 }
 
+/**
+ * @brief Generates a string representation of the game board data array.
+ * 
+ * This function creates a formatted string that represents the current state of the game board.
+ * It includes the tile values and their blocked status for each position on the board.
+ * The string representation ends with a "[" character to indicate the end of the data.
+ * 
+ * @param gbda The game board data array to be printed.
+ * @return std::string A formatted string representing the game board state.
+ * 
+ * @note Changes in the new version:
+ * - Added a "[" character at the end of the string to indicate the end of the data.
+ */
 std::string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
   const int playsize = getPlaySizeOfGameboardDataArray(gbda);
   std::ostringstream os;
@@ -78,6 +91,7 @@ std::string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
     }
     os << "\n";
   }
+  os << "["; // Indicates the end of the game board data
   return os.str();
 }
 
@@ -135,7 +149,7 @@ bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
       const auto offset_check = {
           current_point + offset, // Positive adjacent check
           current_point - offset}; // Negative adjacent Check
-      for (const auto current_offset : offset_check) {
+      for (const auto &current_offset : offset_check) { //auto REFERENCE current_offset
         if (is_point_in_board_play_area(current_offset, playsize)) {
           return getTileValueOnGameboardDataArray(gbda, current_offset) ==
                  current_point_value;

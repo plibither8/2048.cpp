@@ -117,11 +117,22 @@ std::string BoardSizeErrorPrompt() {
   return error_prompt_richtext.str();
 }
 
+/**
+ * @brief Generates a string prompt listing the available input commands.
+ * 
+ * This function creates a formatted string that lists the available input commands for the game.
+ * The commands include movements (Up, Left, Down, Right), saving the game, and returning to the menu.
+ * The prompt is formatted with indentation for readability.
+ * 
+ * @note The new addition includes 'M' for returning to the menu.
+ * 
+ * @return std::string A formatted string containing the list of input commands.
+ */
 std::string InputCommandListPrompt() {
   constexpr auto sp = "  ";
   const auto input_commands_list_text = {
       "W or K or ↑ => Up", "A or H or ← => Left", "S or J or ↓ => Down",
-      "D or L or → => Right", "Z or P => Save"};
+      "D or L or → => Right", "Z or P => Save", "M => Return to menu"};
   std::ostringstream str_os;
   for (const auto txt : input_commands_list_text) {
     str_os << sp << txt << "\n";
