@@ -149,13 +149,13 @@ bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
       const auto offset_check = {
           current_point + offset, // Positive adjacent check
           current_point - offset}; // Negative adjacent Check
-<<<<<<< HEAD
+
       for (const auto &current_offset : offset_check) { //auto REFERENCE current_offset
-=======
+
           
       // Use reference to avoid unnecessary copying of complex structures
       for (const auto &current_offset : offset_check) {
->>>>>>> bc8a89f (Set C++17 standard in CMakeLists.txt for std::filesystem support in menu.cpp. Same as adding .vscode into .gitignore and changed some code deleting comments and changing comments)
+
         if (is_point_in_board_play_area(current_offset, playsize)) {
           return getTileValueOnGameboardDataArray(gbda, current_offset) ==
                  current_point_value;
