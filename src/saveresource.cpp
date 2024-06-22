@@ -7,7 +7,6 @@ namespace Game {
 namespace Saver {
 namespace {
 
-
 /**
  * @brief Generates a file from the previous game's statistics data.
  * 
@@ -20,8 +19,7 @@ namespace {
  * 
  * @note The ']' character is used to signify the end of the statistics data.
  */
-bool generateFilefromPreviousGameStatisticsData(std::ostream &os,
-                                                const GameBoard &gb) {
+bool generateFilefromPreviousGameStatisticsData(std::ostream &os, const GameBoard &gb) {
   os << gb.score << ":" << MoveCountOnGameBoard(gb) << "]" << std::endl;
   return true;
 }
@@ -36,8 +34,7 @@ bool generateFilefromPreviousGameStatisticsData(std::ostream &os,
  * @param gb The game board containing the state to be saved.
  * @return bool Returns true after successfully writing the state data.
  */
-bool generateFilefromPreviousGameStateData(std::ostream &os,
-                                           const GameBoard &gb) {
+bool generateFilefromPreviousGameStateData(std::ostream &os, const GameBoard &gb) {
   os << printStateOfGameBoard(gb);
   return true;
 }
@@ -51,41 +48,15 @@ bool generateFilefromPreviousGameStateData(std::ostream &os,
  * @param filename The name of the file where the game state and statistics will be saved.
  * @param gb The game board containing the state and statistics to be saved.
  */
-void saveToFilePreviousGameStateData(std::string filename,
-                                     const GameBoard &gb) {
+void saveToFilePreviousGameStateData(std::string filename, const GameBoard &gb) {
   std::ofstream stateFile(filename, std::ios_base::app);
   generateFilefromPreviousGameStateData(stateFile, gb);
   generateFilefromPreviousGameStatisticsData(stateFile, gb);
-
 }
-
-// This function can be deleted because it is no longer needed.
-// The functionality to save game statistics has been integrated
-// into the saveToFilePreviousGameStateData function, making this
-// function redundant.
-/*void saveToFilePreviousGameStatisticsData(std::string filename,
-                                          const GameBoard &gb) {
-  std::ofstream stats(filename, std::ios_base::app);
-  generateFilefromPreviousGameStatisticsData(stats, gb);
-}*/
-
-} // namespace
 
 /**
  * @brief Saves the current game state to a file.
  * 
-<<<<<<< HEAD
- * This function removes any existing file with the specified filename and then
- * saves the current state and statistics of the provided game board to a new file.
- * 
- * @param gb The current game board to be saved.
- * @param filename The name of the file where the game state will be saved.
- */
-void saveGamePlayState(GameBoard gb, const std::string& filename) {
-  const auto path_to_file_gd_state = "../data/SavedGameFiles/" + filename;
-  std::remove(path_to_file_gd_state.c_str());
-
-=======
  * This function checks for the existence of the directory and creates it if necessary.
  * It then removes any existing file with the specified filename before saving the 
  * current state and statistics of the provided game board to a new file. This ensures 
@@ -102,17 +73,16 @@ void saveGamePlayState(GameBoard gb, const std::string& filename) {
 void saveGamePlayState(GameBoard gb, const std::string& filename) {
   std::filesystem::path directory_path = "../data/SavedGameFiles/";
 
-  if (!std::filesystem::exists(directory_path))
-  {
+  if (!std::filesystem::exists(directory_path)) {
     std::filesystem::create_directories(directory_path);
   }
 
-  const auto path_to_file_gd_state = "../data/SavedGameFiles/" + filename;
-  std::remove(path_to_file_gd_state.c_str());
+  const auto path_to_file_gd_state = directory_path / filename; // Using filesystem path concatenation for clarity
+  std::remove(path_to_file_gd_state.c_str()); // Removing the file if it exists
 
->>>>>>> bc8a89f (Set C++17 standard in CMakeLists.txt for std::filesystem support in menu.cpp. Same as adding .vscode into .gitignore and changed some code deleting comments and changing comments)
   saveToFilePreviousGameStateData(path_to_file_gd_state, gb);
 }
 
+} // namespace
 } // namespace Saver
 } // namespace Game
