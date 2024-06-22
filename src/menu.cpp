@@ -11,36 +11,34 @@
 #include "statistics.hpp"
 #include <algorithm>
 #include <array>
+#include <filesystem> //To use std::filestream
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <filesystem> //To use std::filestream
 
 mainmenustatus_t mainmenustatus{};
 
 /**
  * @brief Lists all saved game states in the specified directory.
- * 
- * This function scans the specified directory for regular files and returns their names
- * as a list of strings. It checks if the directory exists before attempting to list the files.
- * 
+ *
+ * This function scans the specified directory for regular files and returns
+ * their names as a list of strings. It checks if the directory exists before
+ * attempting to list the files.
+ *
  * @param directory The directory to search for saved game state files.
- * @return std::vector<std::string> A vector containing the names of the saved game state files.
+ * @return std::vector<std::string> A vector containing the names of the saved
+ * game state files.
  */
-std::vector<std::string> listSavedGameStates(const std::string& directory)
-{
+std::vector<std::string> listSavedGameStates(const std::string &directory) {
   std::vector<std::string> gameStates;
 
-  if(!std::filesystem::exists(directory))
-  {
+  if (!std::__fs::filesystem::exists(directory)) {
     std::cout << "Directory does not exists." << std::endl;
     return gameStates;
   }
 
-  for(auto& data : std::filesystem::directory_iterator(directory))
-  {
-    if(data.is_regular_file())
-    {
+  for (auto &data : std::__fs::filesystem::directory_iterator(directory)) {
+    if (data.is_regular_file()) {
       gameStates.push_back(data.path().filename().string());
     }
   }
@@ -50,24 +48,23 @@ std::vector<std::string> listSavedGameStates(const std::string& directory)
 
 /**
  * @brief Prompts the user to choose a game state from a list.
- * 
- * This function displays the available game states and prompts the user to select one.
- * If no game states are found, or if the user's choice is invalid, appropriate messages are displayed.
- * 
+ *
+ * This function displays the available game states and prompts the user to
+ * select one. If no game states are found, or if the user's choice is invalid,
+ * appropriate messages are displayed.
+ *
  * @param gamestate A vector containing the names of available game states.
- * @return std::string The name of the chosen game state, or an empty string if the choice is invalid.
+ * @return std::string The name of the chosen game state, or an empty string if
+ * the choice is invalid.
  */
-std::string chooseGameState(const std::vector<std::string>& gamestate)
-{
-  if(gamestate.empty())
-  {
+std::string chooseGameState(const std::vector<std::string> &gamestate) {
+  if (gamestate.empty()) {
     std::cout << "No saved games found." << std::endl;
     return "";
   }
 
   std::cout << "Saved games are:" << std::endl;
-  for (std::size_t i = 0; i < gamestate.size(); i++)
-  {
+  for (std::size_t i = 0; i < gamestate.size(); i++) {
     std::cout << i + 1 << ". " << gamestate[i] << std::endl;
   }
 
@@ -76,8 +73,7 @@ std::string chooseGameState(const std::vector<std::string>& gamestate)
   std::cout << std::endl;
   std::cin >> index;
 
-  if(index < 1 || index > gamestate.size())
-  {
+  if (index < 1 || index > gamestate.size()) {
     std::cout << "Invalid choice." << std::endl;
     return "";
   }
@@ -95,26 +91,26 @@ void startGame() {
 
 /**
  * @brief Continues a previously saved game.
- * 
- * This function prompts the user to choose a saved game state from a specified directory.
- * If a valid saved game state is selected, it continues the game using that state.
- * If no valid saved game state is selected, it notifies the user that the file is empty.
- * 
+ *
+ * This function prompts the user to choose a saved game state from a specified
+ * directory. If a valid saved game state is selected, it continues the game
+ * using that state. If no valid saved game state is selected, it notifies the
+ * user that the file is empty.
+ *
  * @note Changes in the new version:
- * - Added functionality to list and choose a saved game state from the specified directory.
- * - Validates the chosen game state file and continues the game using the selected file.
+ * - Added functionality to list and choose a saved game state from the
+ * specified directory.
+ * - Validates the chosen game state file and continues the game using the
+ * selected file.
  * - Prints a message if the selected file is empty.
  */
-void continueGame()
-{
+void continueGame() {
   std::string directory_state = "../data/SavedGameFiles/";
-  std::string file_gb_state = chooseGameState(listSavedGameStates(directory_state));
-  if (!file_gb_state.empty())
-  {
+  std::string file_gb_state =
+      chooseGameState(listSavedGameStates(directory_state));
+  if (!file_gb_state.empty()) {
     Game::continueGame(directory_state + file_gb_state);
-  }
-  else
-  {
+  } else {
     std::cout << "The file is empty" << std::endl;
   }
 }
@@ -230,23 +226,27 @@ bool soloLoop() {
 
 /**
  * @brief Runs the endless loop until the game is exited.
- * 
- * This function continuously runs the solo game loop until the exit flag is set in the main menu status.
- * Initially, it sets the start menu flag to display the menu. If the start menu flag is set, it calls the solo loop
- * function to handle the menu interactions.
- * 
+ *
+ * This function continuously runs the solo game loop until the exit flag is set
+ * in the main menu status. Initially, it sets the start menu flag to display
+ * the menu. If the start menu flag is set, it calls the solo loop function to
+ * handle the menu interactions.
+ *
  * @note Changes in the new version:
- * - Added a condition to exit the loop when the exit flag is set in the main menu status.
+ * - Added a condition to exit the loop when the exit flag is set in the main
+ * menu status.
  * - Integrated the menu start state and menu interaction within the loop.
  */
 void endlessLoop() {
-  while (!mainmenustatus[FLAG_EXIT_GAME]) // As long as the exit option is not selected in the menu
+  while (!mainmenustatus[FLAG_EXIT_GAME]) // As long as the exit option is not
+                                          // selected in the menu
   {
     mainmenustatus[FLAG_START_MENU] = true; // Initial state is Menu
-    if (mainmenustatus[FLAG_START_MENU] == true)    // If the menu flag is set, we enter...
+    if (mainmenustatus[FLAG_START_MENU] ==
+        true) // If the menu flag is set, we enter...
     {
-      soloLoop();                         // ... the soloLoop() function, where we navigate the menu
-    }                                               
+      soloLoop(); // ... the soloLoop() function, where we navigate the menu
+    }
   }
 }
 

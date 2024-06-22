@@ -69,16 +69,18 @@ bool getTileBlockedOnGameboardDataArray(gameboard_data_array_t gbda,
 
 /**
  * @brief Generates a string representation of the game board data array.
- * 
- * This function creates a formatted string that represents the current state of the game board.
- * It includes the tile values and their blocked status for each position on the board.
- * The string representation ends with a "[" character to indicate the end of the data.
- * 
+ *
+ * This function creates a formatted string that represents the current state of
+ * the game board. It includes the tile values and their blocked status for each
+ * position on the board. The string representation ends with a "[" character to
+ * indicate the end of the data.
+ *
  * @param gbda The game board data array to be printed.
  * @return std::string A formatted string representing the game board state.
- * 
+ *
  * @note Changes in the new version:
- * - Added a "[" character at the end of the string to indicate the end of the data.
+ * - Added a "[" character at the end of the string to indicate the end of the
+ * data.
  */
 std::string printStateOfGameBoardDataArray(gameboard_data_array_t gbda) {
   const int playsize = getPlaySizeOfGameboardDataArray(gbda);
@@ -127,9 +129,8 @@ unblockTilesOnGameboardDataArray(gameboard_data_array_t gbda) {
       tile_data_array_t(std::get<IDX_BOARD>(gbda).size());
   std::transform(std::begin(std::get<IDX_BOARD>(gbda)),
                  std::end(std::get<IDX_BOARD>(gbda)),
-                 std::begin(new_board_data_array), [](const tile_t t) {
-                   return tile_t{t.value, false};
-                 });
+                 std::begin(new_board_data_array),
+                 [](const tile_t t) { return tile_t{t.value, false}; });
   return gameboard_data_array_t{std::get<IDX_PLAYSIZE>(gbda),
                                 new_board_data_array};
 }
@@ -149,7 +150,8 @@ bool canMoveOnGameboardDataArray(gameboard_data_array_t gbda) {
       const auto offset_check = {
           current_point + offset, // Positive adjacent check
           current_point - offset}; // Negative adjacent Check
-      for (const auto &current_offset : offset_check) { //auto REFERENCE current_offset
+      for (const auto &current_offset :
+           offset_check) { // auto REFERENCE current_offset
         if (is_point_in_board_play_area(current_offset, playsize)) {
           return getTileValueOnGameboardDataArray(gbda, current_offset) ==
                  current_point_value;

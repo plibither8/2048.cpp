@@ -13,8 +13,8 @@
 #include <array>
 #include <chrono>
 #include <iostream>
-#include <sstream>
 #include <random> // Required for generating random numbers/integers in the RemoveTiles() function.
+#include <sstream>
 
 namespace Game {
 namespace {
@@ -29,7 +29,7 @@ enum GameStatusFlag {
   FLAG_ENDLESS_MODE,
   FLAG_GAME_IS_ASKING_QUESTION_MODE,
   FLAG_QUESTION_STAY_OR_QUIT,
-  FLAG_TILES_REMOVED,           // Indicates if tiles have already been removed
+  FLAG_TILES_REMOVED, // Indicates if tiles have already been removed
   MAX_NO_GAME_STATUS_FLAGS
 };
 
@@ -39,13 +39,15 @@ using gamestatus_gameboard_t = std::tuple<gamestatus_t, GameBoard>;
 
 /**
  * @brief Processes the game logic for the current game state.
- * 
- * This function updates the game status and game board based on the current state.
- * It handles tile movements, checks for game-winning conditions, and verifies if the game can continue.
- * If the player cannot make any more moves, it prompts the player to remove random tiles before ending the game.
- * 
+ *
+ * This function updates the game status and game board based on the current
+ * state. It handles tile movements, checks for game-winning conditions, and
+ * verifies if the game can continue. If the player cannot make any more moves,
+ * it prompts the player to remove random tiles before ending the game.
+ *
  * @param gsgb A tuple containing the current game status and game board.
- * @return gamestatus_gameboard_t A tuple containing the updated game status and game board.
+ * @return gamestatus_gameboard_t A tuple containing the updated game status and
+ * game board.
  */
 gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
   gamestatus_t gamestatus;
@@ -65,20 +67,17 @@ gamestatus_gameboard_t process_gamelogic(gamestatus_gameboard_t gsgb) {
     }
   }
   if (!canMoveOnGameboard(gb)) {
-    if(gamestatus[FLAG_TILES_REMOVED] == false)
-    {
+    if (gamestatus[FLAG_TILES_REMOVED] == false) {
       char input;
-      std::cout << "You lose. Do you want to remove random tiles (Y/N) ?" << std::endl;
+      std::cout << "You lose. Do you want to remove random tiles (Y/N) ?"
+                << std::endl;
       std::cin >> input;
 
-      if(input == 'Y' || input == 'y')
-      {
+      if (input == 'Y' || input == 'y') {
         gamestatus[FLAG_TILES_REMOVED] = true;
         removeTiles(gb);
       }
-    }
-    else
-    {
+    } else {
       gamestatus[FLAG_END_GAME] = true;
     }
   }
@@ -190,19 +189,23 @@ gamestatus_t update_one_shot_display_flags(gamestatus_t gamestatus) {
 
 using bool_gamestatus_t = std::tuple<bool, gamestatus_t>;
 /**
- * @brief Processes non-standard input commands and updates the game status accordingly.
- * 
- * This function handles additional input commands that are not part of the standard gameplay.
- * It updates the game status based on the input character received. The function supports saving
- * the game, quitting endless mode, and returning to the main menu.
- * 
+ * @brief Processes non-standard input commands and updates the game status
+ * accordingly.
+ *
+ * This function handles additional input commands that are not part of the
+ * standard gameplay. It updates the game status based on the input character
+ * received. The function supports saving the game, quitting endless mode, and
+ * returning to the main menu.
+ *
  * @param c The input character received from the user.
  * @param gamestatus The current game status flags.
- * @return bool_gamestatus_t A tuple containing a boolean indicating if the keycode is invalid and the updated game status flags.
- * 
+ * @return bool_gamestatus_t A tuple containing a boolean indicating if the
+ * keycode is invalid and the updated game status flags.
+ *
  * @note Changes in the new version:
  * - Added support for returning to the main menu with CODE_RETURN_TO_MENU.
- * - When CODE_RETURN_TO_MENU is detected, the appropriate main menu flags are set.
+ * - When CODE_RETURN_TO_MENU is detected, the appropriate main menu flags are
+ * set.
  */
 bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
   using namespace Input::Keypress::Code;
@@ -221,7 +224,8 @@ bool_gamestatus_t check_input_other(char c, gamestatus_t gamestatus) {
     }
     break;
   case CODE_RETURN_TO_MENU:
-    // When CODE_RETURN_TO_MENU is detected, the main menu is set to start, and game flags are adjusted.    mainmenustatus[FLAG_START_MENU] = true;
+    // When CODE_RETURN_TO_MENU is detected, the main menu is set to start, and
+    // game flags are adjusted.    mainmenustatus[FLAG_START_MENU] = true;
     mainmenustatus[FLAG_START_GAME] = false;
     mainmenustatus[FLAG_CONTINUE_GAME] = false;
     is_invalid_keycode = false;
@@ -317,18 +321,21 @@ bool continue_playing_game(std::istream &in_os) {
 
 /**
  * @brief Processes the current game status and updates the game loop control.
- * 
- * This function evaluates the current game status flags and takes appropriate actions:
+ *
+ * This function evaluates the current game status flags and takes appropriate
+ * actions:
  * - It handles winning conditions and prompts the user to continue playing.
  * - It checks for the end of the game conditions.
  * - It manages saving the game state by prompting the user for a filename.
  * - It resets the question asking event trigger for a new loop cycle.
- * 
+ *
  * @param gsgb A tuple containing the current game status and game board.
- * @return bool_gamestatus_t A tuple containing a boolean indicating whether to continue the game loop and the updated game status flags.
- * 
+ * @return bool_gamestatus_t A tuple containing a boolean indicating whether to
+ * continue the game loop and the updated game status flags.
+ *
  * @note Changes in the new version:
- * - Added a prompt asking the user to enter a filename when saving the game state.
+ * - Added a prompt asking the user to enter a filename when saving the game
+ * state.
  */
 bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
   gamestatus_t gamestatus;
@@ -351,7 +358,8 @@ bool_gamestatus_t process_gameStatus(gamestatus_gameboard_t gsgb) {
     loop_again = false;
   }
   if (gamestatus[FLAG_SAVED_GAME]) {
-    std::cout << "Please enter the filename to save the game state" << std::endl;
+    std::cout << "Please enter the filename to save the game state"
+              << std::endl;
     std::string filename;
     std::cin >> filename;
     Saver::saveGamePlayState(gb, filename);
@@ -428,20 +436,23 @@ std::string drawEndGameLoopGraphics(current_game_session_t finalgamestatus) {
 }
 
 /**
- * @brief Runs the endless game loop until the game ends or the user returns to the menu.
- * 
- * This function manages the continuous gameplay loop for the endless game mode. 
- * It repeatedly calls the solo game loop until the game ends or the user chooses to return to the menu.
- * The game status and game board are updated accordingly in each iteration.
- * 
+ * @brief Runs the endless game loop until the game ends or the user returns to
+ * the menu.
+ *
+ * This function manages the continuous gameplay loop for the endless game mode.
+ * It repeatedly calls the solo game loop until the game ends or the user
+ * chooses to return to the menu. The game status and game board are updated
+ * accordingly in each iteration.
+ *
  * @param currentBestScore The current best score achieved.
  * @param cm The competition mode settings.
  * @param gb The current game board state.
  * @return GameBoard The final state of the game board after the loop ends.
- * 
+ *
  * @note Changes in the new version:
  * - Added checks to monitor if the current state is set to GAME or MENU.
- * - The loop will terminate if the user presses the M key and the state changes to MENU.
+ * - The loop will terminate if the user presses the M key and the state changes
+ * to MENU.
  */
 GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
                           GameBoard gb) {
@@ -451,7 +462,8 @@ GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
   // Monitor the loop to check if the current state is still set to GAME
   // If not, then the M key was pressed, setting the current state to MENU
   // Thus, we return to the menu
-  while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) || (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
+  while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) ||
+                        (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
     std::tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
   }
 
@@ -509,43 +521,45 @@ void startGame() {
 
 /**
  * @brief Continue a previously saved game.
- * 
+ *
  * The ContinueOldGame function has been updated to accept a filename directly.
- * This allows the user to load a specific save file instead of only the last saved game.
- * 
+ * This allows the user to load a specific save file instead of only the last
+ * saved game.
+ *
  * @param filename The name of the file containing the saved game to load.
  */
-void continueGame(const std::string& filename) {
+void continueGame(const std::string &filename) {
   PreGameSetup::ContinueOldGame(filename);
 }
 
 /**
- * @brief Randomly removes two tiles from a GameBoard by setting their values to 0.
+ * @brief Randomly removes two tiles from a GameBoard by setting their values to
+ * 0.
  *
- * This function uses a random number generator to select and remove two non-empty tiles 
- * from the given GameBoard by setting their values to 0. The process continues until 
- * exactly two tiles are removed.
+ * This function uses a random number generator to select and remove two
+ * non-empty tiles from the given GameBoard by setting their values to 0. The
+ * process continues until exactly two tiles are removed.
  *
  * @param gb The GameBoard object from which tiles will be removed.
  */
-void removeTiles(GameBoard& gb) {
-    // Seed with a real random value, if available
-    std::random_device rd;
-    std::mt19937 gen(rd());
+void removeTiles(GameBoard &gb) {
+  // Seed with a real random value, if available
+  std::random_device rd;
+  std::mt19937 gen(rd());
 
-    auto& [playsize, tiles] = gb.gbda;
-    std::uniform_int_distribution<> dis(0, tiles.size() - 1);
+  auto &[playsize, tiles] = gb.gbda;
+  std::uniform_int_distribution<> dis(0, tiles.size() - 1);
 
-    int tiles_to_remove = 2;
-    while (tiles_to_remove > 0) {
-        int random_index = dis(gen);
-        auto& tile = tiles[random_index];
+  int tiles_to_remove = 2;
+  while (tiles_to_remove > 0) {
+    int random_index = dis(gen);
+    auto &tile = tiles[random_index];
 
-        if (tile.value != 0) {  // Ensure it's not already an empty tile
-            tile.value = 0;     // Remove the tile
-            --tiles_to_remove;
-        }
+    if (tile.value != 0) { // Ensure it's not already an empty tile
+      tile.value = 0; // Remove the tile
+      --tiles_to_remove;
     }
+  }
 }
 
 } // namespace Game

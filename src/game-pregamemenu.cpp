@@ -126,39 +126,43 @@ void SetUpNewGame(NewGameFlag ns) {
 }
 
 /**
- * @brief Initializes a GameBoard object by loading game data from a specified file.
+ * @brief Initializes a GameBoard object by loading game data from a specified
+ * file.
  *
- * This function constructs the full path to the game data file by prepending "../data/" to the given filename.
- * It then calls the `load_game` function to load the game data into a new GameBoard object. The function returns 
- * a tuple containing the status of the game load operation (true if successful, false otherwise) and the initialized 
- * GameBoard object.
+ * This function constructs the full path to the game data file by prepending
+ * "../data/" to the given filename. It then calls the `load_game` function to
+ * load the game data into a new GameBoard object. The function returns a tuple
+ * containing the status of the game load operation (true if successful, false
+ * otherwise) and the initialized GameBoard object.
  *
  * @param filename The name of the file from which to read the game data.
- * @return A tuple containing a boolean indicating the success of the load operation and the initialized GameBoard object.
+ * @return A tuple containing a boolean indicating the success of the load
+ * operation and the initialized GameBoard object.
  */
-load_gameboard_status_t initialiseContinueBoardArray(const std::string& filename)
-{
+load_gameboard_status_t
+initialiseContinueBoardArray(const std::string &filename) {
   using namespace Loader;
- // const auto gameboard_data_filename = "../data/" + filename;
+  // const auto gameboard_data_filename = "../data/" + filename;
   auto gb = GameBoard{1};
   auto loaded_game = load_game(filename, gb);
   return std::make_tuple(loaded_game, gb);
 }
 
-
 /**
  * @brief Continues a previously saved game from a specified file.
- * 
+ *
  * This function attempts to load the game state from the provided filename.
  * If successful, it continues the game using the loaded state. If the loading
  * fails, it sets up a new game indicating that no previous save is available.
- * 
- * @param filename The name of the file from which to load the previous game state.
+ *
+ * @param filename The name of the file from which to load the previous game
+ * state.
  */
-void DoContinueOldGame(const std::string& filename) {
+void DoContinueOldGame(const std::string &filename) {
   bool load_old_game_ok;
   GameBoard oldGameBoard;
-  std::tie(load_old_game_ok, oldGameBoard) = initialiseContinueBoardArray(filename);
+  std::tie(load_old_game_ok, oldGameBoard) =
+      initialiseContinueBoardArray(filename);
   if (load_old_game_ok) {
     playGame(PlayGameFlag::ContinuePreviousGame, oldGameBoard);
   } else {
@@ -174,13 +178,14 @@ void SetUpNewGame() {
 
 /**
  * @brief Continue a previously saved game.
- * 
+ *
  * The ContinueOldGame function has been updated to accept a filename directly.
- * This allows the user to load a specific save file instead of only the last saved game.
- * 
+ * This allows the user to load a specific save file instead of only the last
+ * saved game.
+ *
  * @param filename The name of the file containing the saved game to load.
  */
-void ContinueOldGame(const std::string& filename) {
+void ContinueOldGame(const std::string &filename) {
   DoContinueOldGame(filename);
 }
 

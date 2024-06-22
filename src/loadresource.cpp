@@ -15,73 +15,78 @@ namespace Loader {
 namespace {
 
 /**
- * @brief Counts the number of lines in a file until a line containing '[' is found.
+ * @brief Counts the number of lines in a file until a line containing '[' is
+ * found.
  *
- * This function opens a file specified by the given filename and counts the number 
- * of lines until it encounters a line that contains the character '['. If the file 
- * cannot be opened, it prints an error message and returns -1.
+ * This function opens a file specified by the given filename and counts the
+ * number of lines until it encounters a line that contains the character '['.
+ * If the file cannot be opened, it prints an error message and returns -1.
  *
  * @param filename The name of the file to be read.
- * @return The number of lines read before encountering a line with '['. Returns -1 if the file cannot be opened.
+ * @return The number of lines read before encountering a line with '['. Returns
+ * -1 if the file cannot be opened.
  */
-int GetLines(std::string filename) 
-{
+int GetLines(std::string filename) {
   std::ifstream stateFile(filename);
   if (!stateFile) {
-      std::cerr << "Error. Cannot open the file: " << filename << std::endl;
-      return -1; // Return -1 to indicate an error
+    std::cerr << "Error. Cannot open the file: " << filename << std::endl;
+    return -1; // Return -1 to indicate an error
   }
 
   std::string tempLine;
   int noOfLines = 0;
 
   while (std::getline(stateFile, tempLine)) {
-      if (tempLine.find('[') != std::string::npos) {
-          break; // Exit loop if '[' is found
-      }
-      noOfLines++;
+    if (tempLine.find('[') != std::string::npos) {
+      break; // Exit loop if '[' is found
+    }
+    noOfLines++;
   }
 
   return noOfLines;
 }
 
 /**
- * @brief Extracts tile data from a given input stream until a line containing '[' is encountered.
+ * @brief Extracts tile data from a given input stream until a line containing
+ * '[' is encountered.
  *
- * This function reads lines from the provided input stream and extracts tile data 
- * formatted as comma-separated values. The process continues until either the maximum 
- * width (10 lines) is reached or a line containing the character '[' is found. When 
- * a line with '[' is encountered, the function stops reading further and processes 
- * the line up to, but not including, the '[' character.
+ * This function reads lines from the provided input stream and extracts tile
+ * data formatted as comma-separated values. The process continues until either
+ * the maximum width (10 lines) is reached or a line containing the character
+ * '[' is found. When a line with '[' is encountered, the function stops reading
+ * further and processes the line up to, but not including, the '[' character.
  *
  * @param buf The input stream from which to read the tile data.
  * @return A vector of strings containing the extracted tile data.
  */
 std::vector<std::string> get_file_tile_data(std::istream &buf) {
-    std::vector<std::string> tempbuffer;
-    enum { MAX_WIDTH = 10, MAX_HEIGHT = 10 };
-    auto i{0};
+  std::vector<std::string> tempbuffer;
+  enum { MAX_WIDTH = 10, MAX_HEIGHT = 10 };
+  auto i{0};
 
-    for (std::string tempLine; std::getline(buf, tempLine) && i < MAX_WIDTH; i++) {
-        if (tempLine.find('[') != std::string::npos) {
-            // Remove the '[' character and stop reading further
-            tempLine = tempLine.substr(0, tempLine.find('['));
-            std::istringstream temp_filestream(tempLine);
-            auto j{0};
-            for (std::string a_word; std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
-                tempbuffer.push_back(a_word);
-            }
-            break; // Stop the outer loop as the end of tile data is reached
-        }
-
-        std::istringstream temp_filestream(tempLine);
-        auto j{0};
-        for (std::string a_word; std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
-            tempbuffer.push_back(a_word);
-        }
+  for (std::string tempLine; std::getline(buf, tempLine) && i < MAX_WIDTH;
+       i++) {
+    if (tempLine.find('[') != std::string::npos) {
+      // Remove the '[' character and stop reading further
+      tempLine = tempLine.substr(0, tempLine.find('['));
+      std::istringstream temp_filestream(tempLine);
+      auto j{0};
+      for (std::string a_word;
+           std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
+        tempbuffer.push_back(a_word);
+      }
+      break; // Stop the outer loop as the end of tile data is reached
     }
 
-    return tempbuffer;
+    std::istringstream temp_filestream(tempLine);
+    auto j{0};
+    for (std::string a_word;
+         std::getline(temp_filestream, a_word, ',') && j < MAX_HEIGHT; j++) {
+      tempbuffer.push_back(a_word);
+    }
+  }
+
+  return tempbuffer;
 }
 
 std::vector<tile_t>
@@ -180,28 +185,28 @@ load_game_stats_from_file(std::string filename) {
 /**
  * @brief Loads game data from a specified file into a GameBoard object.
  *
- * This function opens a file specified by the given filename, reads the game board data,
- * and initializes a GameBoard object with the read data. It first counts the number of lines 
- * until a line containing '[' is found to determine the size of the game board. Then, it reads
- * the tile data from the file, processes it, and updates the GameBoard object. Finally, it reads
- * the score and move count from the last relevant line containing these values.
+ * This function opens a file specified by the given filename, reads the game
+ * board data, and initializes a GameBoard object with the read data. It first
+ * counts the number of lines until a line containing '[' is found to determine
+ * the size of the game board. Then, it reads the tile data from the file,
+ * processes it, and updates the GameBoard object. Finally, it reads the score
+ * and move count from the last relevant line containing these values.
  *
  * @param fileName The name of the file from which to read the game data.
  * @param gb The GameBoard object to be initialized with the read data.
  * @return true if the game data was successfully loaded; false otherwise.
  */
-bool load_game(std::string fileName, GameBoard& gb)
-{
+bool load_game(std::string fileName, GameBoard &gb) {
   std::ifstream stateFile(fileName);
-  if(!stateFile.is_open())
-  {
+  if (!stateFile.is_open()) {
     std::cerr << "Cannot open the file: " << fileName << std::endl;
     return false;
   }
 
   const ull savedBoardPlaySize = GetLines(fileName);
   const auto file_tile_data = get_file_tile_data(stateFile);
-  const auto processed_tile_data = process_file_tile_string_data(file_tile_data);
+  const auto processed_tile_data =
+      process_file_tile_string_data(file_tile_data);
 
   gb = GameBoard(savedBoardPlaySize, processed_tile_data);
 
@@ -211,10 +216,8 @@ bool load_game(std::string fileName, GameBoard& gb)
   std::string current_line;
   std::string last_line;
 
-  while (std::getline(stateFile, current_line))
-  {
-    if (!current_line.empty() && current_line.front() == '[')
-    {
+  while (std::getline(stateFile, current_line)) {
+    if (!current_line.empty() && current_line.front() == '[') {
       last_line = current_line;
       break;
     }
@@ -224,10 +227,13 @@ bool load_game(std::string fileName, GameBoard& gb)
   size_t colon = last_line.find(':');
   size_t closing_square_bracket = last_line.find(']');
 
-  if (opening_square_bracket != std::string::npos && colon != std::string::npos && closing_square_bracket != std::string::npos)
-  {
-    std::string score = last_line.substr(opening_square_bracket + 1, colon - opening_square_bracket - 1);
-    std::string moveCount = last_line.substr(colon + 1, closing_square_bracket - colon - 1);
+  if (opening_square_bracket != std::string::npos &&
+      colon != std::string::npos &&
+      closing_square_bracket != std::string::npos) {
+    std::string score = last_line.substr(opening_square_bracket + 1,
+                                         colon - opening_square_bracket - 1);
+    std::string moveCount =
+        last_line.substr(colon + 1, closing_square_bracket - colon - 1);
     gb.score = std::stoull(score);
     gb.moveCount = std::stoll(moveCount) - 1;
   }
