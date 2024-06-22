@@ -1,6 +1,7 @@
 #include "saveresource.hpp"
 #include "gameboard.hpp"
 #include <fstream>
+#include <filesystem>
 
 namespace Game {
 namespace Saver {
@@ -73,6 +74,7 @@ void saveToFilePreviousGameStateData(std::string filename,
 /**
  * @brief Saves the current game state to a file.
  * 
+<<<<<<< HEAD
  * This function removes any existing file with the specified filename and then
  * saves the current state and statistics of the provided game board to a new file.
  * 
@@ -83,6 +85,32 @@ void saveGamePlayState(GameBoard gb, const std::string& filename) {
   const auto path_to_file_gd_state = "../data/SavedGameFiles/" + filename;
   std::remove(path_to_file_gd_state.c_str());
 
+=======
+ * This function checks for the existence of the directory and creates it if necessary.
+ * It then removes any existing file with the specified filename before saving the 
+ * current state and statistics of the provided game board to a new file. This ensures 
+ * that only the most recent game state is saved.
+ * 
+ * @param gb The game board object containing the current state to be saved.
+ * @param filename The name of the file where the game state will be saved. This file will
+ *                 be located in the ../data/SavedGameFiles/ directory. If a file with this
+ *                 name already exists, it will be deleted before saving the new state.
+ * 
+ * @note If the directory does not exist, it will be created. Ensure that the application
+ *       has the necessary permissions to write to the specified location.
+ */
+void saveGamePlayState(GameBoard gb, const std::string& filename) {
+  std::filesystem::path directory_path = "../data/SavedGameFiles/";
+
+  if (!std::filesystem::exists(directory_path))
+  {
+    std::filesystem::create_directories(directory_path);
+  }
+
+  const auto path_to_file_gd_state = "../data/SavedGameFiles/" + filename;
+  std::remove(path_to_file_gd_state.c_str());
+
+>>>>>>> bc8a89f (Set C++17 standard in CMakeLists.txt for std::filesystem support in menu.cpp. Same as adding .vscode into .gitignore and changed some code deleting comments and changing comments)
   saveToFilePreviousGameStateData(path_to_file_gd_state, gb);
 }
 

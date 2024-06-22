@@ -240,13 +240,15 @@ bool soloLoop() {
  * - Integrated the menu start state and menu interaction within the loop.
  */
 void endlessLoop() {
-  while (!mainmenustatus[FLAG_EXIT_GAME]) // As long as the exit option is not selected in the menu
-  {
-    mainmenustatus[FLAG_START_MENU] = true; // Initial state is Menu
-    if (mainmenustatus[FLAG_START_MENU] == true)    // If the menu flag is set, we enter...
-    {
-      soloLoop();                         // ... the soloLoop() function, where we navigate the menu
-    }                                               
+  // As long as the exit option is not selected in the menu
+  while (!mainmenustatus[FLAG_EXIT_GAME]) {
+    // Initial state is Menu
+    mainmenustatus[FLAG_START_MENU] = true;
+    // If the menu flag is set, we enter...
+    if (mainmenustatus[FLAG_START_MENU] == true) {
+      // ... the soloLoop() function, where we navigate the menu
+      soloLoop();
+    }
   }
 }
 
@@ -259,3 +261,4 @@ void startMenu() {
 }
 
 } // namespace Menu
+

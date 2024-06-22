@@ -56,7 +56,12 @@ std::string ScoreboardOverlay(scoreboard_display_data_list_t sbddl) {
              << "\n";
     };
 
+<<<<<<< HEAD
     for (const auto& s : sbddl) { // auto REFERENCE s
+=======
+    // Use reference to avoid unnecessary copying of complex structures
+    for (const auto& s : sbddl) {
+>>>>>>> bc8a89f (Set C++17 standard in CMakeLists.txt for std::filesystem support in menu.cpp. Same as adding .vscode into .gitignore and changed some code deleting comments and changing comments)
       print_score_stat(s);
     }
     str_os << sp << bottom_border_text << "\n";

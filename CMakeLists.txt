@@ -20,7 +20,7 @@ endif()
 
 add_executable(2048 ${SOURCES})
 target_include_directories(2048 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/headers/)
-target_compile_features(2048 PRIVATE cxx_std_14)
+target_compile_features(2048 PRIVATE cxx_std_17)
 
 # --- test
 
