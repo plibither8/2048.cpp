@@ -124,11 +124,8 @@ std::string BoardSizeErrorPrompt() {
  * The commands include movements (Up, Left, Down, Right), saving the game, and returning to the menu.
  * The prompt is formatted with indentation for readability.
  * 
-<<<<<<< HEAD
  * @note The new addition includes 'M' for returning to the menu.
-=======
  * 
->>>>>>> bc8a89f (Set C++17 standard in CMakeLists.txt for std::filesystem support in menu.cpp. Same as adding .vscode into .gitignore and changed some code deleting comments and changing comments)
  * 
  * @return std::string A formatted string containing the list of input commands.
  */
