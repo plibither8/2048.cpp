@@ -11,18 +11,11 @@ set(_opts)
 if(NOT DEFINED CTEST_CMAKE_GENERATOR AND DEFINED ENV{CMAKE_GENERATOR})
   set(CTEST_CMAKE_GENERATOR $ENV{CMAKE_GENERATOR})
 endif()
-if(NOT DEFINED CTEST_CMAKE_GENERATOR AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.17)
+if(NOT DEFINED CTEST_CMAKE_GENERATOR)
   find_program(_gen NAMES ninja ninja-build samu)
   if(_gen)
-    execute_process(COMMAND ${_gen} --version
-      OUTPUT_VARIABLE _ninja_version
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      RESULT_VARIABLE _gen_ok
-      TIMEOUT 10)
-    if(_gen_ok EQUAL 0 AND _ninja_version VERSION_GREATER_EQUAL 1.10)
-      set(CTEST_CMAKE_GENERATOR "Ninja")
-    endif()
-  endif(_gen)
+    set(CTEST_CMAKE_GENERATOR "Ninja")
+  endif()
 endif()
 if(NOT DEFINED CTEST_CMAKE_GENERATOR)
   set(CTEST_BUILD_FLAGS -j)  # not --parallel as this goes to generator directly
