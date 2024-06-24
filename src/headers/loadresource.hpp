@@ -14,6 +14,7 @@ load_gameboard_status_t load_GameBoard_data_from_file(std::string filename);
 // [decltype(gameboard.moveCount)]}
 std::tuple<bool, std::tuple<unsigned long long, long long>>
 load_game_stats_from_file(std::string filename);
+bool load_game(std::string filename, GameBoard& gb);
 
 } // namespace Loader
 } // namespace Game

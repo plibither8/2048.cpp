@@ -36,6 +36,7 @@
 /data/*
 2048
 /.vscode
+/src/.vscode/
 .DS_Store
 
 # CMake

@@ -56,7 +56,8 @@ std::string ScoreboardOverlay(scoreboard_display_data_list_t sbddl) {
              << "\n";
     };
 
-    for (const auto s : sbddl) {
+    // Use reference to avoid unnecessary copying of complex structures
+    for (const auto& s : sbddl) {
       print_score_stat(s);
     }
     str_os << sp << bottom_border_text << "\n";
