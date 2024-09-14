@@ -463,10 +463,11 @@ GameBoard endlessGameLoop(ull currentBestScore, competition_mode_t cm,
   while (loop_again && ((mainmenustatus[FLAG_START_GAME] == true) || (mainmenustatus[FLAG_CONTINUE_GAME] == true))) {
     std::tie(loop_again, currentgamestatus) = soloGameLoop(currentgamestatus);
   }
+  auto properGameboard = std::get<GameBoard>(currentgamestatus);
 
   DrawAlways(std::cout,
              DataSuppliment(currentgamestatus, drawEndGameLoopGraphics));
-  return gb;
+  return properGameboard;
 }
 
 Scoreboard::Score make_finalscore_from_game_session(double duration,
