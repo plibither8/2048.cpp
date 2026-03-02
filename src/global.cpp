@@ -1,7 +1,11 @@
 #include "global.hpp"
 #include "color.hpp"
+
 #include <iostream>
 #include <sstream>
+#include <cstdlib> // for system
+#include <system_error>
+#include <cerrno>
 
 #ifdef _WIN32
 
@@ -51,10 +55,12 @@ void wait_for_any_letter_input(std::istream &is) {
 
 void clearScreen() {
 #ifdef _WIN32
-  system("cls");
+  if(system("cls")) {
 #else
-  system("clear");
+  if(system("clear")) {
 #endif
+    std::cerr << "Failed to clear screen: " << std::error_code(errno, std::generic_category()).message() << "\n";
+  }
 };
 
 std::string secondsFormat(double sec) {

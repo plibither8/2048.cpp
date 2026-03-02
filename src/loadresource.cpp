@@ -17,14 +17,14 @@ namespace {
 /**
  * @brief Counts the number of lines in a file until a line containing '[' is found.
  *
- * This function opens a file specified by the given filename and counts the number 
- * of lines until it encounters a line that contains the character '['. If the file 
+ * This function opens a file specified by the given filename and counts the number
+ * of lines until it encounters a line that contains the character '['. If the file
  * cannot be opened, it prints an error message and returns -1.
  *
  * @param filename The name of the file to be read.
  * @return The number of lines read before encountering a line with '['. Returns -1 if the file cannot be opened.
  */
-int GetLines(std::string filename) 
+int GetLines(std::string filename)
 {
   std::ifstream stateFile(filename);
   if (!stateFile) {
@@ -48,10 +48,10 @@ int GetLines(std::string filename)
 /**
  * @brief Extracts tile data from a given input stream until a line containing '[' is encountered.
  *
- * This function reads lines from the provided input stream and extracts tile data 
- * formatted as comma-separated values. The process continues until either the maximum 
- * width (10 lines) is reached or a line containing the character '[' is found. When 
- * a line with '[' is encountered, the function stops reading further and processes 
+ * This function reads lines from the provided input stream and extracts tile data
+ * formatted as comma-separated values. The process continues until either the maximum
+ * width (10 lines) is reached or a line containing the character '[' is found. When
+ * a line with '[' is encountered, the function stops reading further and processes
  * the line up to, but not including, the '[' character.
  *
  * @param buf The input stream from which to read the tile data.
@@ -181,7 +181,7 @@ load_game_stats_from_file(std::string filename) {
  * @brief Loads game data from a specified file into a GameBoard object.
  *
  * This function opens a file specified by the given filename, reads the game board data,
- * and initializes a GameBoard object with the read data. It first counts the number of lines 
+ * and initializes a GameBoard object with the read data. It first counts the number of lines
  * until a line containing '[' is found to determine the size of the game board. Then, it reads
  * the tile data from the file, processes it, and updates the GameBoard object. Finally, it reads
  * the score and move count from the last relevant line containing these values.

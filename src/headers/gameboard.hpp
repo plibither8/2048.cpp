@@ -5,7 +5,7 @@
 #include <tuple>
 #include <vector>
 
-struct point2D_t;
+class point2D_t;
 
 namespace Game {
 

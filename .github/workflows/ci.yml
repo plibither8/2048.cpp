@@ -4,24 +4,23 @@ on:
   push:
     paths:
       - "**.cpp"
+      - "**.hpp"
       - "**.cmake"
       - "**/CMakeLists.txt"
       - ".github/workflows/ci.yml"
   pull_request:
-    paths:
-      - "**.cpp"
-      - "**.cmake"
-      - "**/CMakeLists.txt"
-      - ".github/workflows/ci.yml"
+
 
 jobs:
 
-  linux:
+  core:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-    - uses: actions/checkout@v2
+    - &checkout
+      uses: actions/checkout@v6
 
-    - run: ctest -S setup.cmake -VV
+    - run: cmake --workflow debug
+    - run: cmake --workflow release
